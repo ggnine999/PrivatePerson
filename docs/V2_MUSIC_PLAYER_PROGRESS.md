@@ -134,6 +134,12 @@
 - 布局：猫脸（左）、龙王（唱片上）、仓鼠（右）、幽灵（卡片左下角，歌词居中后左侧留白处）。装饰改用 CSS 背景图（`aspect-ratio: 1` + `background-size: contain`）而非 `<img>`，规避 oxlint 的 no-img-element 规则且语义上更符合纯装饰定位。
 - 验证：lint 0 警告、typecheck、test 4/4、build 通过；桌面截图确认四个形象渲染正常。
 
+## 追加：移除卡通表情装饰（2026-09-05 用户反馈）
+
+- 用户决定自行寻找卡通图素材，OpenMoji 表情装饰（猫/龙/仓鼠/幽灵）连同 `public/images/mascots/` 素材与 README 署名一并移除；相关 CSS（`.music-mascot-char`、`chibi-float` 动画）清理完毕。
+- 卡片底部的 Saber 主视觉装饰（`music-mascot`，来自站点壁纸本身）保留。
+- 待办：用户提供自选的卡通图素材后，可按第九轮的技术方案接入（`public/images/` 放图 + 装饰层背景图），需用户自行确认素材授权。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`

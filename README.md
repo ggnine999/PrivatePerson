@@ -59,7 +59,6 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 播放器右上角的歌曲列表按钮可打开搜索面板：按歌名或歌手即时过滤，点击曲目即切换并自动续播；当前曲目以主题色高亮。新增歌曲只需把音频文件放入 `public/audio/` 并在 `tracks` 数组加一条记录。
 - 歌词同样配置在 `lyrics`（每句 `time` 秒数 + `text` 文本），播放器高亮当前句（淡色变深色）并自动滚动居中；用户滚动歌词时暂停自动滚动 5 秒。无歌词音轨省略 `lyrics` 字段即可，面板自动隐藏。
 - 行为：不自动播放（换曲续播除外）、循环播放、仅播放时旋转唱片；`prefers-reduced-motion` 下禁用旋转和平滑滚动。加载失败会在播放器内提示，恢复后自动清除。
-- 卡片内的卡通形象（猫/龙/仓鼠/幽灵）来自开源项目 [OpenMoji](https://github.com/hfg-gmuend/openmoji)（CC BY-SA 4.0），素材位于 `public/images/mascots/`，许可证文本见同目录 `LICENSE-OpenMoji.txt`。
 
 ### 网易云音乐搜索播放（首页播放器内）
 

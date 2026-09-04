@@ -1913,51 +1913,6 @@ body::after {
 .dark .music-mascot {
   opacity: 0.3;
 }
-.music-mascot-char {
-  position: absolute;
-  aspect-ratio: 1;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  filter: drop-shadow(0 4px 10px rgba(31, 71, 118, 0.18));
-  animation: chibi-float 4.5s ease-in-out infinite alternate;
-}
-.music-char-cat {
-  left: clamp(0.5rem, 6%, 3rem);
-  top: -0.4rem;
-  width: 3.2rem;
-  background-image: url('/images/mascots/cat.svg');
-}
-.music-char-hamster {
-  right: clamp(1.2rem, 9%, 3.4rem);
-  top: -0.1rem;
-  width: 2.9rem;
-  animation-delay: -1.6s;
-  background-image: url('/images/mascots/hamster.svg');
-}
-.music-char-dragon {
-  left: calc(50% - 1.5rem);
-  top: -1.5rem;
-  width: 3rem;
-  animation-delay: -3s;
-  background-image: url('/images/mascots/dragon.svg');
-}
-.music-char-ghost {
-  left: 0.55rem;
-  bottom: 27%;
-  width: 2.4rem;
-  animation-delay: -2.2s;
-  background-image: url('/images/mascots/ghost.svg');
-}
-@keyframes chibi-float {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-0.45rem);
-  }
-}
 .music-player-heading {
   position: relative;
   display: flex;
@@ -2369,30 +2324,9 @@ body::after {
   .music-lyric {
     font-size: 0.92rem;
   }
-  .music-char-cat {
-    width: 2.6rem;
-    left: 0.3rem;
-  }
-  .music-char-hamster {
-    width: 2.3rem;
-    right: 0.5rem;
-  }
-  .music-char-dragon {
-    width: 2.4rem;
-    left: calc(50% - 1.2rem);
-    top: -1.2rem;
-  }
-  .music-char-ghost {
-    width: 1.9rem;
-    left: 0.3rem;
-    bottom: 24%;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .music-disc.playing {
-    animation: none;
-  }
-  .music-mascot-char {
     animation: none;
   }
 }
