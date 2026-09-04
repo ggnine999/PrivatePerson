@@ -2075,7 +2075,6 @@ body::after {
   flex: 1 1 auto;
   height: 7rem;
   margin-top: 0.9rem;
-  padding-block: 2.4rem;
   overflow-y: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
@@ -2088,6 +2087,10 @@ body::after {
     transparent
   );
   mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+}
+/* 轨道上下大留白：让滚动余量足以把任意一句歌词推到面板正中 */
+.music-lyrics-track {
+  padding-block: 11rem;
 }
 .music-lyrics::-webkit-scrollbar {
   display: none;
@@ -2351,6 +2354,8 @@ body::after {
   .music-lyrics {
     height: 7rem;
     margin-top: 0.75rem;
+  }
+  .music-lyrics-track {
     padding-block: 2.2rem;
   }
   .music-lyric {

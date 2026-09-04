@@ -491,7 +491,10 @@ export function MusicPlayer() {
       )}
       {!neteaseSong && !showPlaylist && lyrics.length > 0 && (
         <div className="music-lyrics" ref={lyricsRef}>
-          {lyrics.map((line, index) => {
+          {/* 轨道层：上下大留白制造滚动余量，让「高亮行走到面板中部后钉住居中、
+              其余歌词从下往上滚过」的效果成立 */}
+          <div className="music-lyrics-track">
+            {lyrics.map((line, index) => {
             const isActive = index === activeLyric;
             // 逐字跟唱：当前句内按时间进度线性推进，唱过的字保持蓝色
             const chars = Array.from(
@@ -535,6 +538,7 @@ export function MusicPlayer() {
               </p>
             );
           })}
+          </div>
         </div>
       )}
       {!neteaseSong && error && (
