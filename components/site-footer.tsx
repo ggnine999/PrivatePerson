@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export function SiteFooter() { return <footer className="site-footer"><div className="shell footer-grid"><div><strong>星屿手记</strong><p>愿每一次认真记录，都成为照亮来路的小小星光。</p></div><nav aria-label="页脚导航"><Link href="/articles">文章</Link><Link href="/projects">项目</Link><Link href="/about">关于</Link><Link href="/rss.xml">RSS</Link></nav></div><div className="shell copyright">© 2026 星屿手记 · 示例内容可自由替换</div></footer> }

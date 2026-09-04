@@ -1,0 +1,1 @@
+ALTER TABLE `vault_records` ADD `secret_suffix` text DEFAULT '' NOT NULL;

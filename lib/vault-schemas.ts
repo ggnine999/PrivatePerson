@@ -1,0 +1,4 @@
+import { z } from 'zod';
+export const loginSchema=z.object({username:z.string().min(1).max(100),password:z.string().min(8).max(256),otp:z.string().regex(/^\d{6}$/).optional().or(z.literal(''))});
+export const profileSchema=z.object({salt:z.string().min(20).max(100),verifierIv:z.string().min(12).max(100),verifierCiphertext:z.string().min(20).max(1000),kdfIterations:z.number().int().min(300_000).max(2_000_000)});
+export const recordSchema=z.object({type:z.enum(['account','apiKey']),platform:z.string().trim().min(1).max(120),title:z.string().trim().min(1).max(120),category:z.string().trim().max(80).default('未分类'),tags:z.array(z.string().trim().min(1).max(40)).max(20),favorite:z.boolean().default(false),environment:z.enum(['测试','生产']).nullable().optional(),expiresAt:z.iso.date().nullable().optional(),rotateAt:z.iso.date().nullable().optional(),secretSuffix:z.string().max(8).default(''),ciphertext:z.string().min(20).max(100_000),iv:z.string().min(12).max(100)});

@@ -1,0 +1,1639 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: white;
+  --color-secondary: var(--soft);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--soft);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--soft);
+  --color-accent-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+  --color-destructive: #dc4b62;
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --radius: 0.85rem;
+}
+:root {
+  --background: #f8f9ff;
+  --foreground: #18213d;
+  --card: #fff;
+  --soft: #eef1ff;
+  --muted: #66708c;
+  --border: #dfe3f2;
+  --primary: #5368d9;
+  --pink: #e888ae;
+  --shadow: 0 18px 50px rgba(46, 60, 126, 0.1);
+  color-scheme: light;
+}
+.dark {
+  --background: #0e1325;
+  --foreground: #edf0ff;
+  --card: #171d35;
+  --soft: #202844;
+  --muted: #a9b1ce;
+  --border: #2b3559;
+  --primary: #8da0ff;
+  --pink: #f29abc;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    'Microsoft YaHei UI', 'PingFang SC', 'Noto Sans CJK SC', system-ui,
+    sans-serif;
+  line-height: 1.75;
+  text-rendering: optimizeLegibility;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+.shell {
+  width: min(1160px, calc(100% - 40px));
+  margin-inline: auto;
+}
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -5rem;
+  z-index: 100;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+.nav-wrap {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: Georgia, 'Songti SC', serif;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.brand small {
+  display: block;
+  font: 600 0.62rem/1.1 system-ui;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--primary), var(--pink));
+  color: white;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.7rem;
+  font-size: 0.93rem;
+}
+.nav-links a {
+  color: var(--muted);
+  font-weight: 650;
+}
+.nav-links a:hover {
+  color: var(--foreground);
+}
+.vault-link {
+  padding: 0.42rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.nav-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+}
+.menu-button {
+  display: none;
+}
+.hero {
+  display: grid;
+  grid-template-columns: 0.9fr 1.25fr;
+  align-items: center;
+  gap: 4.5rem;
+  padding-block: 72px 56px;
+  min-height: 650px;
+}
+.hero-copy h1 {
+  font:
+    800 clamp(2.7rem, 5vw, 4.75rem)/1.12 Georgia,
+    'Songti SC',
+    serif;
+  letter-spacing: -0.045em;
+  margin: 1.3rem 0;
+}
+.hero-copy h1 em {
+  font-style: normal;
+  color: var(--primary);
+  position: relative;
+}
+.hero-copy h1 em:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.03em;
+  height: 0.18em;
+  background: color-mix(in srgb, var(--pink) 40%, transparent);
+  border-radius: 99px;
+  z-index: -1;
+}
+.eyebrow,
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+}
+.lead {
+  font-size: 1.08rem;
+  color: var(--muted);
+  max-width: 34rem;
+}
+.hero-actions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 2rem;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.55rem 1.15rem;
+  border-radius: 13px;
+  font-weight: 750;
+}
+.button.primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+.button.ghost {
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+.hero-stats {
+  display: flex;
+  gap: 2.2rem;
+  margin: 2.4rem 0 0;
+}
+.hero-stats div {
+  border-left: 2px solid var(--border);
+  padding-left: 0.8rem;
+}
+.hero-stats dt {
+  font:
+    700 1.25rem Georgia,
+    serif;
+}
+.hero-stats dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.hero-art {
+  position: relative;
+  aspect-ratio: 4/3;
+  margin: 0;
+  border-radius: 28px 9px 28px 9px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+}
+.hero-art img {
+  object-fit: cover;
+}
+.hero-art:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+.hero-art figcaption {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  background: rgba(15, 20, 44, 0.72);
+  color: white;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  backdrop-filter: blur(10px);
+}
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #7ce2b2;
+  border-radius: 50%;
+  margin-right: 0.45rem;
+  box-shadow: 0 0 0 4px rgba(124, 226, 178, 0.15);
+}
+.section {
+  padding-block: 64px;
+}
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.section-heading h2 {
+  font:
+    800 clamp(1.8rem, 3vw, 2.6rem)/1.25 Georgia,
+    'Songti SC',
+    serif;
+  margin: 0.35rem 0 0;
+}
+.section-heading > a {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.article-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1rem;
+}
+.article-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.7rem;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 6px 20px rgba(40, 56, 110, 0.04);
+}
+.article-card.feature {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--card) 88%, var(--primary)),
+    var(--card)
+  );
+}
+.card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--soft);
+  color: var(--primary);
+  margin-bottom: 1.3rem;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.meta span + span:before {
+  content: '·';
+  margin-right: 0.8rem;
+}
+.article-card h3,
+.project-card h3 {
+  font:
+    750 1.45rem/1.4 Georgia,
+    'Songti SC',
+    serif;
+  margin: 0.65rem 0;
+}
+.article-card p,
+.project-card p {
+  color: var(--muted);
+  margin: 0;
+}
+.card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+.card-foot time {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.card-foot a {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--primary);
+}
+.project-section {
+  padding-bottom: 100px;
+}
+.latest-strip {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2rem;
+  padding-block: 2rem;
+  border-block: 1px solid var(--border);
+}
+.latest-strip h2 {
+  margin: 0.3rem 0 0;
+  font: 750 1.6rem Georgia, 'Songti SC', serif;
+}
+.latest-list {
+  display: grid;
+}
+.latest-list a {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 0;
+}
+.latest-list time {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.project-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  padding: 1.5rem 3.5rem 1.5rem 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition:
+    0.2s transform,
+    0.2s box-shadow;
+}
+.project-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+.project-mark {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    var(--soft),
+    color-mix(in srgb, var(--pink) 28%, var(--card))
+  );
+  font:
+    700 1.35rem Georgia,
+    serif;
+  color: var(--primary);
+}
+.project-status {
+  color: #31836a;
+}
+.tags {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+}
+.tags span {
+  font: 650 0.7rem/1 system-ui;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+}
+.project-arrow {
+  position: absolute;
+  right: 1.4rem;
+  top: 1.5rem;
+  color: var(--muted);
+}
+.demo-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 1rem;
+}
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 55%, var(--background));
+  padding-top: 3rem;
+}
+.footer-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.footer-grid strong {
+  font:
+    800 1.25rem Georgia,
+    'Songti SC',
+    serif;
+}
+.footer-grid p {
+  color: var(--muted);
+  margin: 0.35rem 0;
+}
+.footer-grid nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.copyright {
+  margin-top: 2rem;
+  border-top: 1px solid var(--border);
+  padding: 1rem 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.back-top {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 30;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding-top: 48px;
+  }
+  .hero-copy {
+    max-width: 650px;
+  }
+  .hero-art {
+    aspect-ratio: 16/10;
+  }
+  .article-grid,
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+  .nav-links {
+    position: fixed;
+    left: 20px;
+    right: 20px;
+    top: 78px;
+    padding: 1rem;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .nav-links a {
+    padding: 0.55rem;
+  }
+  .menu-button {
+    display: grid;
+  }
+}
+@media (max-width: 560px) {
+  .shell {
+    width: min(100% - 28px, 1160px);
+  }
+  .hero {
+    min-height: auto;
+    padding-block: 38px;
+  }
+  .hero-copy h1 {
+    font-size: 2.55rem;
+  }
+  .hero-stats {
+    gap: 1rem;
+  }
+  .hero-art {
+    aspect-ratio: 4/3;
+  }
+  .section {
+    padding-block: 44px;
+  }
+  .section-heading {
+    align-items: start;
+  }
+  .section-heading > a {
+    font-size: 0;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .article-card {
+    padding: 1.25rem;
+  }
+  .project-card {
+    grid-template-columns: 1fr;
+    padding: 1.25rem 3rem 1.25rem 1.25rem;
+  }
+  .footer-grid {
+    flex-direction: column;
+  }
+  .footer-grid nav {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+.page {
+  padding-block: 72px 110px;
+  min-height: 70vh;
+}
+.page-head {
+  max-width: 720px;
+  margin-bottom: 2.7rem;
+}
+.page-head h1,
+.article-head h1,
+.about-hero h1 {
+  font:
+    800 clamp(2.5rem, 6vw, 4.6rem)/1.15 Georgia,
+    'Songti SC',
+    serif;
+  letter-spacing: -0.04em;
+  margin: 0.7rem 0;
+}
+.page-head p,
+.article-head > p,
+.about-hero > div > p {
+  font-size: 1.08rem;
+  color: var(--muted);
+}
+.narrow {
+  max-width: 850px;
+}
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  padding: 0.75rem;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 280px;
+  padding: 0 0.5rem;
+  color: var(--muted);
+}
+.search-box input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--foreground);
+  width: 100%;
+  min-height: 38px;
+}
+.search-box button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.filter-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.filter-chips button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.filter-chips button.active {
+  background: var(--soft);
+  color: var(--primary);
+}
+.result-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 1.5rem 0 0.8rem;
+}
+.article-list {
+  border-top: 1px solid var(--border);
+}
+.article-list article {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 1.4rem;
+  padding: 2rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.article-list-date {
+  display: flex;
+  flex-direction: column;
+}
+.article-list-date strong {
+  font:
+    800 2rem/1 Georgia,
+    serif;
+  color: var(--primary);
+}
+.article-list-date span {
+  color: var(--muted);
+  font-size: 0.73rem;
+  margin-top: 0.35rem;
+}
+.article-list h2 {
+  font:
+    750 1.55rem/1.35 Georgia,
+    'Songti SC',
+    serif;
+  margin: 0.45rem 0;
+}
+.article-list p {
+  margin: 0;
+  color: var(--muted);
+}
+.empty-state {
+  text-align: center;
+  padding: 5rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 20px;
+}
+.empty-state > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--muted);
+}
+.article-page {
+  padding-block: 54px 110px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.article-head {
+  max-width: 850px;
+  margin: 3.5rem auto 2rem;
+  text-align: center;
+}
+.article-head .meta,
+.publish-info,
+.article-head .tags {
+  justify-content: center;
+}
+.publish-info {
+  display: flex;
+  gap: 1.1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 1.5rem;
+}
+.publish-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.preview-image {
+  display: block;
+  position: relative;
+  width: min(920px, 100%);
+  aspect-ratio: 16/8.5;
+  margin: 3rem auto 4rem;
+  border: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: var(--soft);
+  box-shadow: var(--shadow);
+}
+.preview-image img {
+  object-fit: cover;
+}
+.preview-image > span {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 20, 44, 0.68);
+  color: white;
+  font-size: 0.75rem;
+}
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 8, 18, 0.92);
+  display: grid;
+  place-items: center;
+  padding: 4rem 2rem;
+}
+.lightbox img {
+  object-fit: contain !important;
+  padding: 3rem;
+}
+.lightbox button {
+  position: absolute;
+  right: 1.5rem;
+  top: 1.5rem;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.article-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 760px) 180px;
+  gap: 4rem;
+  justify-content: center;
+}
+.prose {
+  font:
+    400 1.03rem/2 Georgia,
+    'Songti SC',
+    serif;
+  min-width: 0;
+}
+.prose h2 {
+  font:
+    800 1.8rem/1.4 Georgia,
+    'Songti SC',
+    serif;
+  margin: 3rem 0 1rem;
+  scroll-margin-top: 100px;
+}
+.prose blockquote {
+  margin: 2rem 0;
+  padding: 1rem 1.3rem;
+  border-left: 3px solid var(--pink);
+  background: var(--soft);
+  border-radius: 0 14px 14px 0;
+  color: var(--muted);
+}
+.prose pre {
+  overflow: auto;
+  background: #10162a;
+  color: #dce2ff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  font:
+    400 0.86rem/1.7 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+}
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.hljs-keyword,
+.hljs-type {
+  color: #f29abc;
+}
+.hljs-string {
+  color: #96dfc0;
+}
+.hljs-title,
+.hljs-property {
+  color: #9bacff;
+}
+.toc {
+  position: sticky;
+  top: 110px;
+  align-self: start;
+  border-left: 1px solid var(--border);
+  padding-left: 1rem;
+  font-size: 0.82rem;
+}
+.toc strong {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+.toc nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  color: var(--muted);
+}
+.article-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-width: 940px;
+  margin: 5rem auto 0;
+}
+.article-nav > a {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+}
+.article-nav > a:last-child {
+  text-align: right;
+}
+.article-nav small {
+  display: block;
+  color: var(--muted);
+}
+.article-nav span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+.related {
+  max-width: 940px;
+  margin: 4rem auto;
+}
+.related h2 {
+  font:
+    750 2rem Georgia,
+    serif;
+}
+.related > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.related a {
+  display: flex;
+  flex-direction: column;
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.related a span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+.timeline section {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+}
+.timeline h2 {
+  font:
+    700 1.3rem Georgia,
+    serif;
+  color: var(--primary);
+  margin: 0;
+  border-right: 1px solid var(--border);
+}
+.timeline section > a {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 1rem;
+  padding: 1rem 0 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.timeline time,
+.timeline small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+.project-list article {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 1.6rem;
+}
+.project-list h2 {
+  font:
+    750 1.5rem Georgia,
+    'Songti SC',
+    serif;
+}
+.project-list p {
+  color: var(--muted);
+}
+.project-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+.about-hero {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 5rem;
+  align-items: center;
+}
+.about-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 1.7rem;
+  box-shadow: var(--shadow);
+}
+.about-card .brand-mark {
+  width: 58px;
+  height: 58px;
+  font-size: 1.3rem;
+}
+.about-card h2 {
+  font:
+    750 1.3rem Georgia,
+    serif;
+}
+.about-card p,
+.about-card a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  margin: 0.5rem 0;
+}
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 5rem;
+}
+.about-grid section {
+  border-top: 2px solid var(--border);
+  padding-top: 1.2rem;
+}
+.about-grid section > span {
+  color: var(--primary);
+  font: 700 0.8rem system-ui;
+}
+.about-grid p {
+  color: var(--muted);
+}
+.not-found {
+  min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.not-found > span {
+  font:
+    900 clamp(5rem, 18vw, 12rem)/1 Georgia,
+    serif;
+  color: color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.not-found h1 {
+  font:
+    750 2rem Georgia,
+    serif;
+}
+.not-found p {
+  color: var(--muted);
+}
+@media (max-width: 800px) {
+  .latest-strip {
+    grid-template-columns: 1fr;
+  }
+  .filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .search-box {
+    min-width: 0;
+  }
+  .article-layout {
+    grid-template-columns: 1fr;
+  }
+  .toc {
+    display: none;
+  }
+  .project-list,
+  .about-hero,
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-hero {
+    gap: 2rem;
+  }
+  .related > div {
+    grid-template-columns: 1fr;
+  }
+  .page {
+    padding-top: 48px;
+  }
+}
+@media (max-width: 560px) {
+  .latest-list a {
+    grid-template-columns: 1fr auto;
+  }
+  .latest-list time {
+    grid-column: 1 / -1;
+  }
+  .article-list article {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  .article-list-date {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+  .article-list-date strong {
+    font-size: 1.3rem;
+  }
+  .article-nav {
+    grid-template-columns: 1fr;
+  }
+  .publish-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .timeline section {
+    grid-template-columns: 1fr;
+  }
+  .timeline h2 {
+    border: 0;
+    padding: 1.2rem 0 0.5rem;
+  }
+  .timeline section > a {
+    grid-column: 1;
+    padding-left: 0;
+  }
+  .project-actions {
+    flex-direction: column;
+  }
+  .preview-image {
+    margin-block: 2rem 3rem;
+  }
+}
+.vault-login,
+.vault-gate,
+.vault-loading {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 35%
+    ),
+    var(--background);
+}
+.vault-login > section,
+.vault-gate > section {
+  width: min(480px, 100%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+}
+.vault-login h1,
+.vault-gate h1 {
+  font:
+    800 2rem Georgia,
+    'Songti SC',
+    serif;
+  margin: 0.8rem 0;
+}
+.vault-login section > p,
+.vault-gate section > p {
+  color: var(--muted);
+}
+.vault-badge,
+.secure-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #2f8c6d;
+  background: color-mix(in srgb, #55c89e 13%, transparent);
+  border: 1px solid color-mix(in srgb, #55c89e 30%, transparent);
+  border-radius: 999px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.vault-login form,
+.vault-gate form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.vault-login label,
+.vault-gate label,
+.record-form label,
+.dialog-label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.vault-login label small {
+  font-weight: 400;
+}
+.vault-login input,
+.vault-gate input,
+.record-form input,
+.record-form select,
+.record-form textarea,
+.dialog-label input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--background);
+  color: var(--foreground);
+  padding: 0.65rem 0.75rem;
+  outline: 0;
+}
+.vault-login input:focus,
+.vault-gate input:focus,
+.record-form input:focus,
+.record-form select:focus,
+.record-form textarea:focus,
+.dialog-label input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
+}
+.vault-login form .button,
+.vault-gate form .button {
+  width: 100%;
+  margin-top: 0.4rem;
+}
+.form-error {
+  padding: 0.7rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, #dc4b62 10%, transparent);
+  color: #c03750 !important;
+  font-size: 0.82rem;
+}
+.demo-credentials {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: var(--soft);
+  font-size: 0.75rem;
+}
+.demo-credentials > svg {
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+.demo-credentials strong,
+.demo-credentials code,
+.demo-credentials span {
+  display: block;
+}
+.demo-credentials code {
+  margin: 0.3rem 0;
+  color: var(--foreground);
+}
+.demo-credentials span {
+  color: var(--muted);
+}
+.vault-gate > section > svg {
+  width: 3rem;
+  height: 3rem;
+  color: var(--primary);
+}
+.vault-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border));
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+  display: block;
+  margin: 1rem auto 0;
+}
+.vault-loading {
+  color: var(--muted);
+}
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.vault-shell {
+  width: min(1280px, calc(100% - 40px));
+  margin: auto;
+  padding: 3rem 0 7rem;
+  min-height: 80vh;
+}
+.vault-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2rem;
+}
+.vault-top h1 {
+  font:
+    800 2.6rem Georgia,
+    'Songti SC',
+    serif;
+  margin: 0.7rem 0 0.2rem;
+}
+.vault-top p {
+  color: var(--muted);
+  margin: 0;
+  max-width: 650px;
+}
+.vault-actions {
+  display: flex;
+  align-items: start;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+.vault-actions button,
+.vault-actions label,
+.record-actions button,
+.vault-empty button {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted);
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.vault-actions input {
+  display: none;
+}
+.vault-shell > .vault-notice {
+  margin: 1rem 0;
+}
+.vault-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.vault-toolbar > label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(430px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 0 0.75rem;
+  color: var(--muted);
+}
+.vault-toolbar input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--foreground);
+  min-height: 42px;
+}
+.vault-shell [data-slot='tabs-list'] {
+  margin-bottom: 1.2rem;
+  padding: 4px;
+  height: auto;
+}
+.vault-shell [data-slot='tabs-trigger'] {
+  padding: 0.45rem 0.8rem;
+}
+.vault-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.vault-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.2rem;
+}
+.vault-card-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+}
+.vault-card-head .project-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+}
+.vault-card-head span {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.vault-card-head h2 {
+  font:
+    750 1.12rem Georgia,
+    'Songti SC',
+    serif;
+  margin: 0;
+}
+.vault-card-head p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+}
+.favorite {
+  color: var(--pink);
+  fill: var(--pink);
+}
+.key-preview {
+  font:
+    700 0.85rem ui-monospace,
+    monospace;
+  color: var(--muted);
+  margin: 1.1rem 0;
+  padding: 0.6rem;
+  background: var(--soft);
+  border-radius: 10px;
+}
+.key-date {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #b67a28;
+  font-size: 0.76rem;
+}
+.record-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 1.1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.record-actions button {
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  background: var(--soft);
+}
+.record-actions button:last-child {
+  margin-left: auto;
+  color: #c03e58;
+}
+.vault-empty {
+  text-align: center;
+  padding: 5rem;
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  color: var(--muted);
+}
+.vault-empty > svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.vault-empty button {
+  margin: auto;
+}
+.vault-dialog {
+  max-width: min(720px, calc(100% - 2rem)) !important;
+  max-height: 90vh;
+  overflow: auto;
+}
+.record-form {
+  display: grid;
+  gap: 1rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+.form-grid .span-2 {
+  grid-column: span 2;
+}
+.record-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.checkbox {
+  display: flex !important;
+  grid-column: span 2;
+  flex-direction: row;
+  align-items: center;
+}
+.checkbox input {
+  width: auto;
+}
+.input-action {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+.input-action input {
+  border-radius: 11px 0 0 11px;
+}
+.input-action button {
+  border: 1px solid var(--border);
+  border-left: 0;
+  border-radius: 0 11px 11px 0;
+  background: var(--soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+.dialog-label {
+  margin: 1rem 0;
+}
+.secret-view {
+  display: grid;
+  gap: 0.6rem;
+}
+.secret-view div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.6rem;
+  border-radius: 10px;
+  background: var(--soft);
+}
+.secret-view span {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.secret-view code {
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+@media (max-width: 980px) {
+  .vault-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .vault-top {
+    flex-direction: column;
+  }
+  .vault-actions {
+    justify-content: start;
+  }
+}
+@media (max-width: 620px) {
+  .vault-shell {
+    width: min(100% - 28px, 1280px);
+    padding-top: 2rem;
+  }
+  .vault-grid {
+    grid-template-columns: 1fr;
+  }
+  .vault-toolbar {
+    flex-direction: column;
+  }
+  .vault-toolbar .button {
+    width: 100%;
+  }
+  .vault-actions button,
+  .vault-actions label {
+    font-size: 0;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-grid .span-2,
+  .checkbox {
+    grid-column: 1;
+  }
+  .record-actions {
+    flex-wrap: wrap;
+  }
+  .vault-empty {
+    padding: 3rem 1rem;
+  }
+}
+.filter-chips {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}

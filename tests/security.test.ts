@@ -1,0 +1,3 @@
+import { describe, expect, it } from 'vitest';
+import { derivePasswordHash, safeEqual, toBase64, verifyPassword } from '@/lib/security';
+describe('password verification',()=>{it('accepts only the matching password',async()=>{const salt=toBase64(crypto.getRandomValues(new Uint8Array(16)));const hash=await derivePasswordHash('correct horse battery staple',salt,10_000);const encoded=`10000$${salt}$${hash}`;expect(await verifyPassword('correct horse battery staple',encoded)).toBe(true);expect(await verifyPassword('wrong password',encoded)).toBe(false)});it('uses constant-shape equality for equal length values',()=>{expect(safeEqual('same','same')).toBe(true);expect(safeEqual('same','sane')).toBe(false);expect(safeEqual('short','longer')).toBe(false)})});
