@@ -1913,6 +1913,68 @@ body::after {
 .dark .music-mascot {
   opacity: 0.3;
 }
+/* 用户提供的卡通贴纸：白色贴纸底 + 细边框 + 微倾斜，漂浮动画 */
+.music-mascot-char {
+  position: absolute;
+  padding: 0.26rem;
+  border: 1px solid rgba(31, 71, 118, 0.16);
+  border-radius: 12px;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  box-shadow: 0 5px 14px rgba(31, 71, 118, 0.16);
+  pointer-events: none;
+  animation: chibi-float 4.5s ease-in-out infinite alternate;
+}
+.music-char-cat {
+  left: clamp(0.5rem, 6%, 3rem);
+  top: -0.35rem;
+  width: 2.9rem;
+  aspect-ratio: 131 / 130;
+  --tilt: -6deg;
+  background-image: url('/images/mascots/cat01.png');
+}
+.music-char-lulu {
+  right: clamp(1.2rem, 9%, 3.4rem);
+  top: -0.2rem;
+  width: 2.9rem;
+  aspect-ratio: 165 / 160;
+  --tilt: 5deg;
+  background-image: url('/images/mascots/lulu01.png');
+}
+.music-char-nailong {
+  left: 0.7rem;
+  bottom: 22%;
+  width: 3rem;
+  aspect-ratio: 152 / 172;
+  --tilt: -4deg;
+  background-image: url('/images/mascots/nailong01.png');
+}
+.music-char-doro {
+  left: calc(50% - 1.5rem);
+  top: -0.85rem;
+  width: 3rem;
+  aspect-ratio: 178 / 134;
+  --tilt: 3deg;
+  background-image: url('/images/mascots/doro01.png');
+}
+.music-char-niu {
+  right: 0.7rem;
+  bottom: 23%;
+  width: 2.9rem;
+  aspect-ratio: 167 / 164;
+  --tilt: 4deg;
+  background-image: url('/images/mascots/niu01.png');
+}
+@keyframes chibi-float {
+  from {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+  to {
+    transform: translateY(-0.4rem) rotate(var(--tilt, 0deg));
+  }
+}
 .music-player-heading {
   position: relative;
   display: flex;
@@ -2324,9 +2386,33 @@ body::after {
   .music-lyric {
     font-size: 0.92rem;
   }
+  .music-char-cat {
+    width: 2.3rem;
+    left: 0.25rem;
+  }
+  .music-char-lulu {
+    width: 2.3rem;
+    right: 0.4rem;
+  }
+  .music-char-nailong {
+    width: 2.4rem;
+    left: 0.4rem;
+  }
+  .music-char-doro {
+    width: 2.4rem;
+    left: calc(50% - 1.2rem);
+    top: -0.7rem;
+  }
+  .music-char-niu {
+    width: 2.3rem;
+    right: 0.4rem;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .music-disc.playing {
+    animation: none;
+  }
+  .music-mascot-char {
     animation: none;
   }
 }

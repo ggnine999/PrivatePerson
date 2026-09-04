@@ -256,6 +256,13 @@ export function MusicPlayer() {
         onError={() => setError('音轨加载失败，请稍后重试。')}
       />
       <div className="music-player-heading">
+        {/* 用户提供的卡通贴纸（public/images/mascots/），授权由站点所有者负责 */}
+        <span className="music-mascot-char music-char-cat" aria-hidden="true" />
+        <span className="music-mascot-char music-char-lulu" aria-hidden="true" />
+        <span
+          className="music-mascot-char music-char-nailong"
+          aria-hidden="true"
+        />
         <span
           className={playing && !neteaseSong ? 'music-disc playing' : 'music-disc'}
           aria-hidden="true"
@@ -279,6 +286,8 @@ export function MusicPlayer() {
       </div>
       {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏 */}
       <div className="music-mascot" aria-hidden="true" />
+      <span className="music-mascot-char music-char-doro" aria-hidden="true" />
+      <span className="music-mascot-char music-char-niu" aria-hidden="true" />
       {!neteaseSong && (
         <div className="music-controls">
           <button
