@@ -17,21 +17,26 @@ import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
 
-// 贴纸自动布局：按文件名排序，左右两列交替，列内自上而下均分；
-// 中间唱片区与歌词中线保持留空，每张贴纸带伪随机倾斜与尺寸变化。
-function mascotSlotStyle(file: string, index: number, total: number): CSSProperties {
-  const side: 'left' | 'right' = index % 2 === 0 ? 'left' : 'right';
-  const inSide = Math.floor(index / 2);
-  const sideCount = Math.floor((total - (side === 'left' ? 1 : 2)) / 2) + 1;
-  const startTop = 8;
-  const step = sideCount > 1 ? (72 - startTop) / (sideCount - 1) : 22;
-  const top = sideCount > 1 ? startTop + inSide * step : 30;
-  const xOffsets = [0.6, 1.15, 0.85];
-  const width = 2.5 + ((index * 7) % 3) * 0.25;
-  const tilt = ((index * 47) % 11) - 5;
+// 贴纸安全槽位：位置经过验证，避开控制条高度带（约 20%-31%）与右上角列表按钮；
+// 每列最多 3 张、共 6 张，超出的图片不渲染。网易云模式下面板为全宽，
+// 仅保留标题两侧（top 5%）的槽位，其余自动让位。
+const MASCOT_SLOTS = [
+  { side: 'left', top: '5%', x: '0.6rem' },
+  { side: 'right', top: '5%', x: '3.2rem' },
+  { side: 'left', top: '38%', x: '0.6rem' },
+  { side: 'right', top: '38%', x: '0.6rem' },
+  { side: 'left', top: '64%', x: '1rem' },
+  { side: 'right', top: '64%', x: '0.6rem' },
+] as const;
+
+// 贴纸自动布局：按文件名排序依次入座安全槽位，带伪随机倾斜与尺寸变化。
+function mascotSlotStyle(slotIndex: number, file: string): CSSProperties {
+  const slot = MASCOT_SLOTS[slotIndex % MASCOT_SLOTS.length];
+  const width = 2.5 + ((slotIndex * 7) % 3) * 0.25;
+  const tilt = ((slotIndex * 47) % 11) - 5;
   return {
-    [side]: `${xOffsets[inSide % xOffsets.length]}rem`,
-    top: `${top}%`,
+    [slot.side]: slot.x,
+    top: slot.top,
     width: `${width}rem`,
     backgroundImage: `url('/images/mascots/${file}')`,
     '--tilt': `${tilt}deg`,
@@ -300,16 +305,25 @@ export function MusicPlayer() {
           {showPlaylist ? <X /> : <ListMusic />}
         </button>
       </div>
-      {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏 */}
+      {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏。
+          网易云模式下面板全宽，仅保留标题两侧槽位，其余贴纸自动让位 */}
       <div className="music-mascot" aria-hidden="true" />
-      {mascotManifest.mascots.map((mascot, index) => (
-        <span
-          key={mascot.file}
-          className="music-mascot-char"
-          style={mascotSlotStyle(mascot.file, index, mascotManifest.mascots.length)}
-          aria-hidden="true"
-        />
-      ))}
+      {mascotManifest.mascots.slice(0, MASCOT_SLOTS.length).map((mascot, index) => {
+        const slot = MASCOT_SLOTS[index];
+        const style = mascotSlotStyle(index, mascot.file);
+        const yieldToPanel = Boolean(neteaseSong) && slot.top !== '5%';
+        return (
+          <span
+            key={mascot.file}
+            className="music-mascot-char"
+            style={{
+              ...style,
+              display: yieldToPanel ? 'none' : style.display,
+            }}
+            aria-hidden="true"
+          />
+        );
+      })}
       {!neteaseSong && (
         <div className="music-controls">
           <button

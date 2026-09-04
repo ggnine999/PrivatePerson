@@ -2100,18 +2100,18 @@ body::after {
   line-height: 1.55;
   letter-spacing: 0.02em;
   opacity: 0.6;
-  transform: scale(0.96);
+  transform: scale(1);
   transform-origin: center;
   transition:
-    color 0.45s ease,
-    opacity 0.45s ease,
-    transform 0.45s ease;
+    color 0.55s ease,
+    opacity 0.55s ease,
+    transform 0.55s ease;
 }
 .music-lyric.active {
   color: var(--foreground);
   font-weight: 700;
   opacity: 1;
-  transform: scale(1);
+  transform: scale(1.14);
 }
 /* 内容不满时整块歌词在面板内安全居中；溢出时自动边距归零，滚动从顶部开始 */
 .music-lyric:first-child {
