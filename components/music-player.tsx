@@ -17,6 +17,9 @@ import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
 
+// 逐字歌词按字形（grapheme）拆分，避免 emoji 等复合字符被拆坏
+const graphemeSegmenter = new Intl.Segmenter('zh', { granularity: 'grapheme' });
+
 // 贴纸安全槽位：位置经过验证，避开控制条高度带（约 20%-31%）与右上角列表按钮；
 // 每列最多 3 张、共 6 张，超出的图片不渲染。网易云模式下面板为全宽，
 // 仅保留标题两侧（top 5%）的槽位，其余自动让位。
@@ -488,17 +491,50 @@ export function MusicPlayer() {
       )}
       {!neteaseSong && !showPlaylist && lyrics.length > 0 && (
         <div className="music-lyrics" ref={lyricsRef}>
-          {lyrics.map((line, index) => (
-            <p
-              key={`${line.time}-${index}`}
-              ref={(node) => {
-                lyricLineRefs.current[index] = node;
-              }}
-              className={index === activeLyric ? 'music-lyric active' : 'music-lyric'}
-            >
-              {line.text}
-            </p>
-          ))}
+          {lyrics.map((line, index) => {
+            const isActive = index === activeLyric;
+            // 逐字跟唱：当前句内按时间进度线性推进，唱过的字保持蓝色
+            const chars = Array.from(
+              graphemeSegmenter.segment(line.text),
+              (segment) => segment.segment,
+            );
+            let sungChars = 0;
+            if (isActive) {
+              const lineStart = line.time;
+              const lineEnd =
+                index < lyrics.length - 1
+                  ? lyrics[index + 1].time
+                  : duration || lineStart + 8;
+              const progress = Math.min(
+                1,
+                Math.max(
+                  0,
+                  (currentTime - lineStart) / Math.max(lineEnd - lineStart, 0.001),
+                ),
+              );
+              sungChars = Math.floor(progress * chars.length);
+            }
+            return (
+              <p
+                key={`${line.time}-${index}`}
+                ref={(node) => {
+                  lyricLineRefs.current[index] = node;
+                }}
+                className={isActive ? 'music-lyric active' : 'music-lyric'}
+              >
+                {chars.map((char, charIndex) => (
+                  <span
+                    key={`${charIndex}-${char}`}
+                    className={
+                      isActive && charIndex < sungChars ? 'music-char-sung' : undefined
+                    }
+                  >
+                    {char}
+                  </span>
+                ))}
+              </p>
+            );
+          })}
         </div>
       )}
       {!neteaseSong && error && (

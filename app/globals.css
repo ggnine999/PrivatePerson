@@ -2113,6 +2113,13 @@ body::after {
   opacity: 1;
   transform: scale(1.14);
 }
+/* 逐字跟唱：单字颜色平滑过渡，节奏由 currentTime 驱动 */
+.music-lyric span {
+  transition: color 0.4s ease;
+}
+.music-char-sung {
+  color: var(--primary);
+}
 /* 内容不满时整块歌词在面板内安全居中；溢出时自动边距归零，滚动从顶部开始 */
 .music-lyric:first-child {
   margin-top: auto;
