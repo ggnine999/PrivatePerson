@@ -127,6 +127,13 @@
 - 已知小坑：Windows 下 Vite 文件监视偶发漏掉组件变更，dev server 持续供应旧模块（HMR 报导出缺失）——`touch` 相关文件即可强制重编译。
 - 验证：lint 0 警告、typecheck、test 4/4、build 通过；桌面/移动端截图确认三个角色渲染与布局正常。
 
+## 追加：换用 OpenMoji 开源表情（2026-09-05 第九轮，用户反馈）
+
+- 用户在得知版权考量后选择「用开源表情包」：移除手绘 chibi 组件（`music-chibis.tsx` 已删除），改用 **Microsoft Fluent Emoji**？否——最终采用 **OpenMoji**（CC BY-SA 4.0，描边卡通风与卡片手绘感一致）。
+- 素材：`public/images/mascots/`（dragon/cat/hamster/ghost/chick 五个 color SVG，各 2-3KB 矢量）+ `LICENSE-OpenMoji.txt`；通过 npm 包 `openmoji@17`（registry 直连可用）提取，README 已加来源与许可署名。
+- 布局：猫脸（左）、龙王（唱片上）、仓鼠（右）、幽灵（卡片左下角，歌词居中后左侧留白处）。装饰改用 CSS 背景图（`aspect-ratio: 1` + `background-size: contain`）而非 `<img>`，规避 oxlint 的 no-img-element 规则且语义上更符合纯装饰定位。
+- 验证：lint 0 警告、typecheck、test 4/4、build 通过；桌面截图确认四个形象渲染正常。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`

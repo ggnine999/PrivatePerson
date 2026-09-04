@@ -11,7 +11,6 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { CatChibi, ChickChibi, DragonChibi } from '@/components/music-chibis';
 import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
@@ -257,24 +256,13 @@ export function MusicPlayer() {
         onError={() => setError('音轨加载失败，请稍后重试。')}
       />
       <div className="music-player-heading">
+        {/* 卡通形象来自 OpenMoji（CC BY-SA 4.0），素材与许可证在 public/images/mascots/ */}
+        <span className="music-mascot-char music-char-cat" aria-hidden="true" />
+        <span className="music-mascot-char music-char-dragon" aria-hidden="true" />
         <span
-          className="music-mascot-char music-char-cat"
+          className="music-mascot-char music-char-hamster"
           aria-hidden="true"
-        >
-          <CatChibi />
-        </span>
-        <span
-          className="music-mascot-char music-char-dragon"
-          aria-hidden="true"
-        >
-          <DragonChibi />
-        </span>
-        <span
-          className="music-mascot-char music-char-chick"
-          aria-hidden="true"
-        >
-          <ChickChibi />
-        </span>
+        />
         <span
           className={playing && !neteaseSong ? 'music-disc playing' : 'music-disc'}
           aria-hidden="true"
@@ -298,6 +286,8 @@ export function MusicPlayer() {
       </div>
       {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏 */}
       <div className="music-mascot" aria-hidden="true" />
+      {/* 左下角的小幽灵，同样来自 OpenMoji */}
+      <span className="music-mascot-char music-char-ghost" aria-hidden="true" />
       {!neteaseSong && (
         <div className="music-controls">
           <button
