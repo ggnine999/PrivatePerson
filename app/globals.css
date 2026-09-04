@@ -1886,9 +1886,11 @@ body::after {
 }
 /* Home music player */
 .music-player {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-self: stretch;
+  overflow: hidden;
   padding: 1.15rem;
   border: 1px solid var(--glass-edge);
   border-radius: 24px;
@@ -1897,16 +1899,34 @@ body::after {
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   backdrop-filter: blur(20px) saturate(1.2);
 }
+/* 卡片底部的主视觉人物装饰：藏在内容层后面，向上渐隐 */
+.music-mascot {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 56%;
+  pointer-events: none;
+  background: url('/images/saber-meadow-v2.webp') no-repeat 72% 12% / cover;
+  opacity: 0.42;
+  -webkit-mask-image: linear-gradient(to top, #000 40%, transparent);
+  mask-image: linear-gradient(to top, #000 40%, transparent);
+}
+.dark .music-mascot {
+  opacity: 0.3;
+}
 .music-player-heading {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.55rem;
   min-width: 0;
+  text-align: center;
 }
 .music-player-heading > div {
   display: grid;
   flex: 1 1 auto;
   min-width: 0;
+  justify-items: center;
 }
 .music-player-heading strong,
 .music-player-heading small {
@@ -1952,6 +1972,7 @@ body::after {
   animation: music-spin 8s linear infinite;
 }
 .music-controls {
+  position: relative;
   display: grid;
   grid-template-columns: 2.7rem minmax(8rem, 1fr) 5.4rem;
   align-items: center;
@@ -2014,6 +2035,7 @@ body::after {
   height: 1rem;
 }
 .music-error {
+  position: relative;
   margin: 0.7rem 0 0;
   color: #b42335;
   font-size: 0.78rem;
@@ -2022,6 +2044,7 @@ body::after {
   color: #ff98a5;
 }
 .music-lyrics {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -2045,9 +2068,9 @@ body::after {
 }
 .music-lyric {
   margin: 0;
-  padding-block: 0.42rem;
+  padding-block: 0.55rem;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.55;
   letter-spacing: 0.02em;
   opacity: 0.6;
@@ -2072,12 +2095,13 @@ body::after {
   margin-bottom: auto;
 }
 .music-list-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: grid;
-  flex: 0 0 1.7rem;
   place-items: center;
   width: 1.7rem;
   height: 1.7rem;
-  margin-left: 0.35rem;
   padding: 0;
   border: 0;
   border-radius: 9px;
@@ -2094,6 +2118,7 @@ body::after {
   height: 1.05rem;
 }
 .music-playlist {
+  position: relative;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -2213,6 +2238,7 @@ body::after {
   font-size: 0.82rem;
 }
 .music-netease {
+  position: relative;
   display: block;
   flex: 0 0 auto;
   width: 100%;
@@ -2290,12 +2316,12 @@ body::after {
     gap: 0.6rem;
   }
   .music-lyrics {
-    height: 6rem;
+    height: 7rem;
     margin-top: 0.75rem;
-    padding-block: 1.9rem;
+    padding-block: 2.2rem;
   }
   .music-lyric {
-    font-size: 0.82rem;
+    font-size: 0.92rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -109,6 +109,13 @@
 - 修复：`.hero-copy` 也改为 `align-self: stretch` 并转 flex 列布局，统计栏 `margin-top: auto` 钉底消化多余空间；因 flex 内外边距不再折叠，显式接管 `.lead` 默认边距（`.hero-actions` 底边距补回间距）。
 - 验证：900/875/1200 三档视口高度下两卡实测严格等高且顶部对齐（700/700、696/696、1000/1000），lint/typecheck/build 通过。
 
+## 追加：卡片视觉打磨（2026-09-05 第七轮，用户反馈）
+
+- 卡片空白处加入主视觉人物装饰：`.music-mascot` 以 Saber 壁纸为底部背景（72% 水平焦点对准人物），向上渐隐 + 半透明，`aria-hidden` + `pointer-events: none`；深色模式降低不透明度。播放器卡片加 `overflow: hidden` 裁剪，内容层（标题/控制条/歌词/列表）显式定位置于装饰层上方。
+- 标题区改为水平居中：唱片居中、状态/歌名/歌手文字居中（网格 `justify-items: center` + `text-align: center`），歌曲列表按钮移到卡片右上角绝对定位。
+- 歌词加大：桌面字号 0.95→1.05rem、行距 0.42→0.55rem；移动端 0.82→0.92rem、歌词盒高 6→7rem。
+- 验证：lint 0 警告、typecheck、test 4/4、build 通过；深浅主题、网易云搜索模式（列表文字在装饰上方可读）、390×844 移动端截图确认。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`

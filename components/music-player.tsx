@@ -277,6 +277,8 @@ export function MusicPlayer() {
           {showPlaylist ? <X /> : <ListMusic />}
         </button>
       </div>
+      {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏 */}
+      <div className="music-mascot" aria-hidden="true" />
       {!neteaseSong && (
         <div className="music-controls">
           <button
