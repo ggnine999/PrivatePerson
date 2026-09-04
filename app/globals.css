@@ -1732,7 +1732,7 @@ body::after {
   backdrop-filter: blur(22px) saturate(1.15);
 }
 .hero {
-  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: calc(100svh - 72px);
 }
 .hero-copy,
@@ -1877,10 +1877,9 @@ body::after {
 }
 /* Home music player */
 .music-player {
-  align-self: start;
-  justify-self: start;
-  width: min(100%, 26rem);
-  margin-top: clamp(4rem, 10vh, 7rem);
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
   padding: 1.15rem;
   border: 1px solid var(--glass-edge);
   border-radius: 24px;
@@ -2013,6 +2012,9 @@ body::after {
   color: #ff98a5;
 }
 .music-lyrics {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   height: 7rem;
   margin-top: 0.9rem;
   padding-block: 2.4rem;
@@ -2033,10 +2035,10 @@ body::after {
 }
 .music-lyric {
   margin: 0;
-  padding-block: 0.16rem;
+  padding-block: 0.42rem;
   color: var(--muted);
-  font-size: 0.86rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.55;
   letter-spacing: 0.02em;
   opacity: 0.6;
   transform: scale(0.96);
@@ -2052,6 +2054,13 @@ body::after {
   opacity: 1;
   transform: scale(1);
 }
+/* 内容不满时整块歌词在面板内安全居中；溢出时自动边距归零，滚动从顶部开始 */
+.music-lyric:first-child {
+  margin-top: auto;
+}
+.music-lyric:last-child {
+  margin-bottom: auto;
+}
 @keyframes music-spin {
   to {
     transform: rotate(360deg);
@@ -2059,7 +2068,7 @@ body::after {
 }
 @media (max-width: 900px) {
   .music-player {
-    justify-self: end;
+    max-width: 650px;
     margin-top: 0;
   }
 }
