@@ -177,7 +177,7 @@
 2. **一言**：`components/hitokoto.tsx` 挂在页脚，hitokoto.cn 公开 API（5 秒超时 + 失败回退站点语句），CSP 放行 `connect-src`；刷新按钮可换句。
 3. **阅读进度条**：`components/reading-progress.tsx`，文章页顶部 3px 主题色进度条，`scaleX` + passive scroll 监听。
 4. **樱花飘落**：`components/sakura-fall.tsx`，全站 Canvas 花瓣（10-20 片自适应，DPR 适配，visibilitychange 暂停），左下角 🌸 按钮开关 + localStorage 记忆，`prefers-reduced-motion` 下默认关闭。
-5. **轻量看板娘**：`components/kanban-musume.tsx`，右下角壁纸人物裁剪立绘（73% 28% 焦点对准 Saber 面部）+ 点击换台词气泡 + 关闭按钮（localStorage 记忆）；窄屏（≤640px）隐藏，位置避开返回顶部按钮。
+5. **轻量看板娘**：`components/kanban-musume.tsx`，右下角贴纸卡看板娘——角色从 `lib/mascots.generated.json` 轮换（点击同时切换角色与台词，用户提供的卡通形象），关闭按钮 localStorage 记忆；窄屏（≤640px）隐藏，位置避开返回顶部按钮。（首版为壁纸人物裁剪立绘，按用户要求换成卡通形象轮换。）
 - 验证：lint 0 警告、typecheck、test 4/4、build 通过；文章页（进度条 0.44 @1/3 滚动、评论占位）、页脚一言（真实诗句）、全站花瓣、看板娘气泡与裁剪立绘均已截图/DOM 验证。
 
 ## 环境与预览

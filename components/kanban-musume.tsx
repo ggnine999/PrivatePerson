@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import mascotManifest from '@/lib/mascots.generated.json';
 
 const LINES = [
   '今天也要元气满满哦！',
@@ -13,10 +14,12 @@ const LINES = [
 ];
 const DISMISS_KEY = 'kanban-dismissed';
 
-// 轻量看板娘：壁纸人物的裁剪立绘 + 点击换台词气泡，可关闭（localStorage 记忆）。
+// 轻量看板娘：public/images/mascots/ 里的卡通形象轮换登场（贴纸卡样式），
+// 点击切换角色与台词，可关闭（localStorage 记忆）。
 export function KanbanMusume() {
   const [dismissed, setDismissed] = useState(true);
-  const [lineIndex, setLineIndex] = useState(0);
+  const [index, setIndex] = useState(0);
+  const mascots = mascotManifest.mascots;
 
   useEffect(() => {
     // 微任务里读 localStorage：避开 SSR，也满足 react-compiler 的同步约束
@@ -25,20 +28,22 @@ export function KanbanMusume() {
     });
   }, []);
 
-  if (dismissed) return null;
+  if (dismissed || mascots.length === 0) return null;
+
+  const mascot = mascots[index % mascots.length];
+  const line = LINES[index % LINES.length];
 
   return (
     <div className="kanban-musume">
-      <p className="kanban-bubble">{LINES[lineIndex]}</p>
+      <p className="kanban-bubble">{line}</p>
       <div className="kanban-row">
         <button
           type="button"
           className="kanban-figure"
-          onClick={() => setLineIndex((index) => (index + 1) % LINES.length)}
-          aria-label="看板娘：点击换一句台词"
-        >
-          <span className="kanban-figure-art" aria-hidden="true" />
-        </button>
+          style={{ backgroundImage: `url('/images/mascots/${mascot.file}')` }}
+          onClick={() => setIndex((value) => value + 1)}
+          aria-label="看板娘：点击换一个伙伴和台词"
+        />
         <button
           type="button"
           className="kanban-close"
