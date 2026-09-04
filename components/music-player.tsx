@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { CatChibi, ChickChibi, DragonChibi } from '@/components/music-chibis';
 import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
@@ -256,6 +257,24 @@ export function MusicPlayer() {
         onError={() => setError('音轨加载失败，请稍后重试。')}
       />
       <div className="music-player-heading">
+        <span
+          className="music-mascot-char music-char-cat"
+          aria-hidden="true"
+        >
+          <CatChibi />
+        </span>
+        <span
+          className="music-mascot-char music-char-dragon"
+          aria-hidden="true"
+        >
+          <DragonChibi />
+        </span>
+        <span
+          className="music-mascot-char music-char-chick"
+          aria-hidden="true"
+        >
+          <ChickChibi />
+        </span>
         <span
           className={playing && !neteaseSong ? 'music-disc playing' : 'music-disc'}
           aria-hidden="true"
