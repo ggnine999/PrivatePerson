@@ -15,6 +15,9 @@ function formatTime(value: number) {
 
 export function MusicPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const lyricsRef = useRef<HTMLDivElement>(null);
+  const lyricLineRefs = useRef<Array<HTMLParagraphElement | null>>([]);
+  const lyricsLockedUntilRef = useRef(0);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -59,6 +62,42 @@ export function MusicPlayer() {
     };
   }, []);
 
+  const lyrics = homeTrack.lyrics ?? [];
+  let activeLyric = 0;
+  for (let index = 0; index < lyrics.length; index += 1) {
+    if (currentTime >= lyrics[index].time) activeLyric = index;
+  }
+
+  useEffect(() => {
+    const container = lyricsRef.current;
+    const line = lyricLineRefs.current[activeLyric];
+    if (!container || !line) return;
+    // 用户正在浏览歌词时暂停自动滚动，闲置 5 秒后恢复
+    if (Date.now() < lyricsLockedUntilRef.current) return;
+    const containerBox = container.getBoundingClientRect();
+    const lineBox = line.getBoundingClientRect();
+    const target =
+      container.scrollTop +
+      (lineBox.top + lineBox.height / 2 - (containerBox.top + containerBox.height / 2));
+    container.scrollTo({ top: Math.max(0, target) });
+  }, [activeLyric]);
+
+  useEffect(() => {
+    const container = lyricsRef.current;
+    if (!container) return;
+    const lock = () => {
+      lyricsLockedUntilRef.current = Date.now() + 5000;
+    };
+    container.addEventListener('wheel', lock, { passive: true });
+    container.addEventListener('pointerdown', lock);
+    container.addEventListener('touchstart', lock, { passive: true });
+    return () => {
+      container.removeEventListener('wheel', lock);
+      container.removeEventListener('pointerdown', lock);
+      container.removeEventListener('touchstart', lock);
+    };
+  }, []);
+
   async function togglePlayback() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -99,21 +138,15 @@ export function MusicPlayer() {
 
   return (
     <aside className="music-player" aria-label="首页音乐播放器">
+      {/* 歌词面板已在 DOM 中提供全部文本；字幕轨道会形成第二份需要同步的歌词来源 */}
+      {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
       <audio
         ref={audioRef}
         src={homeTrack.src}
         preload="metadata"
         loop
         onError={() => setError('音轨加载失败，请稍后重试。')}
-      >
-        <track
-          kind="captions"
-          src="/audio/starlight-demo.vtt"
-          srcLang="zh"
-          label="无歌词器乐说明"
-          default
-        />
-      </audio>
+      />
       <div className="music-player-heading">
         <span
           className={playing ? 'music-disc playing' : 'music-disc'}
@@ -174,6 +207,21 @@ export function MusicPlayer() {
           />
         </div>
       </div>
+      {lyrics.length > 0 && (
+        <div className="music-lyrics" ref={lyricsRef}>
+          {lyrics.map((line, index) => (
+            <p
+              key={`${line.time}-${index}`}
+              ref={(node) => {
+                lyricLineRefs.current[index] = node;
+              }}
+              className={index === activeLyric ? 'music-lyric active' : 'music-lyric'}
+            >
+              {line.text}
+            </p>
+          ))}
+        </div>
+      )}
       {error && (
         <output className="music-error" aria-live="polite">
           {error}

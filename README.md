@@ -55,9 +55,10 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 ### 首页音乐播放器
 
 - 组件为 `components/music-player.tsx`，音轨集中配置在 `lib/music.ts`（标题、作者、`src`）。
-- 当前音轨 `public/audio/starlight-demo.wav` 由 `npm run audio:generate`（`scripts/generate-demo-audio.mjs`）本地合成的 48 秒无歌词演示曲；脚本先写临时文件再原子替换，dev server 运行中也可重跑。
-- 替换真实音轨：把浏览器原生支持的音频文件（如 MP3/OGG）放入 `public/audio/`，更新 `lib/music.ts` 的 `src` 与文案即可；`public/audio/starlight-demo.vtt` 为配套的器乐说明字幕，可一并替换或删除 `<track>`。
-- 行为：不自动播放、循环播放、仅播放时旋转唱片；`prefers-reduced-motion` 下禁用旋转。加载失败会在播放器内提示，恢复后自动清除。
+- 当前音轨 `public/audio/starlight-demo.wav` 由 `npm run audio:generate`（`scripts/generate-demo-audio.mjs`）本地合成的 48 秒演示曲；脚本先写临时文件再原子替换，dev server 运行中也可重跑。
+- 歌词同样集中配置在 `lib/music.ts` 的 `lyrics`（每句 `time` 秒数 + `text` 文本），播放器在固定高度面板中高亮当前句（淡色变深色）并自动滚动居中；用户滚动歌词时暂停自动滚动 5 秒。无歌词音轨省略 `lyrics` 字段即可，面板自动隐藏。
+- 替换真实音轨：把浏览器原生支持的音频文件（如 MP3/OGG）放入 `public/audio/`，更新 `lib/music.ts` 的 `src`、文案与 `lyrics` 即可。
+- 行为：不自动播放、循环播放、仅播放时旋转唱片；`prefers-reduced-motion` 下禁用旋转和平滑滚动。加载失败会在播放器内提示，恢复后自动清除。
 
 示例文章和项目均为虚构演示内容。新增文章时填写 slug、标题、摘要、分类、标签、发布日期、更新日期、阅读时长与 Markdown 正文即可；文章详情会自动生成目录、上下篇与相关文章。
 

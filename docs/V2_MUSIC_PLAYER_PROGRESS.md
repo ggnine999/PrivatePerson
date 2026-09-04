@@ -63,6 +63,13 @@
 7. `npm run lint`（0 警告 0 错误）、`npm run typecheck`、`npm test`（4/4）、`npm run build`、`npm audit --omit=dev --offline`（0 vulnerabilities）、`git diff --check` 全部通过。
 8. 经用户确认：验证通过后本地提交本批工作，不推送。
 
+## 追加：歌词面板（2026-09-05 第二轮）
+
+- `lib/music.ts` 新增 `MusicLyric` 类型与演示音轨的 8 句同步歌词（每 6 秒一句，与合成音轨的旋律乐句对齐）；无歌词音轨省略 `lyrics` 字段即可自动隐藏面板。
+- `components/music-player.tsx` 新增固定高度歌词面板：按 `currentTime` 推导当前句，淡色→深色高亮并平滑滚动居中；用户滚动歌词时锁定自动滚动 5 秒后恢复；移除旧 `<track kind="captions">`（歌词面板已在 DOM 提供全部文本，避免双份来源；lint 的 media-has-caption 规则以行内注释禁用并注明理由），同步删除 `public/audio/starlight-demo.vtt`。
+- `app/globals.css` 新增 `.music-lyrics` 样式：固定高度、上下渐隐遮罩、隐藏滚动条、当前行颜色/缩放过渡；移动端断点缩小高度。平滑滚动走 CSS `scroll-behavior`，全局 `prefers-reduced-motion` 规则自动将其降级为瞬时滚动。
+- 验证：lint 0 警告、typecheck、test 4/4、build 通过；浏览器实测 seek 与自然播放跨句时当前行高亮、自动滚动居中偏移 0px；深浅主题与 390×844 移动端截图确认。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`
