@@ -2054,6 +2054,7 @@ body::after {
   overflow-y: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
+  text-align: center;
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent,
@@ -2075,7 +2076,7 @@ body::after {
   letter-spacing: 0.02em;
   opacity: 0.6;
   transform: scale(0.96);
-  transform-origin: left center;
+  transform-origin: center;
   transition:
     color 0.45s ease,
     opacity 0.45s ease,
