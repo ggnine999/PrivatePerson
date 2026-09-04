@@ -171,6 +171,15 @@
 - 歌词改为两阶段滚动行为：前几句高亮行在顶部区域自然下走；当放大变蓝的高亮行到达面板中部后即被钉在正中，其余歌词从下往上滚过、顶部渐隐——实现方式为歌词内容包一层轨道层并加大上下留白（桌面 11rem/移动 2.2rem）制造滚动余量，既有 `scrollTop` 居中逻辑（`Math.max(0,…)` 截断）在此余量下自然产生「先下走、后钉中」的两阶段行为。
 - 逐字变色与滚动叠加验证：滚动中逐字点亮依然精确（第 6 句 48% 进度 → 7 字亮 3）；移动端滚动居中同样生效。
 
+## 追加：二次元博客五件套（2026-09-05，按此前建议顺序实施）
+
+1. **评论系统**：Giscus 免服务端方案，`components/comments.tsx` 挂在文章页尾；配置走 `.env` 的 `NEXT_PUBLIC_GISCUS_*`（未配置显示占位卡片）；CSP 放行 `script-src`/`frame-src` 的 giscus.app。上线前需按 `.env.example` 注释完成 giscus.app 配置向导。
+2. **一言**：`components/hitokoto.tsx` 挂在页脚，hitokoto.cn 公开 API（5 秒超时 + 失败回退站点语句），CSP 放行 `connect-src`；刷新按钮可换句。
+3. **阅读进度条**：`components/reading-progress.tsx`，文章页顶部 3px 主题色进度条，`scaleX` + passive scroll 监听。
+4. **樱花飘落**：`components/sakura-fall.tsx`，全站 Canvas 花瓣（10-20 片自适应，DPR 适配，visibilitychange 暂停），左下角 🌸 按钮开关 + localStorage 记忆，`prefers-reduced-motion` 下默认关闭。
+5. **轻量看板娘**：`components/kanban-musume.tsx`，右下角壁纸人物裁剪立绘（73% 28% 焦点对准 Saber 面部）+ 点击换台词气泡 + 关闭按钮（localStorage 记忆）；窄屏（≤640px）隐藏，位置避开返回顶部按钮。
+- 验证：lint 0 警告、typecheck、test 4/4、build 通过；文章页（进度条 0.44 @1/3 滚动、评论占位）、页脚一言（真实诗句）、全站花瓣、看板娘气泡与裁剪立绘均已截图/DOM 验证。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`

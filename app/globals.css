@@ -1913,6 +1913,175 @@ body::after {
 .dark .music-mascot {
   opacity: 0.3;
 }
+.comments {
+  margin-top: 2.4rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 14px 42px rgba(30, 67, 112, 0.12);
+}
+.comments-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.hitokoto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  max-width: 60rem;
+  margin: 0 auto 1.2rem;
+  padding: 0 1.4rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-align: center;
+}
+.hitokoto p {
+  margin: 0;
+}
+.hitokoto-from {
+  margin-left: 0.5rem;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+.hitokoto-refresh {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+.hitokoto-refresh:hover {
+  color: var(--primary);
+}
+.hitokoto-refresh:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.hitokoto-refresh svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+.reading-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  height: 3px;
+  pointer-events: none;
+}
+.reading-progress-bar {
+  height: 100%;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.sakura-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+}
+.sakura-toggle {
+  position: fixed;
+  left: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(30, 67, 112, 0.14);
+}
+.sakura-toggle[aria-pressed='false'] {
+  opacity: 0.45;
+}
+.kanban-musume {
+  position: fixed;
+  right: 4.6rem;
+  bottom: 1rem;
+  z-index: 29;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.kanban-bubble {
+  position: relative;
+  margin: 0;
+  max-width: 15rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 10px 30px rgba(30, 67, 112, 0.16);
+  color: var(--foreground);
+  font-size: 0.84rem;
+  text-align: center;
+}
+.kanban-row {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+.kanban-figure {
+  width: 6.4rem;
+  height: 12rem;
+  padding: 0;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  background: url('/images/saber-meadow-v2.webp') no-repeat 73% 28% / auto 430%;
+  cursor: pointer;
+  box-shadow: 0 12px 34px rgba(30, 67, 112, 0.22);
+}
+.kanban-figure:hover {
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.kanban-figure-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kanban-close {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--glass-edge);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+.kanban-close:hover {
+  color: var(--primary);
+}
+.kanban-close svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+@media (max-width: 640px) {
+  .kanban-musume {
+    display: none;
+  }
+}
 /* 用户提供的卡通贴纸：白色贴纸底 + 细边框 + 微倾斜，漂浮动画。
    数量与图片由 lib/mascots.generated.json 驱动（npm run mascots:sync 生成），
    位置尺寸走行内样式，这里只定义贴纸外观；移动端限宽防止挤占。 */

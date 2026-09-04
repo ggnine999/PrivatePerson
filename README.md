@@ -78,6 +78,7 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 阅读体验：响应式、深浅主题、中文排版、图片预览、返回顶部、404、跳转主内容、键盘可访问控件、减少动画偏好
 - SEO：Metadata、Open Graph 文本信息、`sitemap.xml`、`robots.txt`、`rss.xml`
 - 保险库：登录/退出、初始化/解锁/锁定、5 分钟自动锁定、搜索、筛选、收藏、密码生成、再次认证后查看/复制、编辑、删除、API Key 到期/轮换字段、加密备份与恢复
+- 二次元体验：评论区（Giscus，`.env` 配置后启用，未配置显示占位）、一言（页脚，失败回退站点语句）、文章阅读进度条、樱花飘落特效（左下角开关、localStorage 记忆、尊重减少动态偏好）、轻量看板娘（壁纸人物裁剪立绘 + 点击换台词气泡，可关闭，窄屏隐藏）
 - 安全：客户端加密、独立随机 IV、D1 只存密文、服务端会话、CSRF、登录限速、可选 TOTP、CSP、安全响应头、私人路由 no-store/noindex
 
 ## 安全设计与威胁模型
@@ -123,6 +124,7 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - `OWNER_PASSWORD_HASH`：通过 `npm run auth:hash` 生成
 - `OWNER_TOTP_SECRET`：可选 Base32 TOTP 秘钥；设置后登录强制 2FA
 - `SESSION_TTL_MINUTES`：服务端登录会话时长
+- `NEXT_PUBLIC_GISCUS_*`：评论区（Giscus）配置，见 `.env.example` 注释；留空则评论区显示占位
 
 服务端秘密不得使用 `NEXT_PUBLIC_` 前缀，也不要提交 `.env`。
 
