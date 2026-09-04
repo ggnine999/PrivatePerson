@@ -15,6 +15,15 @@ import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
 
+type NeteaseSong = {
+  id: string;
+  name: string;
+  artist: string;
+  album: string;
+  durationMs: number;
+  vip: boolean;
+};
+
 function formatTime(value: number) {
   if (!Number.isFinite(value)) return '0:00';
   const minutes = Math.floor(value / 60);
@@ -31,6 +40,12 @@ export function MusicPlayer() {
   const [trackIndex, setTrackIndex] = useState(0);
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [query, setQuery] = useState('');
+  const [neteaseSong, setNeteaseSong] = useState<NeteaseSong | null>(null);
+  const [neteaseSearch, setNeteaseSearch] = useState<{
+    keyword: string;
+    state: 'idle' | 'loading' | 'error';
+    results: NeteaseSong[];
+  }>({ keyword: '', state: 'idle', results: [] });
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -130,6 +145,37 @@ export function MusicPlayer() {
     };
   }, []);
 
+  // 搜索网易云（防抖）；音频播放始终走官方外链 iframe，这里只做只读元数据搜索。
+  // setState 全部位于异步回调中；结果只在关键词与当前输入一致时渲染，防止迟到的旧响应串台。
+  useEffect(() => {
+    if (!showPlaylist) return;
+    const keyword = query.trim();
+    if (!keyword) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      setNeteaseSearch({ keyword, state: 'loading', results: [] });
+      fetch(`/api/netease-search?q=${encodeURIComponent(keyword)}`, {
+        signal: controller.signal,
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error('search failed');
+          return response.json() as Promise<{ songs?: NeteaseSong[] }>;
+        })
+        .then((data) => {
+          setNeteaseSearch({ keyword, state: 'idle', results: data.songs ?? [] });
+        })
+        .catch((error: Error) => {
+          if (error.name !== 'AbortError') {
+            setNeteaseSearch({ keyword, state: 'error', results: [] });
+          }
+        });
+    }, 350);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [query, showPlaylist]);
+
   async function togglePlayback() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -169,6 +215,7 @@ export function MusicPlayer() {
   }
 
   function selectTrack(index: number) {
+    setNeteaseSong(null);
     setShowPlaylist(false);
     setQuery('');
     if (index === trackIndex) return;
@@ -176,10 +223,25 @@ export function MusicPlayer() {
     setTrackIndex(index);
   }
 
+  function selectNetease(song: NeteaseSong) {
+    // 保持列表打开，方便连续试听；选本地曲目即可切回自制播放器
+    setNeteaseSong(song);
+  }
+
   function togglePlaylist() {
     setQuery('');
     setShowPlaylist((open) => !open);
   }
+
+  const keyword = query.trim();
+  const neteaseMatches = neteaseSearch.keyword === keyword;
+  const headingTitle = neteaseSong ? neteaseSong.name : track.title;
+  const headingArtist = neteaseSong ? neteaseSong.artist : track.artist;
+  const statusText = neteaseSong
+    ? '网易云音乐'
+    : playing
+      ? '正在播放'
+      : '晴空电台';
 
   return (
     <aside className="music-player" aria-label="首页音乐播放器">
@@ -195,17 +257,15 @@ export function MusicPlayer() {
       />
       <div className="music-player-heading">
         <span
-          className={playing ? 'music-disc playing' : 'music-disc'}
+          className={playing && !neteaseSong ? 'music-disc playing' : 'music-disc'}
           aria-hidden="true"
         >
           <Music2 />
         </span>
         <div>
-          <span className="music-status">
-            {playing ? '正在播放' : '晴空电台'}
-          </span>
-          <strong>{track.title}</strong>
-          <small>{track.artist}</small>
+          <span className="music-status">{statusText}</span>
+          <strong>{headingTitle}</strong>
+          <small>{headingArtist}</small>
         </div>
         <button
           className="music-list-toggle"
@@ -217,108 +277,184 @@ export function MusicPlayer() {
           {showPlaylist ? <X /> : <ListMusic />}
         </button>
       </div>
-      <div className="music-controls">
-        <button
-          className="music-play"
-          type="button"
-          onClick={togglePlayback}
-          aria-label={playing ? '暂停音乐' : '播放音乐'}
-        >
-          {playing ? <Pause /> : <Play />}
-        </button>
-        <div className="music-progress">
-          <input
-            type="range"
-            min="0"
-            max={duration || 0}
-            step="0.1"
-            value={Math.min(currentTime, duration || 0)}
-            onChange={(event) => seek(Number(event.target.value))}
-            aria-label="音乐播放进度"
-            aria-valuetext={`${formatTime(currentTime)} / 共 ${formatTime(duration)}`}
-          />
-          <div className="music-time" aria-live="off">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-        </div>
-        <div className="music-volume">
+      {!neteaseSong && (
+        <div className="music-controls">
           <button
+            className="music-play"
             type="button"
-            onClick={toggleMute}
-            aria-label={muted ? '取消静音' : '静音'}
+            onClick={togglePlayback}
+            aria-label={playing ? '暂停音乐' : '播放音乐'}
           >
-            {muted || volume === 0 ? <VolumeX /> : <Volume2 />}
+            {playing ? <Pause /> : <Play />}
           </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={muted ? 0 : volume}
-            onChange={(event) => changeVolume(Number(event.target.value))}
-            aria-label="音乐音量"
-            aria-valuetext={`${Math.round((muted ? 0 : volume) * 100)}%`}
-          />
-        </div>
-      </div>
-      {showPlaylist ? (
-        <div className="music-playlist">
-          <label className="music-search">
-            <Search aria-hidden="true" />
+          <div className="music-progress">
             <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="搜索歌曲或歌手"
-              aria-label="搜索歌曲"
+              type="range"
+              min="0"
+              max={duration || 0}
+              step="0.1"
+              value={Math.min(currentTime, duration || 0)}
+              onChange={(event) => seek(Number(event.target.value))}
+              aria-label="音乐播放进度"
+              aria-valuetext={`${formatTime(currentTime)} / 共 ${formatTime(duration)}`}
             />
-          </label>
-          <ul className="music-track-list">
-            {filteredTracks.map(({ item, index }) => {
-              const isCurrent = index === trackIndex;
-              return (
-                <li key={item.src}>
-                  <button
-                    className={isCurrent ? 'music-track current' : 'music-track'}
-                    type="button"
-                    onClick={() => selectTrack(index)}
-                    aria-current={isCurrent ? 'true' : undefined}
-                  >
-                    <span className="music-track-meta">
-                      <span className="music-track-title">{item.title}</span>
-                      <span className="music-track-artist">{item.artist}</span>
-                    </span>
-                    {isCurrent && (
-                      <Music2 className="music-track-playing" aria-hidden="true" />
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-            {filteredTracks.length === 0 && (
-              <li className="music-track-empty">没有找到匹配的歌曲</li>
-            )}
-          </ul>
-        </div>
-      ) : (
-        lyrics.length > 0 && (
-          <div className="music-lyrics" ref={lyricsRef}>
-            {lyrics.map((line, index) => (
-              <p
-                key={`${line.time}-${index}`}
-                ref={(node) => {
-                  lyricLineRefs.current[index] = node;
-                }}
-                className={index === activeLyric ? 'music-lyric active' : 'music-lyric'}
-              >
-                {line.text}
-              </p>
-            ))}
+            <div className="music-time" aria-live="off">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
           </div>
-        )
+          <div className="music-volume">
+            <button
+              type="button"
+              onClick={toggleMute}
+              aria-label={muted ? '取消静音' : '静音'}
+            >
+              {muted || volume === 0 ? <VolumeX /> : <Volume2 />}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={muted ? 0 : volume}
+              onChange={(event) => changeVolume(Number(event.target.value))}
+              aria-label="音乐音量"
+              aria-valuetext={`${Math.round((muted ? 0 : volume) * 100)}%`}
+            />
+          </div>
+        </div>
       )}
-      {error && (
+      {(showPlaylist || neteaseSong) && (
+        <>
+          {neteaseSong && (
+            <iframe
+              className="music-netease"
+              key={neteaseSong.id}
+              src={`https://music.163.com/outchain/player?type=2&id=${neteaseSong.id}&auto=1&height=66`}
+              width="100%"
+              height={86}
+              loading="lazy"
+              allow="autoplay"
+              title={`网易云音乐外链播放器：${neteaseSong.name}`}
+            />
+          )}
+          {showPlaylist && (
+            <div className="music-playlist">
+              <label className="music-search">
+                <Search aria-hidden="true" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="搜索本地曲库或网易云音乐"
+                  aria-label="搜索歌曲"
+                />
+              </label>
+              <ul className="music-track-list">
+                {filteredTracks.length > 0 && (
+                  <li className="music-group-label" aria-hidden="true">
+                    本地曲库
+                  </li>
+                )}
+                {filteredTracks.map(({ item, index }) => {
+                  const isCurrent = !neteaseSong && index === trackIndex;
+                  return (
+                    <li key={item.src}>
+                      <button
+                        className={isCurrent ? 'music-track current' : 'music-track'}
+                        type="button"
+                        onClick={() => selectTrack(index)}
+                        aria-current={isCurrent ? 'true' : undefined}
+                      >
+                        <span className="music-track-meta">
+                          <span className="music-track-title">{item.title}</span>
+                          <span className="music-track-artist">{item.artist}</span>
+                        </span>
+                        {isCurrent && (
+                          <Music2 className="music-track-playing" aria-hidden="true" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+                {keyword !== '' && (
+                  <li className="music-group-label" aria-hidden="true">
+                    网易云音乐
+                  </li>
+                )}
+                {keyword !== '' && neteaseMatches && neteaseSearch.state === 'loading' && (
+                  <li className="music-track-empty">正在搜索网易云音乐…</li>
+                )}
+                {keyword !== '' && neteaseMatches && neteaseSearch.state === 'error' && (
+                  <li className="music-track-empty">
+                    网易云搜索暂时失败，请稍后重试。
+                  </li>
+                )}
+                {keyword !== '' &&
+                  neteaseMatches &&
+                  neteaseSearch.state === 'idle' &&
+                  neteaseSearch.results.map((song) => {
+                    const isCurrent = neteaseSong?.id === song.id;
+                    return (
+                      <li key={`netease-${song.id}`}>
+                        <button
+                          className={
+                            isCurrent ? 'music-track current' : 'music-track'
+                          }
+                          type="button"
+                          onClick={() => selectNetease(song)}
+                          aria-current={isCurrent ? 'true' : undefined}
+                        >
+                          <span className="music-track-meta">
+                            <span className="music-track-title">{song.name}</span>
+                            <span className="music-track-artist">
+                              {song.artist}
+                              {song.album ? ` · ${song.album}` : ''}
+                            </span>
+                          </span>
+                          {song.vip && (
+                            <span className="music-track-vip" aria-label="VIP 歌曲">
+                              VIP
+                            </span>
+                          )}
+                          {isCurrent && (
+                            <Music2
+                              className="music-track-playing"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                {keyword !== '' &&
+                  neteaseMatches &&
+                  neteaseSearch.state === 'idle' &&
+                  neteaseSearch.results.length === 0 &&
+                  filteredTracks.length === 0 && (
+                    <li className="music-track-empty">没有找到匹配的歌曲</li>
+                  )}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+      {!neteaseSong && !showPlaylist && lyrics.length > 0 && (
+        <div className="music-lyrics" ref={lyricsRef}>
+          {lyrics.map((line, index) => (
+            <p
+              key={`${line.time}-${index}`}
+              ref={(node) => {
+                lyricLineRefs.current[index] = node;
+              }}
+              className={index === activeLyric ? 'music-lyric active' : 'music-lyric'}
+            >
+              {line.text}
+            </p>
+          ))}
+        </div>
+      )}
+      {!neteaseSong && error && (
         <output className="music-error" aria-live="polite">
           {error}
         </output>

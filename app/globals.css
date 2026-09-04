@@ -2129,6 +2129,7 @@ body::after {
 .music-track-list {
   flex: 1 1 auto;
   min-height: 0;
+  max-height: 22rem;
   margin: 0.55rem 0 0;
   padding: 0.2rem 0;
   list-style: none;
@@ -2202,6 +2203,31 @@ body::after {
   padding: 0.85rem 0.55rem;
   color: var(--muted);
   font-size: 0.82rem;
+}
+.music-netease {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  margin-top: 0.9rem;
+  border: 0;
+  border-radius: 12px;
+}
+.music-group-label {
+  padding: 0.6rem 0.55rem 0.2rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.music-track-vip {
+  flex: 0 0 auto;
+  padding: 0.08rem 0.32rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  border-radius: 6px;
+  color: var(--primary);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 .netease-list {
   display: grid;
