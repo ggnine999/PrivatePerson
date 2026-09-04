@@ -6,9 +6,12 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "predev": "npm run mascots:sync",
     "dev": "vinext dev",
+    "prebuild": "npm run mascots:sync",
     "build": "vinext build",
     "start": "wrangler dev --config dist/server/wrangler.json",
+    "mascots:sync": "node scripts/generate-mascot-manifest.mjs",
     "lint": "oxlint",
     "format": "oxfmt",
     "db:generate": "node --require ./scripts/os-userinfo-shim.cjs ./node_modules/drizzle-kit/bin.cjs generate",

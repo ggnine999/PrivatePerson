@@ -152,6 +152,14 @@
 - 撤掉唱片顶缘的 Doro，五张贴纸全部沿左右两边分布：左列 = 小猫（标题左）→ Doro（中部）→ 奶龙（底部），右列 = 噜噜（标题右）→ 牛牛（底部）；唱片区与歌词中线完全留空。
 - 顺带修正：奶龙原锚定在标题区（`bottom: 18%` 按标题高度解析导致与小猫重叠），已移到卡片层级钉在左下角。
 
+## 追加：贴纸目录化自动管理（2026-09-05 第十一轮，用户需求）
+
+- 用户需求：以后增加卡通形象直接往 `public/images/mascots/` 丢图即可。
+- 新增 `scripts/generate-mascot-manifest.mjs` + `npm run mascots:sync`：扫描目录内图片（png/svg/webp/jpg/gif，忽略大小写）生成 `lib/mascots.generated.json`；挂到 `predev`/`prebuild` 钩子，dev/build 自动同步，dev 运行中加图后手动跑一次。
+- 播放器改为读取清单动态渲染：按文件名排序左右两列交替（左列 = 排序偶数位，右列 = 奇数位），列内 8%~72% 均分纵向位置，水平位置与倾斜角/尺寸由索引伪随机微调；跳过中间唱片区。上限约每列 6 张（再多会互相贴近）。
+- 清理：手写的 `.music-char-*` 每角色 CSS 与组件内固定 span 全部移除，共用贴纸样式保留（白底圆角 + aspect-ratio 1 + contain）；此前的自动布局首版漏了 background-image 内联，回归截图发现后补上。
+- 验证：lint 0 警告、typecheck、test 4/4、build 通过；浏览器确认 5 张贴纸按自动布局渲染（左列 cat01/lulu01/niu01，右列 doro01/nailong01）。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`

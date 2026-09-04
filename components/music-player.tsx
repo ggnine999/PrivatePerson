@@ -11,9 +11,32 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import mascotManifest from '@/lib/mascots.generated.json';
 import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
+
+// 贴纸自动布局：按文件名排序，左右两列交替，列内自上而下均分；
+// 中间唱片区与歌词中线保持留空，每张贴纸带伪随机倾斜与尺寸变化。
+function mascotSlotStyle(file: string, index: number, total: number): CSSProperties {
+  const side: 'left' | 'right' = index % 2 === 0 ? 'left' : 'right';
+  const inSide = Math.floor(index / 2);
+  const sideCount = Math.floor((total - (side === 'left' ? 1 : 2)) / 2) + 1;
+  const startTop = 8;
+  const step = sideCount > 1 ? (72 - startTop) / (sideCount - 1) : 22;
+  const top = sideCount > 1 ? startTop + inSide * step : 30;
+  const xOffsets = [0.6, 1.15, 0.85];
+  const width = 2.5 + ((index * 7) % 3) * 0.25;
+  const tilt = ((index * 47) % 11) - 5;
+  return {
+    [side]: `${xOffsets[inSide % xOffsets.length]}rem`,
+    top: `${top}%`,
+    width: `${width}rem`,
+    backgroundImage: `url('/images/mascots/${file}')`,
+    '--tilt': `${tilt}deg`,
+  } as CSSProperties;
+}
 
 type NeteaseSong = {
   id: string;
@@ -256,9 +279,6 @@ export function MusicPlayer() {
         onError={() => setError('音轨加载失败，请稍后重试。')}
       />
       <div className="music-player-heading">
-        {/* 用户提供的卡通贴纸（public/images/mascots/），授权由站点所有者负责 */}
-        <span className="music-mascot-char music-char-cat" aria-hidden="true" />
-        <span className="music-mascot-char music-char-lulu" aria-hidden="true" />
         <span
           className={playing && !neteaseSong ? 'music-disc playing' : 'music-disc'}
           aria-hidden="true"
@@ -282,9 +302,14 @@ export function MusicPlayer() {
       </div>
       {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏 */}
       <div className="music-mascot" aria-hidden="true" />
-      <span className="music-mascot-char music-char-nailong" aria-hidden="true" />
-      <span className="music-mascot-char music-char-doro" aria-hidden="true" />
-      <span className="music-mascot-char music-char-niu" aria-hidden="true" />
+      {mascotManifest.mascots.map((mascot, index) => (
+        <span
+          key={mascot.file}
+          className="music-mascot-char"
+          style={mascotSlotStyle(mascot.file, index, mascotManifest.mascots.length)}
+          aria-hidden="true"
+        />
+      ))}
       {!neteaseSong && (
         <div className="music-controls">
           <button

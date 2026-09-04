@@ -1913,9 +1913,12 @@ body::after {
 .dark .music-mascot {
   opacity: 0.3;
 }
-/* 用户提供的卡通贴纸：白色贴纸底 + 细边框 + 微倾斜，漂浮动画 */
+/* 用户提供的卡通贴纸：白色贴纸底 + 细边框 + 微倾斜，漂浮动画。
+   数量与图片由 lib/mascots.generated.json 驱动（npm run mascots:sync 生成），
+   位置尺寸走行内样式，这里只定义贴纸外观；移动端限宽防止挤占。 */
 .music-mascot-char {
   position: absolute;
+  aspect-ratio: 1;
   padding: 0.26rem;
   border: 1px solid rgba(31, 71, 118, 0.16);
   border-radius: 12px;
@@ -1926,46 +1929,6 @@ body::after {
   box-shadow: 0 5px 14px rgba(31, 71, 118, 0.16);
   pointer-events: none;
   animation: chibi-float 4.5s ease-in-out infinite alternate;
-}
-.music-char-cat {
-  left: clamp(0.5rem, 6%, 3rem);
-  top: -0.35rem;
-  width: 2.9rem;
-  aspect-ratio: 131 / 130;
-  --tilt: -6deg;
-  background-image: url('/images/mascots/cat01.png');
-}
-.music-char-lulu {
-  right: clamp(1.2rem, 9%, 3.4rem);
-  top: -0.2rem;
-  width: 2.9rem;
-  aspect-ratio: 165 / 160;
-  --tilt: 5deg;
-  background-image: url('/images/mascots/lulu01.png');
-}
-.music-char-nailong {
-  left: 0.7rem;
-  bottom: 18%;
-  width: 3rem;
-  aspect-ratio: 152 / 172;
-  --tilt: -4deg;
-  background-image: url('/images/mascots/nailong01.png');
-}
-.music-char-doro {
-  left: 0.6rem;
-  top: 33%;
-  width: 2.7rem;
-  aspect-ratio: 178 / 134;
-  --tilt: 3deg;
-  background-image: url('/images/mascots/doro01.png');
-}
-.music-char-niu {
-  right: 0.7rem;
-  bottom: 23%;
-  width: 2.9rem;
-  aspect-ratio: 167 / 164;
-  --tilt: 4deg;
-  background-image: url('/images/mascots/niu01.png');
 }
 @keyframes chibi-float {
   from {
@@ -2386,27 +2349,8 @@ body::after {
   .music-lyric {
     font-size: 0.92rem;
   }
-  .music-char-cat {
-    width: 2.3rem;
-    left: 0.25rem;
-  }
-  .music-char-lulu {
-    width: 2.3rem;
-    right: 0.4rem;
-  }
-  .music-char-nailong {
-    width: 2.4rem;
-    left: 0.4rem;
-    bottom: 16%;
-  }
-  .music-char-doro {
-    width: 2.2rem;
-    left: 0.35rem;
-    top: 32%;
-  }
-  .music-char-niu {
-    width: 2.3rem;
-    right: 0.4rem;
+  .music-mascot-char {
+    max-width: 2.4rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
