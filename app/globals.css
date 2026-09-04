@@ -1945,16 +1945,16 @@ body::after {
 }
 .music-char-nailong {
   left: 0.7rem;
-  bottom: 22%;
+  bottom: 18%;
   width: 3rem;
   aspect-ratio: 152 / 172;
   --tilt: -4deg;
   background-image: url('/images/mascots/nailong01.png');
 }
 .music-char-doro {
-  left: calc(50% - 1.5rem);
-  top: -0.85rem;
-  width: 3rem;
+  left: 0.6rem;
+  top: 33%;
+  width: 2.7rem;
   aspect-ratio: 178 / 134;
   --tilt: 3deg;
   background-image: url('/images/mascots/doro01.png');
@@ -2397,11 +2397,12 @@ body::after {
   .music-char-nailong {
     width: 2.4rem;
     left: 0.4rem;
+    bottom: 16%;
   }
   .music-char-doro {
-    width: 2.4rem;
-    left: calc(50% - 1.2rem);
-    top: -0.7rem;
+    width: 2.2rem;
+    left: 0.35rem;
+    top: 32%;
   }
   .music-char-niu {
     width: 2.3rem;

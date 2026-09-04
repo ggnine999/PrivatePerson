@@ -260,10 +260,6 @@ export function MusicPlayer() {
         <span className="music-mascot-char music-char-cat" aria-hidden="true" />
         <span className="music-mascot-char music-char-lulu" aria-hidden="true" />
         <span
-          className="music-mascot-char music-char-nailong"
-          aria-hidden="true"
-        />
-        <span
           className={playing && !neteaseSong ? 'music-disc playing' : 'music-disc'}
           aria-hidden="true"
         >
@@ -286,6 +282,7 @@ export function MusicPlayer() {
       </div>
       {/* 站点主视觉人物作为卡片内装饰，纯装饰性元素对读屏器隐藏 */}
       <div className="music-mascot" aria-hidden="true" />
+      <span className="music-mascot-char music-char-nailong" aria-hidden="true" />
       <span className="music-mascot-char music-char-doro" aria-hidden="true" />
       <span className="music-mascot-char music-char-niu" aria-hidden="true" />
       {!neteaseSong && (
