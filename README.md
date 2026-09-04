@@ -42,7 +42,7 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 个人介绍与社交链接：`app/about/page.tsx`
 - 视觉令牌和响应式样式：`app/globals.css`
 - 文章内示例插画：`public/images/night-editorial.png`
-- 首页音乐播放器组件：`components/music-player.tsx`；音轨与文案：`lib/music.ts`
+- 首页音乐播放器组件：`components/music-player.tsx`；曲库（多音轨 + 歌词）：`lib/music.ts`
 
 ### 第二版背景素材
 
@@ -54,11 +54,11 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 
 ### 首页音乐播放器
 
-- 组件为 `components/music-player.tsx`，音轨集中配置在 `lib/music.ts`（标题、作者、`src`）。
-- 当前音轨 `public/audio/starlight-demo.wav` 由 `npm run audio:generate`（`scripts/generate-demo-audio.mjs`）本地合成的 48 秒演示曲；脚本先写临时文件再原子替换，dev server 运行中也可重跑。
-- 歌词同样集中配置在 `lib/music.ts` 的 `lyrics`（每句 `time` 秒数 + `text` 文本），播放器在固定高度面板中高亮当前句（淡色变深色）并自动滚动居中；用户滚动歌词时暂停自动滚动 5 秒。无歌词音轨省略 `lyrics` 字段即可，面板自动隐藏。
-- 替换真实音轨：把浏览器原生支持的音频文件（如 MP3/OGG）放入 `public/audio/`，更新 `lib/music.ts` 的 `src`、文案与 `lyrics` 即可。
-- 行为：不自动播放、循环播放、仅播放时旋转唱片；`prefers-reduced-motion` 下禁用旋转和平滑滚动。加载失败会在播放器内提示，恢复后自动清除。
+- 组件为 `components/music-player.tsx`，曲库集中配置在 `lib/music.ts` 的 `tracks` 数组（标题、作者、`src`、可选 `lyrics`）。
+- 当前曲库为 4 首本地合成演示曲（48 秒 + 36 秒 × 3），由 `npm run audio:generate`（`scripts/generate-demo-audio.mjs`）生成；脚本先写临时文件再原子替换，dev server 运行中也可重跑，但被播放中的那一首可能被占用而跳过（停止播放后重跑即可）。
+- 播放器右上角的歌曲列表按钮可打开搜索面板：按歌名或歌手即时过滤，点击曲目即切换并自动续播；当前曲目以主题色高亮。新增歌曲只需把音频文件放入 `public/audio/` 并在 `tracks` 数组加一条记录。
+- 歌词同样配置在 `lyrics`（每句 `time` 秒数 + `text` 文本），播放器高亮当前句（淡色变深色）并自动滚动居中；用户滚动歌词时暂停自动滚动 5 秒。无歌词音轨省略 `lyrics` 字段即可，面板自动隐藏。
+- 行为：不自动播放（换曲续播除外）、循环播放、仅播放时旋转唱片；`prefers-reduced-motion` 下禁用旋转和平滑滚动。加载失败会在播放器内提示，恢复后自动清除。
 
 示例文章和项目均为虚构演示内容。新增文章时填写 slug、标题、摘要、分类、标签、发布日期、更新日期、阅读时长与 Markdown 正文即可；文章详情会自动生成目录、上下篇与相关文章。
 

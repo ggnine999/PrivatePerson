@@ -1,8 +1,17 @@
 'use client';
 
-import { Music2, Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import {
+  ListMusic,
+  Music2,
+  Pause,
+  Play,
+  Search,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { homeTrack } from '@/lib/music';
+import { tracks } from '@/lib/music';
 
 const INITIAL_VOLUME = 0.65;
 
@@ -18,12 +27,32 @@ export function MusicPlayer() {
   const lyricsRef = useRef<HTMLDivElement>(null);
   const lyricLineRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const lyricsLockedUntilRef = useRef(0);
+  const autoplayAfterSwitchRef = useRef(false);
+  const [trackIndex, setTrackIndex] = useState(0);
+  const [showPlaylist, setShowPlaylist] = useState(false);
+  const [query, setQuery] = useState('');
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(INITIAL_VOLUME);
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState('');
+
+  const track = tracks[trackIndex];
+  const lyrics = track.lyrics ?? [];
+  let activeLyric = 0;
+  for (let index = 0; index < lyrics.length; index += 1) {
+    if (currentTime >= lyrics[index].time) activeLyric = index;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredTracks = tracks
+    .map((item, index) => ({ item, index }))
+    .filter(
+      ({ item }) =>
+        normalizedQuery === '' ||
+        `${item.title} ${item.artist}`.toLowerCase().includes(normalizedQuery),
+    );
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -44,14 +73,23 @@ export function MusicPlayer() {
     audio.addEventListener('canplay', recover);
     audio.addEventListener('playing', recover);
 
-    // 本地小文件的 loadedmetadata 可能在监听器挂载前就已触发，
-    // 不补读一次 duration，进度条会停留在 max=0 无法拖动。
+    // audio 元素随曲目 src 变化由 key 重建：重置进度状态、按需补读时长，并在换曲后续播。
+    // 本地小文件的 loadedmetadata 可能在监听器挂载前就已触发，不补读一次进度条会停在 max=0。
+    setCurrentTime(0);
+    setDuration(0);
+    setError('');
     if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
       updateDuration();
     }
     audio.volume = INITIAL_VOLUME;
+    if (autoplayAfterSwitchRef.current) {
+      autoplayAfterSwitchRef.current = false;
+      audio.play().catch(() => setError('浏览器暂时无法播放这首音轨，请稍后重试。'));
+    }
 
     return () => {
+      // 清理引用的是旧曲目元素，必须暂停，否则换曲后旧歌会继续在后台播放
+      audio.pause();
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('durationchange', updateDuration);
@@ -60,13 +98,7 @@ export function MusicPlayer() {
       audio.removeEventListener('canplay', recover);
       audio.removeEventListener('playing', recover);
     };
-  }, []);
-
-  const lyrics = homeTrack.lyrics ?? [];
-  let activeLyric = 0;
-  for (let index = 0; index < lyrics.length; index += 1) {
-    if (currentTime >= lyrics[index].time) activeLyric = index;
-  }
+  }, [track.src]);
 
   useEffect(() => {
     const container = lyricsRef.current;
@@ -136,13 +168,27 @@ export function MusicPlayer() {
     setMuted(audio.muted);
   }
 
+  function selectTrack(index: number) {
+    setShowPlaylist(false);
+    setQuery('');
+    if (index === trackIndex) return;
+    autoplayAfterSwitchRef.current = true;
+    setTrackIndex(index);
+  }
+
+  function togglePlaylist() {
+    setQuery('');
+    setShowPlaylist((open) => !open);
+  }
+
   return (
     <aside className="music-player" aria-label="首页音乐播放器">
       {/* 歌词面板已在 DOM 中提供全部文本；字幕轨道会形成第二份需要同步的歌词来源 */}
       {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
       <audio
+        key={track.src}
         ref={audioRef}
-        src={homeTrack.src}
+        src={track.src}
         preload="metadata"
         loop
         onError={() => setError('音轨加载失败，请稍后重试。')}
@@ -158,9 +204,18 @@ export function MusicPlayer() {
           <span className="music-status">
             {playing ? '正在播放' : '晴空电台'}
           </span>
-          <strong>{homeTrack.title}</strong>
-          <small>{homeTrack.artist}</small>
+          <strong>{track.title}</strong>
+          <small>{track.artist}</small>
         </div>
+        <button
+          className="music-list-toggle"
+          type="button"
+          onClick={togglePlaylist}
+          aria-expanded={showPlaylist}
+          aria-label={showPlaylist ? '关闭歌曲列表' : '查看歌曲列表'}
+        >
+          {showPlaylist ? <X /> : <ListMusic />}
+        </button>
       </div>
       <div className="music-controls">
         <button
@@ -207,20 +262,61 @@ export function MusicPlayer() {
           />
         </div>
       </div>
-      {lyrics.length > 0 && (
-        <div className="music-lyrics" ref={lyricsRef}>
-          {lyrics.map((line, index) => (
-            <p
-              key={`${line.time}-${index}`}
-              ref={(node) => {
-                lyricLineRefs.current[index] = node;
-              }}
-              className={index === activeLyric ? 'music-lyric active' : 'music-lyric'}
-            >
-              {line.text}
-            </p>
-          ))}
+      {showPlaylist ? (
+        <div className="music-playlist">
+          <label className="music-search">
+            <Search aria-hidden="true" />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="搜索歌曲或歌手"
+              aria-label="搜索歌曲"
+            />
+          </label>
+          <ul className="music-track-list">
+            {filteredTracks.map(({ item, index }) => {
+              const isCurrent = index === trackIndex;
+              return (
+                <li key={item.src}>
+                  <button
+                    className={isCurrent ? 'music-track current' : 'music-track'}
+                    type="button"
+                    onClick={() => selectTrack(index)}
+                    aria-current={isCurrent ? 'true' : undefined}
+                  >
+                    <span className="music-track-meta">
+                      <span className="music-track-title">{item.title}</span>
+                      <span className="music-track-artist">{item.artist}</span>
+                    </span>
+                    {isCurrent && (
+                      <Music2 className="music-track-playing" aria-hidden="true" />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+            {filteredTracks.length === 0 && (
+              <li className="music-track-empty">没有找到匹配的歌曲</li>
+            )}
+          </ul>
         </div>
+      ) : (
+        lyrics.length > 0 && (
+          <div className="music-lyrics" ref={lyricsRef}>
+            {lyrics.map((line, index) => (
+              <p
+                key={`${line.time}-${index}`}
+                ref={(node) => {
+                  lyricLineRefs.current[index] = node;
+                }}
+                className={index === activeLyric ? 'music-lyric active' : 'music-lyric'}
+              >
+                {line.text}
+              </p>
+            ))}
+          </div>
+        )
       )}
       {error && (
         <output className="music-error" aria-live="polite">
