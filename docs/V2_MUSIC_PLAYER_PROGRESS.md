@@ -103,6 +103,12 @@
 - 修复：重写组件时歌词面板分支曾遗漏，回归测试发现后补回；搜索列表加 `max-height: 22rem` 防止长结果把卡片撑高破坏与左侧卡片的对称。
 - 验证：lint 0 警告、typecheck、test 4/4、build、audit 0 漏洞；浏览器实测完整回路（本地歌词 → 搜网易云并内嵌自动播放 → 切回本地歌词恢复）、卡片高度保持 702 与左卡对称；版权受限歌曲由平台在 iframe 内提示。
 
+## 补充修复：双卡等高的浏览器差异（2026-09-05 用户反馈）
+
+- 用户真实 Chrome 中左右卡片高度不一致：`.hero` 的 `min-height: calc(100svh - 72px)` 在部分 Chromium 下会把网格行拉伸到该高度，`align-self: stretch` 的播放器卡片跟随变高，而介绍卡片按 `align-items: center` 居中不拉伸，导致 703 vs 803 的错位（内置自动化浏览器不触发该拉伸路径，此前未测出）。
+- 修复：`.hero-copy` 也改为 `align-self: stretch` 并转 flex 列布局，统计栏 `margin-top: auto` 钉底消化多余空间；因 flex 内外边距不再折叠，显式接管 `.lead` 默认边距（`.hero-actions` 底边距补回间距）。
+- 验证：900/875/1200 三档视口高度下两卡实测严格等高且顶部对齐（700/700、696/696、1000/1000），lint/typecheck/build 通过。
+
 ## 环境与预览
 
 - 工作区：`D:\develop\PrivatePerson`

@@ -220,7 +220,7 @@ svg {
 .hero-actions {
   display: flex;
   gap: 0.7rem;
-  margin-top: 2rem;
+  margin: 2rem 0 2.4rem;
 }
 .button {
   display: inline-flex;
@@ -244,7 +244,7 @@ svg {
 .hero-stats {
   display: flex;
   gap: 2.2rem;
-  margin: 2.4rem 0 0;
+  margin: auto 0 0;
 }
 .hero-stats div {
   border-left: 2px solid var(--border);
@@ -1751,7 +1751,15 @@ body::after {
   backdrop-filter: blur(18px) saturate(1.18);
 }
 .hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
   padding: clamp(1.5rem, 3.5vw, 2.7rem);
+}
+/* 与右侧播放器卡片保持等高：跟随网格行高拉伸；多余空间由统计栏钉底消化。
+   flex 布局中相邻外边距不再折叠，这里显式接管 p.lead 的默认边距。 */
+.hero-copy .lead {
+  margin-block: 0;
 }
 .section-heading {
   padding: 1rem 1.3rem;
