@@ -1775,6 +1775,7 @@ body::after {
 }
 .article-card,
 .project-card,
+.netease-card,
 .filter-bar,
 .article-list,
 .project-list article,
@@ -2201,6 +2202,33 @@ body::after {
   padding: 0.85rem 0.55rem;
   color: var(--muted);
   font-size: 0.82rem;
+}
+.netease-list {
+  display: grid;
+  gap: 1.3rem;
+  max-width: 44rem;
+}
+.netease-card {
+  padding: 1.15rem 1.25rem 1.25rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+}
+.netease-head {
+  margin-bottom: 0.85rem;
+}
+.netease-head h2 {
+  font: 700 1.15rem/1.35 Georgia, 'Songti SC', serif;
+}
+.netease-head p {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.netease-card iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
 }
 @keyframes music-spin {
   to {

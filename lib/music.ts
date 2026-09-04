@@ -12,6 +12,32 @@ export type MusicTrack = {
   lyrics?: MusicLyric[];
 };
 
+// 网易云音乐官方外链播放器（https://music.163.com）嵌入配置。
+// 获取方式：在网易云音乐网页版打开歌曲或歌单的分享页，选「生成外链播放器」，
+// 把链接中的 id 与类型填到下面；type 为 'song'（单曲）或 'playlist'（歌单）。
+// 注意：部分歌曲因版权禁止外链，VIP 歌曲对未登录访客可能只提供试听片段。
+export type NeteaseEmbed = {
+  type: 'song' | 'playlist';
+  id: string;
+  title: string;
+  note: string;
+};
+
+export const neteaseEmbeds: NeteaseEmbed[] = [
+  {
+    type: 'song',
+    id: '347230',
+    title: '海阔天空',
+    note: 'Beyond · 官方外链可播的示例单曲。',
+  },
+  {
+    type: 'song',
+    id: '186016',
+    title: '晴天',
+    note: '周杰伦 · 官方外链可播的示例单曲，替换成你自己的歌单 ID 即可。',
+  },
+];
+
 // 站内曲库：第一首为默认播放曲目；在首页播放器的歌曲列表中可搜索并切换。
 // 演示音轨每 6 秒一个乐句，歌词时间轴与 scripts/generate-demo-audio.mjs 的旋律结构对齐。
 export const tracks: MusicTrack[] = [
