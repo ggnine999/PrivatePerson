@@ -141,6 +141,8 @@ npm run db:migrate:local
 
 ## 生产部署前
 
+完整的技术债与上线前检查清单见 [`docs/TECH_DEBT.md`](docs/TECH_DEBT.md)，部署前逐项过一遍。
+
 最低限度需要站点所有者提供：
 
 1. 公开域名或正式 origin；
