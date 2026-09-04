@@ -41,13 +41,29 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 项目：`lib/content.ts` 中的 `projects`
 - 个人介绍与社交链接：`app/about/page.tsx`
 - 视觉令牌和响应式样式：`app/globals.css`
-- 原创首页插画：`public/images/night-editorial.png`
+- 文章内示例插画：`public/images/night-editorial.png`
+- 首页音乐播放器组件：`components/music-player.tsx`；音轨与文案：`lib/music.ts`
+
+### 第二版背景素材
+
+- 固定背景：`public/images/saber-meadow-v2.avif`，不支持 AVIF 时回退到 `public/images/saber-meadow-v2.webp`；两者均为 1920×1080。
+- 可编辑源图：`public/images/saber-meadow-v2.png`。这是根据用户提供的 Wallpaper Engine 预览图扩展生成的 16:9 静态版本。
+- 样式使用蓝白渐变暗幕、玻璃面板、独立深浅主题和移动端焦点；当前没有启用动态视频，因此移动端和 `prefers-reduced-motion` 用户天然使用静态背景。
+- 原 Wallpaper Engine 目录只提供专用 `scene.pkg`，没有可直接用于浏览器的视频文件；如后续获得明确授权的源视频，应转码为静音 WebM/MP4，并继续保留当前 AVIF/WebP 降级。
+- 素材目录没有附带可确认的网站再分发许可证。公开部署前必须由站点所有者确认原素材及衍生背景的使用授权。
+
+### 首页音乐播放器
+
+- 组件为 `components/music-player.tsx`，音轨集中配置在 `lib/music.ts`（标题、作者、`src`）。
+- 当前音轨 `public/audio/starlight-demo.wav` 由 `npm run audio:generate`（`scripts/generate-demo-audio.mjs`）本地合成的 48 秒无歌词演示曲；脚本先写临时文件再原子替换，dev server 运行中也可重跑。
+- 替换真实音轨：把浏览器原生支持的音频文件（如 MP3/OGG）放入 `public/audio/`，更新 `lib/music.ts` 的 `src` 与文案即可；`public/audio/starlight-demo.vtt` 为配套的器乐说明字幕，可一并替换或删除 `<track>`。
+- 行为：不自动播放、循环播放、仅播放时旋转唱片；`prefers-reduced-motion` 下禁用旋转。加载失败会在播放器内提示，恢复后自动清除。
 
 示例文章和项目均为虚构演示内容。新增文章时填写 slug、标题、摘要、分类、标签、发布日期、更新日期、阅读时长与 Markdown 正文即可；文章详情会自动生成目录、上下篇与相关文章。
 
 ## 已实现功能
 
-- 首页：简介、精选文章、最新文章入口、精选项目
+- 首页：简介、精选文章、最新文章入口、精选项目、音乐播放器
 - 文章：列表、全文搜索、分类、标签、Markdown、代码高亮、目录、阅读时长、日期、归档、上下篇、相关文章
 - 项目：集中配置、分类/技术/状态/精选、网站与仓库安全外链
 - 关于：介绍、经历、技能、兴趣和可替换联系方式
@@ -134,7 +150,8 @@ npm run db:migrate:local
 - `npm test`：2 个测试文件、4 个测试全部通过；覆盖密码哈希验证、常量形态比较、AES-GCM 往返、唯一 IV、错误主密码拒绝
 - `npm run build`
 - 本地 D1 迁移：3 个迁移全部成功
-- 浏览器：桌面/移动首页、深浅主题、文章搜索、归档、文章详情/目录/图片预览、项目安全外链
+- 浏览器：桌面/移动首页、深浅主题、固定背景焦点与玻璃面板、文章搜索、归档、文章详情/目录/图片预览、项目安全外链
+- 首页音乐播放器：播放/暂停、点击与键盘拖动进度、音量、静音、循环与总时长显示；1440×900 与 390×844、深浅主题下均不遮挡主视觉；`audio:generate` 原子重新生成音轨正常
 - 保险库：登录、初始化、刷新与无操作自动锁定、解锁、账号与 API Key 新增/查看/复制/编辑、删除确认、删除接口、退出/未授权 API
 - WebMCP：`lock_vault` 工具注册、有效调用和无效参数拒绝均已在浏览器中验证
 - 数据库查询：测试密码、邮箱和 API Key 未出现在 `ciphertext` 中；每条记录 IV 长度与密文长度正常

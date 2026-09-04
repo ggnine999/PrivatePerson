@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   ArrowRight,
   BookOpen,
@@ -8,6 +7,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { articles, projects } from '@/lib/content';
+import { MusicPlayer } from '@/components/music-player';
 
 export default function Home() {
   const featured = articles.filter((article) => article.featured);
@@ -50,18 +50,7 @@ export default function Home() {
             </div>
           </dl>
         </div>
-        <figure className="hero-art">
-          <Image
-            src="/images/night-editorial.png"
-            alt="夜樱窗边，一位写作者正在灯下记录灵感"
-            fill
-            priority
-            sizes="(max-width: 900px) 100vw, 52vw"
-          />
-          <figcaption>
-            <span className="status-dot" /> 今夜也在缓慢记录
-          </figcaption>
-        </figure>
+        <MusicPlayer />
       </section>
       <section className="section shell">
         <div className="section-heading">

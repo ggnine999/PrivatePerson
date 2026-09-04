@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "audio:generate": "node scripts/generate-demo-audio.mjs",
     "auth:hash": "node scripts/hash-password.mjs"
   },
   "dependencies": {
