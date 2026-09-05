@@ -119,6 +119,61 @@ svg {
 .site-header:not(.scrolled) .nav-dropdown > button {
   color: var(--foreground);
 }
+/* ===== 视差波浪分隔层：首页 Hero 与内容区之间的场景过渡 ===== */
+.wave-divider {
+  height: 110px;
+  margin: -46px 0 -1px;
+  position: relative;
+  pointer-events: none;
+}
+.wave-divider .waves {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.wave-divider .parallax > use {
+  fill: var(--background);
+  animation: wave-drift 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+}
+.wave-divider .parallax > use:nth-child(1) {
+  opacity: 0.14;
+  animation-delay: -2s;
+  animation-duration: 7s;
+}
+.wave-divider .parallax > use:nth-child(2) {
+  opacity: 0.3;
+  animation-delay: -3s;
+  animation-duration: 10s;
+}
+.wave-divider .parallax > use:nth-child(3) {
+  opacity: 0.55;
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+.wave-divider .parallax > use:nth-child(4) {
+  opacity: 1;
+  animation-delay: -5s;
+  animation-duration: 20s;
+}
+@keyframes wave-drift {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+@media (max-width: 900px) {
+  .wave-divider {
+    height: 70px;
+    margin-top: -30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wave-divider .parallax > use {
+    animation: none;
+  }
+}
 .nav-wrap {
   height: 72px;
   display: flex;
