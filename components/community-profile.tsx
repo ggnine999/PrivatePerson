@@ -10,7 +10,12 @@ type Me = {
   bio: string | null;
   level: number;
   publishedComments: number;
+  createdAt: number;
 };
+
+function joinDays(createdAt: number) {
+  return Math.max(1, Math.floor((Date.now() - createdAt) / 86_400_000) + 1);
+}
 
 export function CommunityProfile() {
   const router = useRouter();
@@ -31,10 +36,7 @@ export function CommunityProfile() {
         setLoading(false);
         return;
       }
-      const data = (await response.json()) as {
-        user: Me;
-        csrfToken: string;
-      };
+      const data = (await response.json()) as { user: Me; csrfToken: string };
       setMe(data.user);
       setDisplayName(data.user.displayName);
       setBio(data.user.bio ?? '');
@@ -50,6 +52,11 @@ export function CommunityProfile() {
     return () => clearTimeout(timer);
   }, [load]);
 
+  useEffect(() => {
+    // 未登录：直接送到登录/注册界面
+    if (!loading && !me) router.replace('/community/login');
+  }, [loading, me, router]);
+
   async function saveAvatar(file: File) {
     setError('');
     if (file.size > 100 * 1024) {
@@ -58,7 +65,8 @@ export function CommunityProfile() {
     }
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+      reader.onload = () =>
+        resolve(typeof reader.result === 'string' ? reader.result : '');
       reader.onerror = () => reject(new Error('read failed'));
       reader.readAsDataURL(file);
     });
@@ -112,47 +120,63 @@ export function CommunityProfile() {
     router.push('/');
   }
 
-  if (loading) {
-    return <p className="comments-loading">正在确认登录状态…</p>;
-  }
-  if (!me) {
-    // 未登录：直接送到登录/注册界面（登录页里可切换注册）
-    router.replace('/community/login');
-    return <p className="comments-loading">正在前往登录…</p>;
+  if (loading || !me) {
+    return (
+      <p className="comments-loading">
+        {loading ? '正在确认登录状态…' : '正在前往登录…'}
+      </p>
+    );
   }
 
   return (
-    <div className="community-profile">
-      <div className="community-profile-head">
-        {me.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className="community-avatar" src={me.avatar} alt="头像" />
-        ) : (
-          <span className="community-avatar community-avatar-fallback" aria-hidden="true">
-            {me.displayName.slice(0, 1)}
-          </span>
-        )}
-        <div>
-          <p className="community-profile-name">
-            {me.displayName} <span className="comments-badge">Lv.{me.level}</span>
-          </p>
-          <p className="community-profile-meta">
-            @{me.username} · 已发布 {me.publishedComments} 条评论
-          </p>
-        </div>
-        <button type="button" className="button ghost" onClick={() => void logout()}>
+    <div className="qq-card">
+      <div className="qq-banner">
+        <button type="button" className="qq-logout" onClick={() => void logout()}>
           退出登录
         </button>
       </div>
+      <div className="qq-head">
+        {me.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="qq-avatar" src={me.avatar} alt="头像" />
+        ) : (
+          <span className="qq-avatar qq-avatar-fallback" aria-hidden="true">
+            {me.displayName.slice(0, 1)}
+          </span>
+        )}
+        <div className="qq-names">
+          <p className="qq-nick">
+            {me.displayName}
+            <span className="comments-badge">Lv.{me.level}</span>
+          </p>
+          <p className="qq-uid">@{me.username}</p>
+        </div>
+      </div>
+      <p className="qq-sign">{me.bio || '这个人很懒，什么都没有留下～'}</p>
+      <dl className="qq-stats">
+        <div>
+          <dt>已发布评论</dt>
+          <dd>{me.publishedComments}</dd>
+        </div>
+        <div>
+          <dt>加入天数</dt>
+          <dd>{joinDays(me.createdAt)}</dd>
+        </div>
+        <div>
+          <dt>等级</dt>
+          <dd>Lv.{me.level}</dd>
+        </div>
+      </dl>
       <form
-        className="community-profile-form"
+        className="qq-edit"
         onSubmit={(event) => {
           event.preventDefault();
           void saveProfile();
         }}
       >
-        <label className="community-field">
-          <span>更换头像（100KB 以内的 PNG/JPG/WebP）</span>
+        <span className="qq-edit-title">编辑资料</span>
+        <label className="qq-edit-field">
+          <span>更换头像（100KB 以内 PNG/JPG/WebP）</span>
           <input
             type="file"
             accept="image/png,image/jpeg,image/webp"
@@ -162,7 +186,7 @@ export function CommunityProfile() {
             }}
           />
         </label>
-        <label className="community-field">
+        <label className="qq-edit-field">
           <span>昵称</span>
           <input
             value={displayName}
@@ -170,12 +194,13 @@ export function CommunityProfile() {
             maxLength={20}
           />
         </label>
-        <label className="community-field">
-          <span>一句话签名（选填）</span>
+        <label className="qq-edit-field">
+          <span>个性签名</span>
           <input
             value={bio}
             onChange={(event) => setBio(event.target.value)}
             maxLength={200}
+            placeholder="写一句个性签名～"
           />
         </label>
         {error && <p className="comments-error">{error}</p>}

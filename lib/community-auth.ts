@@ -159,6 +159,7 @@ export type CommunitySessionUser = {
   displayName: string;
   avatar: string | null;
   bio: string | null;
+  createdAt: number;
   csrfToken: string;
 };
 
@@ -171,7 +172,7 @@ export async function getCommunitySessionUser(): Promise<
   const row = await db()
     .prepare(
       `SELECT s.csrf_token, s.expires_at,
-              u.id, u.username, u.display_name, u.avatar, u.bio, u.status
+              u.id, u.username, u.display_name, u.avatar, u.bio, u.status, u.created_at
        FROM community_sessions s
        JOIN community_users u ON u.id = s.user_id
        WHERE s.token_hash = ?`,
@@ -186,6 +187,7 @@ export async function getCommunitySessionUser(): Promise<
       avatar: string | null;
       bio: string | null;
       status: string;
+      created_at: number;
     }>();
   if (!row || row.expires_at < Date.now() || row.status !== 'active') {
     return null;
@@ -196,6 +198,7 @@ export async function getCommunitySessionUser(): Promise<
     displayName: row.display_name,
     avatar: row.avatar,
     bio: row.bio,
+    createdAt: row.created_at,
     csrfToken: row.csrf_token,
   };
 }

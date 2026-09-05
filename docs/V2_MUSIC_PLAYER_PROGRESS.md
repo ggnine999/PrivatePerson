@@ -230,3 +230,9 @@
 - 导航改为两态：页首（scrollY ≤ 24）完全透明浮在壁纸上（无背景/边框/投影/模糊），滚动后 0.35s 渐变为玻璃面板；透明态下导航文字改用前景色保证亮色壁纸上可读。
 - 实现：`site-header.tsx` 加 `scrolled` 状态（passive scroll 监听）；CSS 拆为基础态 + `.site-header.scrolled` 玻璃态；原共享规则中的 `.site-header`（position: relative + z-index: 0 会破坏 sticky 并困住下拉层级）移出，header 独占 `position: sticky; z-index: 50`。
 - 验证：页首 bg rgba(0,0,0,0)、滚动后 0.88 玻璃，深浅主题、桌面/移动截图确认；lint/typecheck/test/build 全绿。
+
+## 追加：QQ 名片风格资料卡（2026-09-06，用户反馈）
+
+- 「我的资料」页撤掉 page-head 标题卡，资料卡重做为 **QQ 个人名片同构**：顶部 Saber 壁纸横幅（右上角悬浮退出登录）、圆形头像叠压横幅下缘（白描边）、昵称 + Lv 等级铭牌 + @用户名、个性签名（无签名时显示「这个人很懒，什么都没有留下～」）、虚线框统计栏（已发布评论 / 加入天数 / 等级）、内嵌资料编辑区（头像上传 / 昵称 / 个性签名 / 保存）。
+- `/me` 接口补充 `createdAt`（卡片显示加入天数）；卡片 max-width 760、移动端断点收缩。
+- 验证：lint 0 警告、typecheck、test 20/20、build 通过；浅色主题截图确认。

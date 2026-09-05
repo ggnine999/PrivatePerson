@@ -22,6 +22,7 @@ export async function GET() {
       bio: user.bio,
       level: Math.min(9, 1 + Math.floor(published / 5)),
       publishedComments: published,
+      createdAt: user.createdAt,
     },
     csrfToken: user.csrfToken,
   });
