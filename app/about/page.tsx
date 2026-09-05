@@ -1,4 +1,4 @@
 import type { Metadata } from 'next';
 import { GitBranch, Mail, MapPin } from 'lucide-react';
-export const metadata:Metadata={title:'关于我'};
+export const metadata:Metadata={title:'关于阿枫'};
 export default function AboutPage(){return <main className="page shell about-page"><header className="about-hero"><div><span className="kicker">ABOUT</span><h1>你好，我是<br/>这个小岛的记录者。</h1><p>这是可替换的示例介绍：一名喜欢把复杂问题讲清楚的独立开发者，也在学习摄影、写作和长期主义。</p></div><div className="about-card"><span className="brand-mark">星</span><h2>站点主人 / 待替换</h2><p><MapPin/> 中国 · 城市待补充</p><a href="mailto:hello@example.com"><Mail/> hello@example.com</a><a href="https://github.com/example" target="_blank" rel="noopener noreferrer"><GitBranch/> github.com/example</a></div></header><div className="about-grid"><section><span>01</span><h2>经历</h2><p>这里适合放置简短时间线：学习方向、工作领域和重要转折。示例内容没有暗示任何真实履历。</p></section><section><span>02</span><h2>技能</h2><p>TypeScript、React、Node.js、Web 安全、产品设计与技术写作。请按你的实际技能替换。</p></section><section><span>03</span><h2>兴趣</h2><p>夜间散步、城市摄影、动画配乐、纸质书，以及那些做完后能让生活安静一点的小工具。</p></section></div></main>}

@@ -1,10 +1,11 @@
 'use client';
 import Link from 'next/link';
-import { Menu, Moon, Sun, User, X } from 'lucide-react';
+import { ChevronDown, Menu, Moon, Sun, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 export function SiteHeader() {
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   useEffect(() => {
     const value = localStorage.getItem('theme');
     const next =
@@ -36,9 +37,6 @@ export function SiteHeader() {
           <Link href="/articles" onClick={() => setOpen(false)}>
             文章
           </Link>
-          <Link href="/archive" onClick={() => setOpen(false)}>
-            归档
-          </Link>
           <Link href="/projects" onClick={() => setOpen(false)}>
             项目
           </Link>
@@ -48,9 +46,54 @@ export function SiteHeader() {
           <Link href="/links" onClick={() => setOpen(false)}>
             友链
           </Link>
-          <Link href="/about" onClick={() => setOpen(false)}>
-            关于
-          </Link>
+          <div
+            className={`nav-dropdown ${dropdownOpen ? 'open' : ''}`}
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((value) => !value)}
+              aria-expanded={dropdownOpen}
+            >
+              关于阿枫
+              <ChevronDown aria-hidden="true" />
+            </button>
+            <ul className="dropdown-menu">
+              <li>
+                <Link
+                  href="/archive"
+                  onClick={() => {
+                    setOpen(false);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  归档
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/feed"
+                  onClick={() => {
+                    setOpen(false);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  投喂
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  onClick={() => {
+                    setOpen(false);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  关于阿枫
+                </Link>
+              </li>
+            </ul>
+          </div>
         </nav>
         <div className="nav-actions">
           <Link

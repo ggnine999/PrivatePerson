@@ -1727,6 +1727,8 @@ body::after {
   box-shadow: 0 8px 32px rgba(24, 55, 101, 0.08);
   -webkit-backdrop-filter: blur(22px) saturate(1.2);
   backdrop-filter: blur(22px) saturate(1.2);
+  /* 头部子树（含下拉菜单）需要高于后续内容区的玻璃层，否则下拉菜单会被拦截点击 */
+  z-index: 50;
 }
 .site-footer {
   border-color: var(--glass-edge);
@@ -2524,6 +2526,135 @@ body::after {
 }
 .studio-moderation h2 {
   font-size: 1.05rem;
+}
+/* ===== 导航下拉（关于阿枫）===== */
+.nav-dropdown {
+  position: relative;
+}
+/* 透明桥：悬停从按钮移向下拉菜单时穿过这条 0.55rem 间隙，:hover 不断开 */
+.nav-dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 0.55rem;
+}
+.nav-dropdown > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.42rem 0.65rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.nav-dropdown > button:hover {
+  color: var(--foreground);
+}
+.nav-dropdown > button svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  transition: transform 0.2s ease;
+}
+.nav-dropdown.open > button svg,
+.nav-dropdown:hover > button svg {
+  transform: rotate(180deg);
+}
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 50%;
+  translate: -50% 0;
+  display: grid;
+  min-width: 8.5rem;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 18px 44px rgba(30, 67, 112, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.18s ease,
+    translate 0.18s ease,
+    visibility 0.18s;
+  z-index: 60;
+}
+.nav-dropdown:hover .dropdown-menu,
+.nav-dropdown.open .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  translate: -50% 0;
+}
+.dropdown-menu a {
+  display: block;
+  padding: 0.5rem 0.8rem;
+  border-radius: 9px;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+.dropdown-menu a:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+/* ===== 投喂页：月亮上睡觉的小猫 ===== */
+.feed-art {
+  margin: 0;
+  padding: 1.2rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 22px;
+  background: linear-gradient(165deg, #16223f 0%, #0d1426 100%);
+  box-shadow: 0 18px 50px rgba(10, 20, 40, 0.4);
+}
+.feed-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.feed-art figcaption {
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+.feed-zzz text {
+  animation: feed-zzz-float 3.2s ease-in-out infinite alternate;
+}
+.feed-zzz text:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.feed-zzz text:nth-child(3) {
+  animation-delay: 1s;
+}
+@keyframes feed-zzz-float {
+  from {
+    opacity: 0.55;
+    translate: 0 3px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 -3px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-zzz text {
+    animation: none;
+  }
+}
+.feed-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.feed-note a {
+  color: var(--primary);
 }
 @media (max-width: 640px) {
   .kanban-musume {
