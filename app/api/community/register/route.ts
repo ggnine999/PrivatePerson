@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   if (!validateCommunityUsername(username)) {
     return NextResponse.json(
-      { error: '用户名需 3-20 位小写字母、数字、下划线或连字符' },
+      { error: '用户名需 3-20 位字母或数字' },
       { status: 400 },
     );
   }

@@ -38,7 +38,7 @@ function secureCookies() {
 }
 
 export function validateCommunityUsername(username: string) {
-  return /^[a-z0-9_-]{3,20}$/.test(username);
+  return /^[a-z0-9]{3,20}$/.test(username);
 }
 
 export function validateCommunityPassword(password: string) {

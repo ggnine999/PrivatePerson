@@ -67,7 +67,7 @@ export function CommunityAuthForm({ mode }: { mode: 'login' | 'register' }) {
           }}
         >
           <label className="auth-field">
-            <span>用户名*</span>
+            <span>用户名*（3-20 位字母或数字）</span>
             <input
               value={username}
               onChange={(event) => setUsername(event.target.value)}
