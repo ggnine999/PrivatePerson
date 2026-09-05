@@ -6,6 +6,7 @@ export function SiteHeader() {
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const value = localStorage.getItem('theme');
     const next =
@@ -15,6 +16,12 @@ export function SiteHeader() {
     const timer = setTimeout(() => setDark(next), 0);
     return () => clearTimeout(timer);
   }, []);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   function toggleTheme() {
     const next = !dark;
     setDark(next);
@@ -22,7 +29,7 @@ export function SiteHeader() {
     localStorage.setItem('theme', next ? 'dark' : 'light');
   }
   return (
-    <header className="site-header">
+    <header className={scrolled ? 'site-header scrolled' : 'site-header'}>
       <div className="shell nav-wrap">
         <Link className="brand" href="/">
           <span className="brand-mark">星</span>

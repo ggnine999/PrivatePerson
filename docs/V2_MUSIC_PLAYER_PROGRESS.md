@@ -224,3 +224,9 @@
 - 新增 `/feed` 投喂页：原创 SVG「月亮上睡觉的小猫」插画（Zzz 逐个漂浮动画，尊重减少动态偏好）+「作者偷懒中……」文案，无其他功能（按用户要求）；已加入 sitemap。
 - 修复：`.site-header` 被共享规则压到 `z-index: 0` 层，导致下拉菜单下半部分被后续内容区拦截点击（视觉可见但命中测试落到 hero）——header 单独提到 `z-index: 50`。
 - 验证：lint 0 警告、typecheck、test 20/20、build 通过；桌面（悬停展开 + 点击跳转 /feed）、移动端（菜单内展开 + 跳转）、深浅主题截图确认。
+
+## 追加：透明导航 + 滚动玻璃化（2026-09-06，参考 moejue.cn）
+
+- 导航改为两态：页首（scrollY ≤ 24）完全透明浮在壁纸上（无背景/边框/投影/模糊），滚动后 0.35s 渐变为玻璃面板；透明态下导航文字改用前景色保证亮色壁纸上可读。
+- 实现：`site-header.tsx` 加 `scrolled` 状态（passive scroll 监听）；CSS 拆为基础态 + `.site-header.scrolled` 玻璃态；原共享规则中的 `.site-header`（position: relative + z-index: 0 会破坏 sticky 并困住下拉层级）移出，header 独占 `position: sticky; z-index: 50`。
+- 验证：页首 bg rgba(0,0,0,0)、滚动后 0.88 玻璃，深浅主题、桌面/移动截图确认；lint/typecheck/test/build 全绿。
