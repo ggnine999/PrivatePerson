@@ -13,5 +13,7 @@
 | birdcage-girl.jpg | 鸟笼少女（白底插画） | 1280×800 |
 | violet-water.jpg | 薇尔莉特 · 水边 | 1280×800 |
 | akari-night-city.jpg | 红发和服 · 夜城 | 1280×800 |
+| violet-umbrella.jpg | 薇尔莉特 · 撑伞海边 | 1280×720 |
+| blue-sky-gaze.jpg | 蓝发 · 仰望天空 | 1280×864 |
 
 选用流程：挑中某张 → 交给接入流程（生成 AVIF/WebP 变体 → `body::before` 或页面引用）→ 在 README「第二版背景素材」登记授权状态。
