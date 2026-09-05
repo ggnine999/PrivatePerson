@@ -3,7 +3,6 @@ import {
   ArrowRight,
   BookOpen,
   CalendarDays,
-  ChevronDown,
   Code2,
   Sparkles,
 } from 'lucide-react';
@@ -20,13 +19,9 @@ export default function Home() {
           <span className="eyebrow">
             <Sparkles aria-hidden="true" /> 私人星图 · 公开阅读
           </span>
-          <h1>
-            把代码、生活与
-            <br />
-            <em>微小的灵感</em>写进夜色。
-          </h1>
+          <h1>星屿手记</h1>
           <p className="lead">
-            这里记录工程实践、创作札记和正在生长的个人项目。慢一点写，认真一点想。
+            把代码、生活与微小的灵感写进夜色。慢一点写，认真一点想。
           </p>
           <div className="hero-actions">
             <Link className="button primary" href="/articles">
@@ -37,17 +32,28 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <a className="scroll-cue" href="#discover" aria-label="向下探索">
-          <ChevronDown aria-hidden="true" />
-          <span>向下探索</span>
-        </a>
       </section>
       <WaveDivider />
-      <section className="section shell" id="discover">
+      <section className="section shell home-discover" id="discover">
         <div className="home-intro-grid">
           <div id="home-music-slot" className="home-music-slot" />
-          <div className="home-stats-card">
-            <span className="kicker">SITE STATS</span>
+          <div className="home-profile-card">
+            <span className="kicker">PROFILE</span>
+            <div className="home-profile-head">
+              <span className="brand-mark" aria-hidden="true">
+                星
+              </span>
+              <div>
+                <h2>阿枫</h2>
+                <p>星屿手记 · 站主</p>
+              </div>
+            </div>
+            <p className="home-profile-bio">
+              喜欢把复杂问题讲清楚的独立开发者，也在练习摄影、写作与长期主义。
+            </p>
+            <p className="home-profile-quote">
+              「愿每一次认真记录，都成为照亮来路的小小星光。」
+            </p>
             <dl className="hero-stats">
               <div>
                 <dt>{articles.length}</dt>
@@ -62,9 +68,9 @@ export default function Home() {
                 <dd>继续更新</dd>
               </div>
             </dl>
-            <p className="home-stats-note">
-              音乐会持续播放——去别的页面逛逛也不会停。
-            </p>
+            <Link className="home-profile-more" href="/about">
+              关于阿枫 <ArrowRight />
+            </Link>
           </div>
         </div>
       </section>
