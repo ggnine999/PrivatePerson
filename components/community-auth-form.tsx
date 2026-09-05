@@ -18,15 +18,18 @@ export function CommunityAuthForm({ mode }: { mode: 'login' | 'register' }) {
     setError('');
     setSubmitting(true);
     try {
-      const response = await fetch(`/api/community/${isRegister ? 'register' : 'login'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          password,
-          displayName: isRegister ? displayName : undefined,
-        }),
-      });
+      const response = await fetch(
+        `/api/community/${isRegister ? 'register' : 'login'}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            password,
+            displayName: isRegister ? displayName : undefined,
+          }),
+        },
+      );
       const data = (await response.json()) as { error?: string };
       if (!response.ok) {
         setError(data.error ?? '操作失败，请稍后再试');
@@ -39,57 +42,75 @@ export function CommunityAuthForm({ mode }: { mode: 'login' | 'register' }) {
   }
 
   return (
-    <form
-      className="community-auth"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void submit();
-      }}
-    >
-      <label className="community-field">
-        <span>用户名（3-20 位小写字母、数字、下划线或连字符）</span>
-        <input
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
-          autoComplete="username"
-          required
-        />
-      </label>
-      <label className="community-field">
-        <span>密码（8-72 个字符）</span>
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete={isRegister ? 'new-password' : 'current-password'}
-          required
-        />
-      </label>
-      {isRegister && (
-        <label className="community-field">
-          <span>昵称（选填，默认同用户名）</span>
-          <input
-            value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
-            maxLength={20}
-          />
-        </label>
-      )}
-      {error && <p className="comments-error">{error}</p>}
-      <button type="submit" className="button primary" disabled={submitting}>
-        {submitting ? '处理中…' : isRegister ? '注册并登录' : '登录'}
-      </button>
-      <p className="community-switch">
-        {isRegister ? (
-          <>
-            已经有账号了？<Link href="/community/login">去登录</Link>
-          </>
-        ) : (
-          <>
-            还没有账号？<Link href="/community/register">注册一个</Link>
-          </>
-        )}
-      </p>
-    </form>
+    <div className="auth-split">
+      <div className="auth-form-side">
+        <span className="kicker">COMMUNITY</span>
+        <h1>{isRegister ? '欢迎加入' : '欢迎回来'}</h1>
+        <p className="auth-sub">
+          {isRegister ? (
+            <>
+              已经有账户了？
+              <Link href="/community/login">去登录</Link>
+            </>
+          ) : (
+            <>
+              如果你还没有账户，
+              <Link href="/community/register">点击注册</Link>
+            </>
+          )}
+        </p>
+        <form
+          className="auth-fields"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
+          <label className="auth-field">
+            <span>用户名*</span>
+            <input
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              autoComplete="username"
+              required
+            />
+          </label>
+          <label className="auth-field">
+            <span>密码*</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete={isRegister ? 'new-password' : 'current-password'}
+              required
+            />
+          </label>
+          {isRegister && (
+            <label className="auth-field">
+              <span>
+                昵称（选填，不填就和用户名一样；仅用于评论区展示）
+              </span>
+              <input
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                maxLength={20}
+              />
+            </label>
+          )}
+          {error && <p className="comments-error">{error}</p>}
+          <button type="submit" className="auth-submit" disabled={submitting}>
+            {submitting ? '处理中…' : isRegister ? '注册账号' : '登录账号'}
+          </button>
+        </form>
+        <p className="auth-note">
+          社区账号仅用于评论互动，和私人保险库完全独立。
+        </p>
+      </div>
+      <div className="auth-art" aria-hidden="true">
+        <span className="auth-art-brand">
+          星屿手记<small>STARRY NOTES</small>
+        </span>
+      </div>
+    </div>
   );
 }
