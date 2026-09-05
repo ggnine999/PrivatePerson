@@ -143,7 +143,7 @@ export function VaultApp() {
     [formOpen, setFormOpen] = useState(false),
     [reveal, setReveal] = useState<{
       record: RecordItem;
-      action: 'view' | 'copy';
+      action: 'view' | 'copy' | 'edit';
     } | null>(null),
     [revealed, setRevealed] = useState<{
       record: RecordItem;
@@ -151,32 +151,62 @@ export function VaultApp() {
     } | null>(null),
     [deleteTarget, setDeleteTarget] = useState<RecordItem | null>(null),
     [notice, setNotice] = useState(''),
-    [loading, setLoading] = useState(true);
+    [loading, setLoading] = useState(true),
+    [loadError, setLoadError] = useState('');
   const lastActivity = useRef(0);
-  const lock = useCallback(() => {
-    setKey(null);
+
+  const clearSensitiveState = useCallback(() => {
+    setForm(emptyForm());
+    setEditing(null);
+    setFormOpen(false);
     setRevealed(null);
     setReveal(null);
-    setNotice('保险库已锁定，解密密钥已从页面状态中移除。');
+    setDeleteTarget(null);
   }, []);
+
+  const lock = useCallback(() => {
+    clearSensitiveState();
+    setKey(null);
+    setRecords([]);
+    setQuery('');
+    setNotice(
+      '保险库已锁定，所有已解密表单、记录列表与密钥均已从页面状态中移除。',
+    );
+  }, [clearSensitiveState]);
+
+  const loadInitialState = useCallback(async () => {
+    setLoading(true);
+    setLoadError('');
+    try {
+      const [session, loadedProfile] = await Promise.all([
+        jsonFetch<{ csrfToken: string }>('/api/auth/session'),
+        jsonFetch<VaultProfile | null>('/api/vault/profile'),
+      ]);
+      setCsrf(session.csrfToken);
+      setProfile(loadedProfile);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : '加载失败');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([
-      jsonFetch<{ csrfToken: string }>('/api/auth/session'),
-      jsonFetch<VaultProfile | null>('/api/vault/profile'),
-    ])
-      .then(([session, p]) => {
-        setCsrf(session.csrfToken);
-        setProfile(p);
-        setLoading(false);
-      })
-      .catch(() => {});
-  }, []);
+    const timer = setTimeout(() => void loadInitialState(), 0);
+    return () => clearTimeout(timer);
+  }, [loadInitialState]);
   useEffect(() => {
     if (!key) return;
     lastActivity.current = Date.now();
     void jsonFetch<RecordItem[]>('/api/vault/records')
       .then(setRecords)
-      .catch(() => {});
+      .catch((error) =>
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : '保险库记录加载失败，请重试。',
+        ),
+      );
     const activity = () => {
       lastActivity.current = Date.now();
     };
@@ -274,29 +304,32 @@ export function VaultApp() {
       setNotice('主密码不正确。');
     }
   }
-  async function openEdit(record?: RecordItem, type: Kind = 'account') {
-    if (record && key) {
-      const secret = await decryptJson<Secret>(key, record);
-      setForm({
-        ...emptyForm(record.type),
-        ...record,
-        environment: record.environment ?? '测试',
-        tags: record.tags.join(', '),
-        expiresAt: record.expiresAt ?? '',
-        rotateAt: record.rotateAt ?? '',
-        username: secret.username ?? '',
-        password: secret.password ?? '',
-        key: secret.key ?? '',
-        secret: secret.secret ?? '',
-        scopes: secret.scopes ?? '',
-        notes: secret.notes ?? '',
-        createdDate: secret.createdDate ?? '',
-      });
-      setEditing(record);
-    } else {
-      setForm(emptyForm(type));
-      setEditing(null);
-    }
+  function openCreate(type: Kind = 'account') {
+    clearSensitiveState();
+    setForm(emptyForm(type));
+    setFormOpen(true);
+  }
+
+  function openDecryptedEditor(record: RecordItem, secret: Secret) {
+    setForm({
+      type: record.type,
+      platform: record.platform,
+      title: record.title,
+      category: record.category,
+      tags: record.tags.join(', '),
+      favorite: record.favorite,
+      environment: record.environment ?? '测试',
+      expiresAt: record.expiresAt ?? '',
+      rotateAt: record.rotateAt ?? '',
+      username: secret.username ?? '',
+      password: secret.password ?? '',
+      key: secret.key ?? '',
+      secret: secret.secret ?? '',
+      scopes: secret.scopes ?? '',
+      notes: secret.notes ?? '',
+      createdDate: secret.createdDate ?? '',
+    });
+    setEditing(record);
     setFormOpen(true);
   }
   function generatePassword() {
@@ -355,7 +388,7 @@ export function VaultApp() {
       },
     );
     setRecords(await jsonFetch('/api/vault/records'));
-    setFormOpen(false);
+    clearSensitiveState();
     setNotice(
       editing ? '记录已更新并重新加密。' : '记录已在浏览器加密后保存。',
     );
@@ -384,7 +417,11 @@ export function VaultApp() {
             if (current === text) await navigator.clipboard.writeText('');
           } catch {}
         }, 30_000);
-      } else setRevealed({ record: reveal.record, secret });
+      } else if (reveal.action === 'edit') {
+        openDecryptedEditor(reveal.record, secret);
+      } else {
+        setRevealed({ record: reveal.record, secret });
+      }
       setReveal(null);
     } catch {
       setNotice('再次验证失败。');
@@ -401,6 +438,7 @@ export function VaultApp() {
     setNotice('记录已删除。');
   }
   async function logout() {
+    lock();
     await jsonFetch('/api/auth/logout', {
       method: 'POST',
       headers: { 'x-csrf-token': csrf },
@@ -464,6 +502,22 @@ export function VaultApp() {
       <main className="vault-loading">
         <RefreshCw className="spin" />
         <p>正在确认安全会话…</p>
+      </main>
+    );
+  if (loadError)
+    return (
+      <main className="vault-gate">
+        <section>
+          <AlertTriangle />
+          <h1>无法加载保险库</h1>
+          <p>{loadError}。请检查本地服务和数据库后重试。</p>
+          <button
+            className="button primary"
+            onClick={() => void loadInitialState()}
+          >
+            <RefreshCw /> 重试
+          </button>
+        </section>
       </main>
     );
   if (!profile)
@@ -580,7 +634,7 @@ export function VaultApp() {
             placeholder="搜索平台、分类或标签…"
           />
         </label>
-        <button className="button primary" onClick={() => openEdit()}>
+        <button className="button primary" onClick={() => openCreate()}>
           <Plus /> 新建记录
         </button>
       </div>
@@ -642,7 +696,11 @@ export function VaultApp() {
                       >
                         <Clipboard /> 复制
                       </button>
-                      <button onClick={() => openEdit(record)}>编辑</button>
+                      <button
+                        onClick={() => setReveal({ record, action: 'edit' })}
+                      >
+                        编辑
+                      </button>
                       <button onClick={() => setDeleteTarget(record)}>
                         <Trash2 /> 删除
                       </button>
@@ -654,15 +712,16 @@ export function VaultApp() {
               <div className="vault-empty">
                 <FileKey />
                 <h2>还没有{type === 'account' ? '账号' : '密钥'}记录</h2>
-                <button onClick={() => openEdit(undefined, type)}>
-                  添加第一条
-                </button>
+                <button onClick={() => openCreate(type)}>添加第一条</button>
               </div>
             )}
           </TabsContent>
         ))}
       </Tabs>
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+      <Dialog
+        open={formOpen}
+        onOpenChange={(open) => !open && clearSensitiveState()}
+      >
         <DialogContent className="vault-dialog">
           <DialogHeader>
             <DialogTitle>{editing ? '编辑记录' : '新建加密记录'}</DialogTitle>
@@ -734,6 +793,8 @@ export function VaultApp() {
                     密码
                     <span className="input-action">
                       <input
+                        type="password"
+                        autoComplete="new-password"
                         required
                         value={form.password}
                         onChange={(e) =>
@@ -776,6 +837,8 @@ export function VaultApp() {
                   <label>
                     API Key / Token
                     <input
+                      type="password"
+                      autoComplete="off"
                       required
                       value={form.key}
                       onChange={(e) =>
@@ -786,6 +849,8 @@ export function VaultApp() {
                   <label>
                     Secret（可选）
                     <input
+                      type="password"
+                      autoComplete="off"
                       value={form.secret}
                       onChange={(e) =>
                         setForm({ ...form, secret: e.target.value })
@@ -845,7 +910,7 @@ export function VaultApp() {
               <button
                 type="button"
                 className="button ghost"
-                onClick={() => setFormOpen(false)}
+                onClick={clearSensitiveState}
               >
                 取消
               </button>
@@ -862,7 +927,7 @@ export function VaultApp() {
           <DialogHeader>
             <DialogTitle>再次验证主密码</DialogTitle>
             <DialogDescription>
-              查看或复制完整敏感信息前需要重新验证。本次输入不会发送到服务器。
+              查看、复制或编辑完整敏感信息前需要重新验证。本次输入不会发送到服务器。
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={confirmReveal}>

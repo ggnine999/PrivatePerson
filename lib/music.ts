@@ -12,7 +12,43 @@ export type MusicTrack = {
   lyrics?: MusicLyric[];
 };
 
-// 站内曲库：第一首为默认播放曲目；在首页播放器的歌曲列表中可搜索并切换。
+const DAILY_RECOMMENDATION_QUERIES = [
+  '治愈 轻音乐',
+  '华语 慢歌',
+  '日系 清新',
+  '爵士 午后',
+  '民谣 夜晚',
+  '钢琴 纯音乐',
+  'Lo-fi 学习',
+] as const;
+
+export function getDailyRecommendationQuery(date = new Date()) {
+  const chinaDay = Math.floor(
+    (date.getTime() + 8 * 60 * 60 * 1000) / 86_400_000,
+  );
+  return DAILY_RECOMMENDATION_QUERIES[
+    chinaDay % DAILY_RECOMMENDATION_QUERIES.length
+  ];
+}
+
+export function getWrappedQueueIndex(
+  queueLength: number,
+  currentIndex: number,
+  step = 1,
+) {
+  if (!Number.isInteger(queueLength) || queueLength <= 0) return -1;
+  const normalizedCurrent =
+    Number.isInteger(currentIndex) &&
+    currentIndex >= 0 &&
+    currentIndex < queueLength
+      ? currentIndex
+      : 0;
+  return (
+    (((normalizedCurrent + step) % queueLength) + queueLength) % queueLength
+  );
+}
+
+// 站内曲库：作为空队列时的安全降级来源，也可由访客按需加入听歌队列。
 // 演示音轨每 6 秒一个乐句，歌词时间轴与 scripts/generate-demo-audio.mjs 的旋律结构对齐。
 export const tracks: MusicTrack[] = [
   {

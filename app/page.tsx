@@ -7,7 +7,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { articles, projects } from '@/lib/content';
-import { MusicPlayer } from '@/components/music-player';
 
 export default function Home() {
   const featured = articles.filter((article) => article.featured);
@@ -50,7 +49,7 @@ export default function Home() {
             </div>
           </dl>
         </div>
-        <MusicPlayer />
+        <div id="home-music-slot" className="home-music-slot" />
       </section>
       <section className="section shell">
         <div className="section-heading">

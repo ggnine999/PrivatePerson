@@ -1,3 +1,51 @@
 import { loginSchema } from '@/lib/vault-schemas';
-import { clientKey, createSession, isRateLimited, recordAttempt, validateOwner } from '@/lib/server-auth';
-export async function POST(request:Request){try{const key=await clientKey();if(await isRateLimited(key))return Response.json({error:'尝试次数过多，请 15 分钟后再试。'},{status:429,headers:{'cache-control':'no-store'}});const parsed=loginSchema.safeParse(await request.json());if(!parsed.success){await recordAttempt(key,false);return Response.json({error:'登录信息不完整。'},{status:400})}const valid=await validateOwner(parsed.data.username,parsed.data.password,parsed.data.otp||undefined);await recordAttempt(key,valid);if(!valid)return Response.json({error:'账号、密码或验证码不正确。'},{status:401});const csrfToken=await createSession();return Response.json({ok:true,csrfToken},{headers:{'cache-control':'no-store'}})}catch{return Response.json({error:'登录暂时不可用。'},{status:500})}}
+import {
+  clearLoginAttempts,
+  clientKey,
+  createSession,
+  reserveLoginAttempt,
+  validateOwner,
+} from '@/lib/server-auth';
+
+const noStore = { 'cache-control': 'no-store' };
+
+export async function POST(request: Request) {
+  try {
+    const key = await clientKey();
+    if (!(await reserveLoginAttempt(key))) {
+      return Response.json(
+        { error: '尝试次数过多，请 15 分钟后再试。' },
+        { status: 429, headers: noStore },
+      );
+    }
+
+    const parsed = loginSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return Response.json(
+        { error: '登录信息不完整。' },
+        { status: 400, headers: noStore },
+      );
+    }
+
+    const valid = await validateOwner(
+      parsed.data.username,
+      parsed.data.password,
+      parsed.data.otp || undefined,
+    );
+    if (!valid) {
+      return Response.json(
+        { error: '账号、密码或验证码不正确。' },
+        { status: 401, headers: noStore },
+      );
+    }
+
+    await clearLoginAttempts(key);
+    const csrfToken = await createSession();
+    return Response.json({ ok: true, csrfToken }, { headers: noStore });
+  } catch {
+    return Response.json(
+      { error: '登录暂时不可用。' },
+      { status: 500, headers: noStore },
+    );
+  }
+}
