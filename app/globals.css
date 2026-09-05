@@ -247,10 +247,23 @@ svg {
   justify-items: center;
   align-content: center;
   gap: 1.2rem;
-  padding-block: 72px 6.5rem;
+  padding-block: calc(72px + 2.5rem) 6.5rem;
   min-height: calc(100svh - 72px);
   text-align: center;
   position: relative;
+  isolation: isolate;
+  margin-top: -72px;
+}
+/* 首页封面背景：背景图资料库选中的 miku-ocean，铺满首屏、导航悬浮其上 */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url('/images/cover-miku-ocean.jpg') no-repeat center 32% / cover;
+}
+.dark .hero::before {
+  filter: brightness(0.52) saturate(0.9);
 }
 .hero-copy h1 {
   font:
@@ -1872,7 +1885,7 @@ body::after {
 #discover {
   scroll-margin-top: 84px;
 }
-/* 沉浸式封面：文案直接铺在壁纸上，不再套玻璃卡（.hero .hero-copy 提高优先级，压过共享玻璃规则） */
+/* 沉浸式封面：文案直接铺在插画上，浅色模式加白晕保证可读 */
 .hero .hero-copy {
   border: 0;
   background: transparent;
@@ -1881,6 +1894,14 @@ body::after {
   backdrop-filter: none;
   padding: 0;
   max-width: 46rem;
+}
+.hero .hero-copy h1,
+.hero .hero-copy .lead {
+  text-shadow: 0 1px 16px rgba(255, 255, 255, 0.55);
+}
+.dark .hero .hero-copy h1,
+.dark .hero .hero-copy .lead {
+  text-shadow: 0 1px 16px rgba(6, 15, 37, 0.55);
 }
 /* ===== 全站搜索弹窗（原生 dialog）===== */
 .site-search {

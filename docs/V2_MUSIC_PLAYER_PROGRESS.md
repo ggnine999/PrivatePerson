@@ -250,3 +250,10 @@
 - **文章导航下拉**：导航「文章 ▼」展开全部文章/分类/标签直达链接（分类走 `?category=` 参数，ArticleBrowser 支持 initialCategory）。
 - 实现说明：`.hero` 改为单列居中封面布局；`.hero-copy` 玻璃卡在封面态移除（`.hero .hero-copy` 提升优先级压过共享玻璃规则）；播放器插槽移入发现区（portal 目标不变，全局持续播放不受影响）。
 - 验证：lint 0 警告、typecheck、test 20/20、build 通过；透明导航两态、搜索弹窗（搜索"安全"命中文章）、发现区双卡、移动端均截图/DOM 验证。
+
+## 追加：首页封面背景图（2026-09-06，用户需求）
+
+- 从背景图素材库选用 **miku-ocean.jpg**（初音白裙 · 海面）作为首页首屏背景：复制到 `public/images/cover-miku-ocean.jpg`，`.hero::before` 铺满首屏（`isolation: isolate` + `z-index: -1` 置于文案之下），导航悬浮其上（`.hero` 上移 72px 顶到视口顶端）。
+- 深色模式自动加暗（`filter: brightness(0.52)`）；浅色模式文案加白色柔光 text-shadow 保证在插画上可读。
+- 与全局 Saber 壁纸的关系：仅首页首屏使用新图，其余页面与内容区维持原壁纸；波浪分隔层紧贴封面下缘过渡到内容区。
+- 验证：lint 0 警告、typecheck、test 20/20、build 通过；浅色/深色、滚动前后、移动端截图确认。
