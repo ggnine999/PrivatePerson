@@ -29,6 +29,13 @@
       "when": 1788587283303,
       "tag": "0003_striped_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788624673595,
+      "tag": "0004_large_blink",
+      "breakpoints": true
     }
   ]
 }

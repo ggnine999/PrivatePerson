@@ -2,24 +2,23 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-type CommentItem = {
+type Message = {
   id: string;
-  parentId: string | null;
   authorType: 'member' | 'guest';
   authorName: string;
   content: string;
   createdAt: number;
 };
 
-type Member = { displayName: string; level: number } | null;
+type Member = { displayName: string } | null;
 
 function formatTime(timestamp: number) {
   const date = new Date(timestamp);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-export function Comments({ slug }: { slug: string }) {
-  const [comments, setComments] = useState<CommentItem[] | null>(null);
+export function MessageBoard() {
+  const [messages, setMessages] = useState<Message[] | null>(null);
   const [member, setMember] = useState<Member>(null);
   const [guestName, setGuestName] = useState('');
   const [content, setContent] = useState('');
@@ -28,14 +27,12 @@ export function Comments({ slug }: { slug: string }) {
   const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async () => {
-    const response = await fetch(
-      `/api/community/comments?slug=${encodeURIComponent(slug)}`,
-    );
+    const response = await fetch('/api/community/messages');
     if (response.ok) {
-      const data = (await response.json()) as { comments: CommentItem[] };
-      setComments(data.comments);
+      const data = (await response.json()) as { messages: Message[] };
+      setMessages(data.messages);
     }
-  }, [slug]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -44,9 +41,7 @@ export function Comments({ slug }: { slug: string }) {
         try {
           const response = await fetch('/api/community/me');
           if (response.ok) {
-            const data = (await response.json()) as {
-              user: { displayName: string; level: number } | null;
-            };
+            const data = (await response.json()) as { user: Member };
             setMember(data.user);
           }
         } catch {
@@ -62,11 +57,10 @@ export function Comments({ slug }: { slug: string }) {
     setNotice('');
     setSubmitting(true);
     try {
-      const response = await fetch('/api/community/comments', {
+      const response = await fetch('/api/community/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slug,
           content,
           guestName: member ? undefined : guestName,
         }),
@@ -76,7 +70,7 @@ export function Comments({ slug }: { slug: string }) {
         setError(data.error ?? '提交失败，请稍后再试');
         return;
       }
-      setNotice(data.message ?? '评论已提交');
+      setNotice(data.message ?? '留言已提交');
       setContent('');
       await load();
     } finally {
@@ -85,31 +79,30 @@ export function Comments({ slug }: { slug: string }) {
   }
 
   return (
-    <section className="comments" aria-label="评论区">
-      <h2>评论</h2>
-      <div className="comments-form">
+    <div className="message-board">
+      <div className="message-form comments-form">
         {!member && (
           <input
             className="comments-name"
             value={guestName}
             onChange={(event) => setGuestName(event.target.value)}
-            placeholder="昵称（游客评论需审核后显示）"
+            placeholder="昵称（游客留言需审核后显示）"
             maxLength={20}
             aria-label="昵称"
           />
         )}
         {member && (
           <p className="comments-member">
-            将以 <strong>{member.displayName}</strong>（Lv.{member.level}）发布
+            将以 <strong>{member.displayName}</strong> 发布
           </p>
         )}
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
-          placeholder="说点什么吧……（支持 2-1000 字）"
+          placeholder="写点想对博主说的话……（支持 2-1000 字）"
           maxLength={1000}
           rows={4}
-          aria-label="评论内容"
+          aria-label="留言内容"
         />
         <div className="comments-actions">
           {error && <p className="comments-error">{error}</p>}
@@ -120,44 +113,32 @@ export function Comments({ slug }: { slug: string }) {
             onClick={() => void submit()}
             disabled={submitting || content.trim().length < 2}
           >
-            {submitting ? '提交中…' : '发表评论'}
+            {submitting ? '提交中…' : '发表留言'}
           </button>
         </div>
       </div>
-      {comments === null ? (
-        <p className="comments-loading">评论加载中…</p>
-      ) : comments.length === 0 ? (
-        <p className="comments-empty">还没有评论，来抢沙发吧。</p>
+      {messages === null ? (
+        <p className="comments-loading">留言加载中…</p>
+      ) : messages.length === 0 ? (
+        <p className="comments-empty">还没有留言，来当第一个吧。</p>
       ) : (
         <ul className="comments-list">
-          {comments.map((comment) => {
-            const parent = comment.parentId
-              ? comments.find((item) => item.id === comment.parentId)
-              : null;
-            return (
-              <li key={comment.id} className="comments-item">
-                <p className="comments-meta">
-                  <strong>{comment.authorName}</strong>
-                  <span className="comments-badge">
-                    {comment.authorType === 'member' ? '成员' : '游客'}
-                  </span>
-                  <time dateTime={new Date(comment.createdAt).toISOString()}>
-                    {formatTime(comment.createdAt)}
-                  </time>
-                </p>
-                <p className="comments-content">
-                  {parent && (
-                    <span className="comments-reply">
-                      回复 @{parent.authorName}：
-                    </span>
-                  )}
-                  {comment.content}
-                </p>
-              </li>
-            );
-          })}
+          {messages.map((message) => (
+            <li key={message.id} className="comments-item">
+              <p className="comments-meta">
+                <strong>{message.authorName}</strong>
+                <span className="comments-badge">
+                  {message.authorType === 'member' ? '成员' : '游客'}
+                </span>
+                <time dateTime={new Date(message.createdAt).toISOString()}>
+                  {formatTime(message.createdAt)}
+                </time>
+              </p>
+              <p className="comments-content">{message.content}</p>
+            </li>
+          ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }

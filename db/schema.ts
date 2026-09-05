@@ -72,3 +72,84 @@ export const requestRateLimits = sqliteTable(
     }),
   ],
 );
+
+/* ===== 社区系统：与保险库完全独立的账号、会话与内容表 ===== */
+
+export const communityUsers = sqliteTable(
+  'community_users',
+  {
+    id: text('id').primaryKey(),
+    username: text('username').notNull().unique(),
+    passwordHash: text('password_hash').notNull(),
+    displayName: text('display_name').notNull(),
+    avatar: text('avatar'),
+    bio: text('bio'),
+    status: text('status', { enum: ['active', 'banned'] })
+      .notNull()
+      .default('active'),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [index('idx_community_users_created').on(table.createdAt)],
+);
+
+export const communitySessions = sqliteTable(
+  'community_sessions',
+  {
+    tokenHash: text('token_hash').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => communityUsers.id),
+    csrfToken: text('csrf_token').notNull(),
+    expiresAt: integer('expires_at').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    index('idx_community_sessions_expires').on(table.expiresAt),
+    index('idx_community_sessions_user').on(table.userId),
+  ],
+);
+
+export const articleComments = sqliteTable(
+  'article_comments',
+  {
+    id: text('id').primaryKey(),
+    articleSlug: text('article_slug').notNull(),
+    parentId: text('parent_id'),
+    authorType: text('author_type', { enum: ['member', 'guest'] }).notNull(),
+    authorUserId: text('author_user_id'),
+    authorName: text('author_name').notNull(),
+    content: text('content').notNull(),
+    status: text('status', { enum: ['published', 'pending'] }).notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    index('idx_article_comments_slug').on(
+      table.articleSlug,
+      table.status,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const siteMessages = sqliteTable(
+  'site_messages',
+  {
+    id: text('id').primaryKey(),
+    authorType: text('author_type', { enum: ['member', 'guest'] }).notNull(),
+    authorUserId: text('author_user_id'),
+    authorName: text('author_name').notNull(),
+    content: text('content').notNull(),
+    status: text('status', { enum: ['published', 'pending'] }).notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [index('idx_site_messages_status').on(table.status, table.createdAt)],
+);
+
+export const friendLinks = sqliteTable('friend_links', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  url: text('url').notNull(),
+  description: text('description').notNull().default(''),
+  status: text('status', { enum: ['approved', 'pending'] }).notNull(),
+  createdAt: integer('created_at').notNull(),
+});

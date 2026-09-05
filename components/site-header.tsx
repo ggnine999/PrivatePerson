@@ -42,6 +42,12 @@ export function SiteHeader() {
           <Link href="/projects" onClick={() => setOpen(false)}>
             项目
           </Link>
+          <Link href="/messages" onClick={() => setOpen(false)}>
+            留言板
+          </Link>
+          <Link href="/links" onClick={() => setOpen(false)}>
+            友链
+          </Link>
           <Link href="/about" onClick={() => setOpen(false)}>
             关于
           </Link>
