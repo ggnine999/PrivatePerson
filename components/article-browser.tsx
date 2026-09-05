@@ -6,12 +6,14 @@ import type { Article } from '@/lib/content';
 export function ArticleBrowser({
   articles,
   initialQuery = '',
+  initialCategory,
 }: {
   articles: Article[];
   initialQuery?: string;
+  initialCategory?: string;
 }) {
   const [query, setQuery] = useState(initialQuery);
-  const [category, setCategory] = useState('全部');
+  const [category, setCategory] = useState(initialCategory ?? '全部');
   const categories = ['全部', ...new Set(articles.map((a) => a.category))];
   const results = useMemo(
     () =>

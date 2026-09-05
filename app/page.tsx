@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BookOpen,
   CalendarDays,
+  ChevronDown,
   Code2,
   Sparkles,
 } from 'lucide-react';
@@ -14,7 +15,7 @@ export default function Home() {
   const featuredProjects = projects.filter((project) => project.featured);
   return (
     <main>
-      <section className="hero shell">
+      <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">
             <Sparkles aria-hidden="true" /> 私人星图 · 公开阅读
@@ -35,24 +36,38 @@ export default function Home() {
               看看项目
             </Link>
           </div>
-          <dl className="hero-stats">
-            <div>
-              <dt>{articles.length}</dt>
-              <dd>篇文章</dd>
-            </div>
-            <div>
-              <dt>{projects.length}</dt>
-              <dd>个示例项目</dd>
-            </div>
-            <div>
-              <dt>∞</dt>
-              <dd>继续更新</dd>
-            </div>
-          </dl>
         </div>
-        <div id="home-music-slot" className="home-music-slot" />
+        <a className="scroll-cue" href="#discover" aria-label="向下探索">
+          <ChevronDown aria-hidden="true" />
+          <span>向下探索</span>
+        </a>
       </section>
       <WaveDivider />
+      <section className="section shell" id="discover">
+        <div className="home-intro-grid">
+          <div id="home-music-slot" className="home-music-slot" />
+          <div className="home-stats-card">
+            <span className="kicker">SITE STATS</span>
+            <dl className="hero-stats">
+              <div>
+                <dt>{articles.length}</dt>
+                <dd>篇文章</dd>
+              </div>
+              <div>
+                <dt>{projects.length}</dt>
+                <dd>个示例项目</dd>
+              </div>
+              <div>
+                <dt>∞</dt>
+                <dd>继续更新</dd>
+              </div>
+            </dl>
+            <p className="home-stats-note">
+              音乐会持续播放——去别的页面逛逛也不会停。
+            </p>
+          </div>
+        </div>
+      </section>
       <section className="section shell">
         <div className="section-heading">
           <div>
