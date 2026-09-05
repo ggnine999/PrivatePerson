@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -114,22 +113,12 @@ export function CommunityProfile() {
   }
 
   if (loading) {
-    return <p className="comments-loading">加载中…</p>;
+    return <p className="comments-loading">正在确认登录状态…</p>;
   }
   if (!me) {
-    return (
-      <div className="community-auth">
-        <p className="comments-hint">还没有登录社区账号。</p>
-        <p>
-          <Link className="button primary" href="/community/login">
-            去登录
-          </Link>{' '}
-          <Link className="button ghost" href="/community/register">
-            注册一个
-          </Link>
-        </p>
-      </div>
-    );
+    // 未登录：直接送到登录/注册界面（登录页里可切换注册）
+    router.replace('/community/login');
+    return <p className="comments-loading">正在前往登录…</p>;
   }
 
   return (
