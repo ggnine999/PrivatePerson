@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 type CommentItem = {
@@ -101,6 +102,13 @@ export function Comments({ slug }: { slug: string }) {
         {member && (
           <p className="comments-member">
             将以 <strong>{member.displayName}</strong>（Lv.{member.level}）发布
+          </p>
+        )}
+        {!member && (
+          <p className="comments-member">
+            游客评论需审核后显示；
+            <Link href="/community/login">登录社区账号</Link>
+            可免审核并使用头像。
           </p>
         )}
         <textarea

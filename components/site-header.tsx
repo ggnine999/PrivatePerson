@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Menu, Moon, Sun, X } from 'lucide-react';
+import { Menu, Moon, Sun, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 export function SiteHeader() {
   const [dark, setDark] = useState(false);
@@ -53,6 +53,15 @@ export function SiteHeader() {
           </Link>
         </nav>
         <div className="nav-actions">
+          <Link
+            className="icon-button"
+            href="/community/me"
+            aria-label="社区账号：登录、注册或个人资料"
+            title="社区账号"
+            onClick={() => setOpen(false)}
+          >
+            <User />
+          </Link>
           <button
             className="icon-button"
             onClick={toggleTheme}
