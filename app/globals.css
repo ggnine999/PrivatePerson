@@ -1972,10 +1972,8 @@ body::after {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 1.4rem;
   align-items: stretch;
-}
-.home-music-slot {
-  min-height: 400px;
-  display: grid;
+  /* 行高下限：播放器卡与个人名片都拉足高度（slot 是 display:contents） */
+  grid-auto-rows: minmax(480px, auto);
 }
 /* 个人名片：与播放器卡并排的玻璃卡，站点统计并入卡片底部 */
 .home-profile-card {
