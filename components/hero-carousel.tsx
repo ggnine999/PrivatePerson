@@ -13,12 +13,16 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [autoPlay, setAutoPlay] = useState(true);
 
   useEffect(() => {
-    if (
-      typeof matchMedia !== 'undefined' &&
-      matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      setAutoPlay(false);
-    }
+    // 延迟到下一个宏任务，避免 effect 内同步 setState
+    const timer = setTimeout(() => {
+      if (
+        typeof matchMedia !== 'undefined' &&
+        matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
+        setAutoPlay(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -36,6 +40,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     <div className="hero-carousel" data-tone={tone}>
       <div aria-hidden="true">
         {slides.map((slide, index) => (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             key={slide.src}
             src={slide.src}
@@ -46,7 +51,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         ))}
       </div>
       {slides.length > 1 && (
-        <div className="hero-dots" role="group" aria-label="切换封面背景">
+        <div className="hero-dots" aria-label="切换封面背景">
           {slides.map((slide, index) => (
             <button
               key={slide.src}
