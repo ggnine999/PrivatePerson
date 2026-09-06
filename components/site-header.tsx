@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   ChevronDown,
   Menu,
@@ -22,6 +23,11 @@ export function SiteHeader() {
   const [openMenu, setOpenMenu] = useState<'articles' | 'about' | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isSection = (...paths: string[]) =>
+    paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  const articlesActive = isSection('/articles');
+  const aboutActive = isSection('/about', '/archive', '/feed');
   useEffect(() => {
     const value = localStorage.getItem('theme');
     const next =
@@ -66,6 +72,7 @@ export function SiteHeader() {
           >
             <button
               type="button"
+              className={articlesActive ? 'active' : undefined}
               onClick={() =>
                 setOpenMenu(openMenu === 'articles' ? null : 'articles')
               }
@@ -102,13 +109,28 @@ export function SiteHeader() {
               ))}
             </ul>
           </div>
-          <Link href="/projects" onClick={closeMenus}>
+          <Link
+            href="/projects"
+            className={isSection('/projects') ? 'active' : undefined}
+            aria-current={isSection('/projects') ? 'page' : undefined}
+            onClick={closeMenus}
+          >
             项目
           </Link>
-          <Link href="/messages" onClick={closeMenus}>
+          <Link
+            href="/messages"
+            className={isSection('/messages') ? 'active' : undefined}
+            aria-current={isSection('/messages') ? 'page' : undefined}
+            onClick={closeMenus}
+          >
             留言板
           </Link>
-          <Link href="/links" onClick={closeMenus}>
+          <Link
+            href="/links"
+            className={isSection('/links') ? 'active' : undefined}
+            aria-current={isSection('/links') ? 'page' : undefined}
+            onClick={closeMenus}
+          >
             友链
           </Link>
           <div
@@ -117,6 +139,7 @@ export function SiteHeader() {
           >
             <button
               type="button"
+              className={aboutActive ? 'active' : undefined}
               onClick={() => setOpenMenu(openMenu === 'about' ? null : 'about')}
               aria-expanded={openMenu === 'about'}
             >

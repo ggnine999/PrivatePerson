@@ -271,3 +271,9 @@
 - 封面恢复铺满整个首屏（100svh），波浪分隔层整体上移一个自身高度叠进封面底部，底边与封面下缘齐平，波峰留在画面内收边；内容区从折叠线以下铺开，发现区顶部内边距微调至 40px。
 - 修复一个遗留问题：globals.css 尾部还残存旧版双栏 hero 时代的两条媒体查询（≤900 的 `min-height: calc(100svh - 72px)` 与 ≤560 的 `min-height: auto; padding-top: 11.5rem`），因出现在文件末尾一直压过新规则，导致手机端首屏高度实际由内容撑开（约 500px），45vh/满屏设定从未在手机上真正生效；顺带消除了 ≤900 宽度下 `grid-template-columns: minmax(0,650px); justify-content: start` 造成的平板端内容左偏隐患。两条遗留规则已删除。
 - 验证：桌面 1440×900、平板 768、移动 390×844，深浅主题截图确认满屏封面与波浪贴底；hero/wave 几何实测 hero=视口高、wave 底边=封面底边；lint / typecheck / test 20/20 / build 全绿。
+
+## 追加：导航栏当前分区高亮（2026-09-06）
+
+- `site-header.tsx` 接入 `usePathname`：文章下拉命中 `/articles`（含详情页），关于阿枫下拉命中 `/about`、`/archive`、`/feed`，项目/留言板/友链各自精确分区匹配；普通链接同步设置 `aria-current="page"`。
+- 样式：选中项主色文字 + 底部圆角指示条；页首透明态用更高优先级规则压过整体前景色，滚动玻璃态与深浅主题均正常；移动端导航面板内指示条改为左侧竖条。首页不属于任何分区，无高亮。
+- 验证：/articles、/about、/links、/messages、首页，透明态/玻璃态、深浅主题、移动端面板截图确认；lint / typecheck / test 20/20 / build 全绿。

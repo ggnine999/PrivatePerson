@@ -220,6 +220,29 @@ svg {
 .nav-links a:hover {
   color: var(--foreground);
 }
+/* 当前分区高亮：主色文字 + 底部圆角指示条 */
+.nav-links > a.active,
+.nav-dropdown > button.active {
+  position: relative;
+  color: var(--primary);
+}
+.nav-links > a.active::after,
+.nav-dropdown > button.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.34rem;
+  translate: -50% 0;
+  width: 1.15rem;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--primary);
+}
+/* 页首透明态下保持主色高亮（压过整体前景色规则） */
+.site-header:not(.scrolled) .nav-links > a.active,
+.site-header:not(.scrolled) .nav-dropdown > button.active {
+  color: var(--primary);
+}
 .vault-link {
   padding: 0.42rem 0.85rem;
   border: 1px solid var(--border);
@@ -682,6 +705,16 @@ svg {
   }
   .nav-links a {
     padding: 0.55rem;
+  }
+  /* 移动端导航面板内，指示条改为左侧竖条 */
+  .nav-links > a.active::after,
+  .nav-dropdown > button.active::after {
+    left: -0.3rem;
+    bottom: auto;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 1.05rem;
   }
   .menu-button {
     display: grid;
