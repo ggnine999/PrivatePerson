@@ -16,7 +16,7 @@ export type SongEvent =
   | { t: 'snare'; beat: number; gain?: number }
   | { t: 'hat'; beat: number; gain?: number };
 
-export type ChartNote = { beat: number; lane: number };
+export type ChartNote = { beat: number; lane: number; /** 长条音符的持续拍数（tap 无此字段） */ dur?: number };
 
 export type TrackChart = {
   difficulty: RhythmDifficulty;
@@ -394,12 +394,14 @@ const round4 = (value: number) => Math.round(value * 10_000) / 10_000;
 
 // 轨道分配：音高轮廓 → 左右移动，低音在左、高音在右；
 // 同音近距离连打时向内侧换轨（反弹），避免键盘上同一根手指连点。
+// 长条音符会占用轨道直到尾部 + 间隙，冲突时向邻近空轨偏移。
 function assignLanes(
-  notes: Array<{ beat: number; midi: number }>,
+  notes: Array<{ beat: number; midi: number; hold?: number }>,
 ): ChartNote[] {
   let lastLane = 1;
   let lastBeat = -Infinity;
   let lastMidi: number | null = null;
+  const busyUntil = [-Infinity, -Infinity, -Infinity, -Infinity];
   const out: ChartNote[] = [];
   for (const note of notes) {
     const anchor = Math.max(0, Math.min(3, Math.floor((note.midi - 55) / 7)));
@@ -421,7 +423,26 @@ function assignLanes(
         if (lane < 0 || lane > 3) lane = lastLane - dir;
       }
     }
-    out.push({ beat: note.beat, lane: Math.max(0, Math.min(3, lane)) });
+    // 长条占用检查：候选轨道忙则向邻近空轨偏移（长条同时最多一条，必有空轨）
+    if (note.beat < busyUntil[Math.max(0, Math.min(3, lane))] - 1e-6) {
+      const order = [lane - 1, lane + 1, lane - 2, lane + 2];
+      const free = order.find(
+        (candidate) =>
+          candidate >= 0 &&
+          candidate <= 3 &&
+          note.beat >= busyUntil[candidate] - 1e-6,
+      );
+      if (free !== undefined) lane = free;
+    }
+    lane = Math.max(0, Math.min(3, lane));
+    const hold = note.hold;
+    if (hold) busyUntil[lane] = note.beat + hold + 0.2;
+    else busyUntil[lane] = Math.max(busyUntil[lane], note.beat);
+    out.push(
+      hold
+        ? { beat: note.beat, lane, dur: round4(hold) }
+        : { beat: note.beat, lane },
+    );
     lastLane = lane;
     lastBeat = note.beat;
     lastMidi = note.midi;
@@ -434,15 +455,19 @@ export function buildChart(
   difficulty: RhythmDifficulty,
 ): TrackChart {
   const config = CHART_CONFIGS[difficulty];
-  // 第一遍：旋律音符全保留（量化 + 最小间隔）
+  // 第一遍：旋律音符全保留（量化 + 最小间隔）；较长的音转成长条
   const leads = track.events
     .filter((event) => event.t === 'lead')
-    .map((event) => ({
-      beat: round4(Math.round((event as { beat: number }).beat / config.grid) * config.grid),
-      midi: (event as { midi: number }).midi,
-    }))
+    .map((event) => {
+      const leadEvent = event as { beat: number; midi: number; dur: number };
+      return {
+        beat: round4(Math.round(leadEvent.beat / config.grid) * config.grid),
+        midi: leadEvent.midi,
+        hold: leadEvent.dur >= 1.75 ? Math.min(leadEvent.dur, 4) : undefined,
+      };
+    })
     .sort((a, b) => a.beat - b.beat);
-  const picked: Array<{ beat: number; midi: number }> = [];
+  const picked: Array<{ beat: number; midi: number; hold?: number }> = [];
   let lastBeat = -Infinity;
   for (const note of leads) {
     if (note.beat - lastBeat < config.minGap - 1e-6) continue;

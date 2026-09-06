@@ -4,6 +4,7 @@ import {
   createGame,
   judgeGame,
   ratingOf,
+  releaseGame,
   tickGame,
 } from '@/lib/rhythm/engine';
 import {
@@ -67,6 +68,27 @@ describe('rhythm tracks', () => {
       }
     }
   });
+
+  it('每张谱面都包含长条音符，且长条期间同轨无其他音符', () => {
+    for (const track of RHYTHM_TRACKS) {
+      for (const difficulty of DIFFICULTIES) {
+        const chart = buildChart(track, difficulty);
+        const holdCount = chart.notes.filter((note) => (note.dur ?? 0) > 0).length;
+        expect(holdCount).toBeGreaterThan(3);
+        for (const note of chart.notes) {
+          if ((note.dur ?? 0) <= 0) continue;
+          const end = note.beat + (note.dur ?? 0);
+          for (const other of chart.notes) {
+            if (other === note || other.lane !== note.lane) continue;
+            const overlaps =
+              other.beat < end - 1e-6 &&
+              other.beat + (other.dur ?? 0) > note.beat + 1e-6;
+            expect(overlaps).toBe(false);
+          }
+        }
+      }
+    }
+  });
 });
 
 describe('rhythm engine', () => {
@@ -120,6 +142,62 @@ describe('rhythm engine', () => {
     expect(game.judged).toBe(3);
   });
 
+  it('长条：头部命中后按到尾端自动完成，不额外计判定', () => {
+    // 迷你谱面隔离验证：8 拍处长条 2 拍 + 尾端后的单击
+    const game = createGame(
+      [
+        { beat: 8, lane: 1, dur: 2 },
+        { beat: 11, lane: 2 },
+      ],
+      track,
+    );
+    const head = judgeGame(game, 1, 8 * spb, 0);
+    expect(head.judgment).toBe('perfect');
+    const note = game.laneNotes[1][0];
+    expect(note.state).toBe('holding');
+    expect(game.combo).toBe(1);
+    // 推进到尾端之后，自动完成；后续音符尚未到窗不误伤
+    tickGame(game, 10 * spb + 0.05, 0);
+    expect(note.state).toBe('hit');
+    expect(game.judged).toBe(1);
+    expect(game.combo).toBe(1);
+  });
+
+  it('长条：提前松手超出容差则打断（MISS + 断连击）', () => {
+    const game = createGame([{ beat: 8, lane: 1, dur: 2 }], track);
+    judgeGame(game, 1, 8 * spb, 0);
+    const note = game.laneNotes[1][0];
+    const release = releaseGame(game, 1, (8 + 2) * spb - 0.5, 0);
+    expect(release.broke).toBe(true);
+    expect(note.state).toBe('missed');
+    expect(game.combo).toBe(0);
+    expect(game.counts.miss).toBe(1);
+  });
+
+  it('长条：尾端容差内提前松手视为完成', () => {
+    const game = createGame([{ beat: 8, lane: 1, dur: 2 }], track);
+    judgeGame(game, 1, 8 * spb, 0);
+    const note = game.laneNotes[1][0];
+    const release = releaseGame(game, 1, (8 + 2) * spb - 0.1, 0);
+    expect(release.broke).toBe(false);
+    expect(note.state).toBe('hit');
+    expect(game.combo).toBe(1);
+  });
+
+  it('长条：按住期间重复按键不丢状态，尾端仍能自动完成', () => {
+    const game = createGame([{ beat: 8, lane: 1, dur: 2 }], track);
+    const head = judgeGame(game, 1, 8 * spb, 0);
+    expect(head.judgment).toBe('perfect');
+    // 按住期间同一轨道再敲一次：空挥，但不得干扰按住中的长条
+    const again = judgeGame(game, 1, 8.3 * spb, 0);
+    expect(again.judgment).toBeNull();
+    // 推进到尾端：长条正常完成
+    tickGame(game, (8 + 2) * spb + 0.05, 0);
+    const note = game.laneNotes[1][0];
+    expect(note.state).toBe('hit');
+    expect(game.combo).toBe(1);
+  });
+
   it('判定窗口边界：容差内命中，容差外不命中', () => {
     const game = createGame(chart.notes, track);
     const note = chart.notes[0];
@@ -142,6 +220,19 @@ describe('rhythm engine', () => {
     // hitTime = songTime - latency = t(note) + 0.05 - 0.1 = t(note) - 0.05
     const outcome = judgeGame(game, note.lane, t(note) + 0.05, 0.1);
     expect(outcome.judgment).toBe('perfect');
+  });
+
+  it('倍速：tempoMul 加倍后音符时间减半，谱面节拍不变', () => {
+    const game = createGame(chart.notes, track, 2);
+    const first = chart.notes[0];
+    const note = game.laneNotes[first.lane].find((item) => item.beat === first.beat)!;
+    expect(note.beat).toBe(first.beat);
+    expect(note.time).toBeCloseTo((first.beat * (60 / track.bpm)) / 2, 6);
+    // 长条尾端同样按倍率缩短
+    const hold = game.laneNotes.flatMap((lane) => lane).find((item) => (item.dur ?? 0) > 0);
+    if (hold) {
+      expect(hold.endTime - hold.time).toBeCloseTo(hold.dur! * (60 / track.bpm) / 2, 6);
+    }
   });
 
   it('game id 与谱面一一对应', () => {

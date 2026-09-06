@@ -94,10 +94,10 @@ export class SongSynth {
     return this.ctx.sampleRate;
   }
 
-  start(track: RhythmTrack) {
+  start(track: RhythmTrack, tempoMul = 1) {
     this.resetBuses();
     this.track = track;
-    this.spb = 60 / track.bpm;
+    this.spb = 60 / (track.bpm * tempoMul);
     const events: ScheduledEvent[] = [];
     for (const event of track.events) {
       events.push({ time: (event as { beat: number }).beat * this.spb, event });
