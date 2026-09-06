@@ -28,6 +28,7 @@ export function SiteHeader() {
   const isSection = (...paths: string[]) =>
     paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
   const articlesActive = isSection('/articles');
+  const gamesActive = isSection('/games');
   const aboutActive = isSection(
     '/about',
     '/archive',
@@ -111,6 +112,14 @@ export function SiteHeader() {
             onClick={closeMenus}
           >
             项目
+          </Link>
+          <Link
+            href="/games"
+            className={gamesActive ? 'active' : undefined}
+            aria-current={gamesActive ? 'page' : undefined}
+            onClick={closeMenus}
+          >
+            游戏
           </Link>
           <Link
             href="/messages"
