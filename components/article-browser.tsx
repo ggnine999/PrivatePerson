@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Article } from '@/lib/content';
+import { countWords } from '@/lib/word-count';
+import { ViewsBadge } from '@/components/article-stats';
 export function ArticleBrowser({
   articles,
   initialQuery = '',
@@ -69,6 +71,8 @@ export function ArticleBrowser({
               <div className="meta">
                 <span>{article.category}</span>
                 <span>{article.readingMinutes} 分钟</span>
+                <span>{countWords(article.content)} 字</span>
+                <ViewsBadge slug={article.slug} />
               </div>
               <h2>
                 <Link href={`/articles/${article.slug}`}>{article.title}</Link>

@@ -291,3 +291,12 @@
 - 鼠标悬停/键盘聚焦胶囊展开玻璃小菜单「退出登录」（POST /api/community/logout 后原地刷新）；带悬停桥防空隙断触。header 监听 pathname 变化重拉登录态，覆盖登录页 router.push 跳转后的状态刷新。
 - 修复：改导入时误删仍在使用的 ChevronDown（dev 报 ChevronDown is not defined），已补回。
 - 验证：桌面深浅主题悬停菜单、移动端 390 头部无溢出（实测 chip 右缘 278 < 容器 361）、已登录胶囊渲染确认；lint / typecheck / test 20/20 / build 全绿。登出点击未在浏览器实测（避免注销本地已有会话），接口与资料页登出同源。
+
+## 追加：改进方案 P0 数据闭环（2026-09-06）
+
+- **阅读量+点赞**：新迁移 0005 `article_stats`（slug 主键 / views / likes）；API 三件套（GET 批量 ?slugs=、POST view、POST like，均校验 slug 合法性并走 D1 限流）；客户端 `components/article-stats.tsx` 模块级共享缓存——同屏多徽章合并为一次批量请求；文章页统计条进入时记一次阅读（sessionStorage 会话去重）+ 点赞按钮（localStorage 记忆、乐观更新、再次点击取消并钳制 ≥0）；文章页与首页/列表卡片展示阅读量徽章（数据到达后原位补齐）。
+- **字数统计**：`lib/word-count.ts` 纯函数（CJK 按字、拉丁按词、代码块/行内代码/标记不计），文章页 meta 与首页/列表卡片显示「N 字」，配 4 个单元测试。
+- **页脚统计**：以仓库首个提交日（2026-09-04）为建站日，页脚显示「已运行 N 天 · N 篇文章 · N 个项目」。
+- **代码块复制**：`components/code-copy.tsx` 渐进增强，为 `.prose pre` 注入复制按钮（key=slug 重扫），点击写剪贴板并反馈「已复制 ✓」。
+- **说明**：计划中的 Ctrl+K 一项暂缓——全站搜索弹窗已按用户要求移除，若要恢复键盘唤起搜索，基于保留的 site-search 组件约十行即可。
+- 验证：本地迁移应用成功；文章页实测阅读计数（1 次阅读）、点赞（0→1）、复制按钮反馈、卡片字数与阅读徽章、页脚「已运行 3 天」；lint / typecheck / test 24/24 / build 全绿。

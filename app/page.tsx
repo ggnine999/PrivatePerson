@@ -7,6 +7,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { articles, projects } from '@/lib/content';
+import { countWords } from '@/lib/word-count';
+import { ViewsBadge } from '@/components/article-stats';
 import { WaveDivider } from '@/components/wave-divider';
 
 export default function Home() {
@@ -96,6 +98,8 @@ export default function Home() {
               <div className="meta">
                 <span>{article.category}</span>
                 <span>{article.readingMinutes} 分钟阅读</span>
+                <span>{countWords(article.content)} 字</span>
+                <ViewsBadge slug={article.slug} />
               </div>
               <h3>
                 <Link href={`/articles/${article.slug}`}>{article.title}</Link>
