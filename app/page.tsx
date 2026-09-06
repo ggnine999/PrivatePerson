@@ -39,6 +39,17 @@ export default function Home() {
       <section className="section shell home-discover" id="discover">
         <div className="home-intro-grid">
           <div id="home-music-slot" className="home-music-slot" />
+          <div className="rhythm-card">
+            <span className="kicker">RHYTHM GAME</span>
+            <h2>音游排行榜</h2>
+            <div className="rhythm-empty">
+              <span className="rhythm-ghost" aria-hidden="true">
+                🎮
+              </span>
+              <p>音游还在开发中——排行榜先在这里占个位置。</p>
+              <p className="rhythm-sub">COMING SOON</p>
+            </div>
+          </div>
           <div className="home-profile-card">
             <span className="kicker">PROFILE</span>
             <div className="home-profile-head">
