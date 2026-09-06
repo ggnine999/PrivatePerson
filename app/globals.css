@@ -1970,8 +1970,8 @@ body::after {
 .home-intro-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  /* 两行等高且锁死上限：播放器卡跨双行（约 970px），歌曲列表在卡内滚动 */
-  grid-template-rows: repeat(2, minmax(468px, 475px));
+  /* 两行等高且锁死上限：播放器卡跨双行（约 870px），歌曲列表在卡内滚动 */
+  grid-template-rows: repeat(2, minmax(424px, 424px));
   gap: 1.4rem;
   align-items: stretch;
 }
