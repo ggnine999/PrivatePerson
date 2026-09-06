@@ -3,14 +3,33 @@
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { articles, projects } from '@/lib/content';
 
-// 全站搜索弹窗：文章 + 项目客户端即时过滤（数据来自静态内容，无需接口）。
+type SearchArticle = {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  readingMinutes: number;
+};
+
+type SearchProject = {
+  slug: string;
+  name: string;
+  description: string;
+  tech: string[];
+  website: string;
+};
+
+type ContentIndex = { articles: SearchArticle[]; projects: SearchProject[] };
+
+// 全站搜索弹窗：文章 + 项目客户端即时过滤（索引来自 /api/content-index，随内容增删改查实时更新）。
 // 使用原生 <dialog>：Esc 关闭、点击背板关闭、焦点管理均为浏览器原生行为。
 export function SiteSearch({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
+  const [index, setIndex] = useState<ContentIndex | null>(null);
 
   useEffect(() => {
     dialogRef.current?.showModal();
@@ -28,28 +47,41 @@ export function SiteSearch({ onClose }: { onClose: () => void }) {
     return () => dialog.removeEventListener('click', onClick);
   }, [onClose]);
 
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/content-index')
+      .then(async (response) => {
+        if (!alive || !response.ok) return;
+        setIndex((await response.json()) as ContentIndex);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const q = query.trim().toLowerCase();
   const articleHits = useMemo(
     () =>
-      articles
+      (index?.articles ?? [])
         .filter((article) =>
           `${article.title}${article.description}${article.category}${article.tags.join('')}`
             .toLowerCase()
             .includes(q),
         )
         .slice(0, 6),
-    [q],
+    [index, q],
   );
   const projectHits = useMemo(
     () =>
-      projects
+      (index?.projects ?? [])
         .filter((project) =>
           `${project.name}${project.description}${project.tech.join('')}`
             .toLowerCase()
             .includes(q),
         )
         .slice(0, 4),
-    [q],
+    [index, q],
   );
   const total = articleHits.length + projectHits.length;
 
@@ -74,6 +106,8 @@ export function SiteSearch({ onClose }: { onClose: () => void }) {
       </label>
       {q === '' ? (
         <p className="site-search-hint">输入关键词，搜索站内的全部文章与项目。</p>
+      ) : index === null ? (
+        <p className="site-search-hint">搜索索引加载中…</p>
       ) : total === 0 ? (
         <p className="site-search-hint">没有找到「{query}」相关的内容。</p>
       ) : (

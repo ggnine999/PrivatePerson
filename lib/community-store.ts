@@ -389,6 +389,14 @@ export async function deleteMoment(id: string): Promise<void> {
   await db().prepare(`DELETE FROM moments WHERE id = ?`).bind(id).run();
 }
 
+export async function updateMoment(id: string, content: string): Promise<boolean> {
+  const result = await db()
+    .prepare(`UPDATE moments SET content = ? WHERE id = ?`)
+    .bind(content, id)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
 export type FriendFeed = { id: string; name: string; rssUrl: string };
 
 export async function listFriendFeeds(): Promise<FriendFeed[]> {

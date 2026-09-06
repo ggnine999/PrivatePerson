@@ -5156,3 +5156,325 @@ body::after {
   }
 }
 
+
+/* ===== 创作工坊（/studio 站主管理） ===== */
+.studio-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.6rem;
+}
+.studio-link-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.studio-link-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.studio-link-card svg {
+  width: 19px;
+  height: 19px;
+  color: var(--primary);
+}
+.studio-link-card strong {
+  color: var(--foreground);
+  font-size: 0.95rem;
+}
+.studio-link-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+.studio-link-card.is-static {
+  opacity: 0.72;
+}
+.studio-moderation-section {
+  margin: 0.4rem 0 0.9rem;
+}
+.studio-moderation-section h2 {
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: 1.3rem;
+  color: var(--foreground);
+}
+.studio-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+.studio-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.studio-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--soft);
+}
+.studio-item-main {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.studio-item-main strong {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--foreground);
+  font-size: 0.92rem;
+}
+.studio-item-meta {
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.studio-item-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.studio-chip {
+  padding: 0.08rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+.studio-chip.is-draft {
+  background: color-mix(in srgb, #f2b53c 18%, transparent);
+  color: #b07d12;
+}
+.studio-chip.is-featured {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
+}
+.studio-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
+  font-size: 0.8rem;
+}
+.studio-dialog {
+  max-width: 640px;
+  width: calc(100vw - 2rem);
+}
+.studio-form {
+  display: grid;
+  gap: 0.75rem;
+}
+.studio-form-row {
+  display: grid;
+  gap: 0.3rem;
+}
+.studio-form-row small.studio-form-hint {
+  color: var(--muted);
+}
+.studio-form-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+.studio-select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.88rem;
+}
+.studio-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  align-self: end;
+  padding-bottom: 0.4rem;
+  color: var(--foreground);
+  font-size: 0.88rem;
+}
+.studio-check input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary);
+}
+.button.is-danger {
+  color: #e5484d;
+}
+.button.is-danger:hover {
+  border-color: #e5484d;
+  color: #e5484d;
+}
+.moment-owner-actions {
+  position: absolute;
+  top: 0.9rem;
+  right: 0;
+  display: flex;
+  gap: 0.3rem;
+}
+.moments-timeline li {
+  position: relative;
+}
+.moment-action,
+.moment-delete {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.moment-action:hover,
+.moment-delete:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+.moment-delete:hover {
+  background: color-mix(in srgb, #e5484d 12%, transparent);
+  color: #e5484d;
+}
+.moment-action svg,
+.moment-delete svg {
+  width: 14px;
+  height: 14px;
+}
+.moment-edit {
+  display: grid;
+  gap: 0.5rem;
+}
+.moment-edit textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--foreground);
+  font: inherit;
+  resize: vertical;
+}
+.moment-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+@media (max-width: 640px) {
+  .studio-links {
+    grid-template-columns: 1fr;
+  }
+  .studio-form-cols {
+    grid-template-columns: 1fr;
+  }
+  .studio-list li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ===== 游戏架：目录驱动的游戏卡片 ===== */
+.game-anchor {
+  scroll-margin-top: 90px;
+}
+.game-shelf {
+  margin-top: 2rem;
+}
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.game-card {
+  position: relative;
+  display: grid;
+  gap: 0.28rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.game-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0.85;
+}
+.game-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  transform: translateY(-2px);
+}
+.game-card-icon {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+.game-card-title {
+  font-weight: 800;
+  color: var(--foreground);
+  font-size: 0.98rem;
+}
+.game-card-tagline {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+.game-card-status {
+  justify-self: start;
+  margin-top: 0.35rem;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+.game-card.is-soon {
+  opacity: 0.62;
+}
+.game-card.is-soon:hover {
+  transform: none;
+}
+.game-card.is-soon .game-card-status {
+  background: var(--soft);
+  color: var(--muted);
+}
+.game-shelf-hint {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+@media (max-width: 1100px) {
+  .game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

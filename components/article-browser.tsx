@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import type { Article } from '@/lib/content';
+import type { SiteArticle } from '@/lib/site-content';
 import { countWords } from '@/lib/word-count';
 import { ViewsBadge } from '@/components/article-stats';
 export function ArticleBrowser({
@@ -10,7 +10,7 @@ export function ArticleBrowser({
   initialQuery = '',
   initialCategory,
 }: {
-  articles: Article[];
+  articles: SiteArticle[];
   initialQuery?: string;
   initialCategory?: string;
 }) {

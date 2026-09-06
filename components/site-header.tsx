@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   ChevronDown,
+  Hammer,
   LogOut,
   Menu,
   Moon,
@@ -24,6 +25,8 @@ export function SiteHeader() {
   const [openMenu, setOpenMenu] = useState<'about' | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [me, setMe] = useState<HeaderUser | null>(null);
+  // 站主会话探测：null=未知，true=已登录站主（显示创作工坊入口）
+  const [ownerAuthed, setOwnerAuthed] = useState(false);
   const pathname = usePathname();
   const isSection = (...paths: string[]) =>
     paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -54,6 +57,29 @@ export function SiteHeader() {
     const timer = setTimeout(() => void loadUser(), 0);
     return () => clearTimeout(timer);
   }, [loadUser, pathname]);
+  // 站主会话探测：登录后导航栏出现创作工坊入口，访客不可见
+  useEffect(() => {
+    let alive = true;
+    const timer = setTimeout(() => {
+      fetch('/api/auth/session')
+        .then(async (response) => {
+          if (!alive) return;
+          if (!response.ok) {
+            setOwnerAuthed(false);
+            return;
+          }
+          const data = (await response.json()) as { authenticated?: boolean };
+          setOwnerAuthed(Boolean(data.authenticated));
+        })
+        .catch(() => {
+          if (alive) setOwnerAuthed(false);
+        });
+    }, 0);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [pathname]);
   async function logout() {
     await fetch('/api/community/logout', { method: 'POST' });
     setMe(null);
@@ -193,6 +219,17 @@ export function SiteHeader() {
           </div>
         </nav>
         <div className="nav-actions">
+          {ownerAuthed && (
+            <Link
+              className="icon-button nav-studio-link"
+              href="/studio"
+              title="创作工坊：管理文章、项目与说说"
+              aria-label="创作工坊"
+              onClick={closeMenus}
+            >
+              <Hammer aria-hidden="true" />
+            </Link>
+          )}
           {me ? (
             <div className="nav-user">
               <Link

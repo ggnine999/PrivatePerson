@@ -6,13 +6,21 @@ import {
   Code2,
   Sparkles,
 } from 'lucide-react';
-import { articles, projects, heroSlides } from '@/lib/content';
+import { heroSlides } from '@/lib/content';
 import { countWords } from '@/lib/word-count';
 import { ViewsBadge } from '@/components/article-stats';
 import { HeroCarousel } from '@/components/hero-carousel';
 import { WaveDivider } from '@/components/wave-divider';
+import {
+  listPublishedArticles,
+  listPublishedProjects,
+} from '@/lib/site-content';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const articles = await listPublishedArticles();
+  const projects = await listPublishedProjects();
   const featured = articles.filter((article) => article.featured);
   const featuredProjects = projects.filter((project) => project.featured);
   return (

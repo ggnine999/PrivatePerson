@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { articles } from '@/lib/content';
+import { getArticleBySlug } from '@/lib/site-content';
 
 function db() {
   if (!env.DB) throw new Error('DB binding unavailable');
@@ -8,8 +8,12 @@ function db() {
 
 export type ArticleStats = { views: number; likes: number };
 
-function isKnownSlug(slug: string) {
-  return articles.some((article) => article.slug === slug);
+async function isKnownSlug(slug: string) {
+  try {
+    return Boolean(await getArticleBySlug(slug));
+  } catch {
+    return false;
+  }
 }
 
 export async function getArticleStatsMap(slugs: string[]) {
@@ -36,7 +40,7 @@ export async function getArticleStatsMap(slugs: string[]) {
 export async function recordArticleView(
   slug: string,
 ): Promise<ArticleStats | null> {
-  if (!isKnownSlug(slug)) return null;
+  if (!(await isKnownSlug(slug))) return null;
   try {
     return await db()
       .prepare(
@@ -58,7 +62,7 @@ export async function adjustArticleLikes(
   slug: string,
   delta: number,
 ): Promise<ArticleStats | null> {
-  if (!isKnownSlug(slug)) return null;
+  if (!(await isKnownSlug(slug))) return null;
   try {
     return await db()
       .prepare(

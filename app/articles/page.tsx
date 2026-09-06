@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ArticleBrowser } from '@/components/article-browser';
-import { articles } from '@/lib/content';
+import { listPublishedArticles } from '@/lib/site-content';
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '全部文章',
   description: '星屿手记的全部文章、分类与标签。',
@@ -11,6 +12,7 @@ export default async function ArticlesPage({
   searchParams: Promise<{ tag?: string; q?: string; category?: string }>;
 }) {
   const query = await searchParams;
+  const articles = await listPublishedArticles();
   return (
     <main className="page shell">
       <header className="page-head">

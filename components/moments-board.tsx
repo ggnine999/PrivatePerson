@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { Check, Pencil, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmojiPicker } from '@/components/emoji-picker';
 
@@ -12,7 +12,7 @@ function formatTime(timestamp: number) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-// 说说时间线：所有访客可看；站主会话下出现发布框与删除按钮。
+// 说说时间线：所有访客可看；站主会话下出现发布框与每条的说编辑/删除按钮。
 export function MomentsBoard() {
   const [moments, setMoments] = useState<Moment[] | null>(null);
   const [canPublish, setCanPublish] = useState(false);
@@ -20,6 +20,9 @@ export function MomentsBoard() {
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState('');
+  const [editText, setEditText] = useState('');
+  const [savingId, setSavingId] = useState('');
 
   const load = useCallback(async () => {
     const response = await fetch('/api/moments');
@@ -76,6 +79,34 @@ export function MomentsBoard() {
     if (response.ok) await load();
   }
 
+  function startEdit(moment: Moment) {
+    setEditingId(moment.id);
+    setEditText(moment.content);
+  }
+
+  async function saveEdit(id: string) {
+    setSavingId(id);
+    try {
+      const response = await fetch('/api/moments', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
+        },
+        body: JSON.stringify({ id, content: editText }),
+      });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        setError(data.error ?? '保存失败，请稍后再试');
+        return;
+      }
+      setEditingId('');
+      await load();
+    } finally {
+      setSavingId('');
+    }
+  }
+
   return (
     <div className="moments-board">
       {canPublish && (
@@ -118,16 +149,56 @@ export function MomentsBoard() {
               <time dateTime={new Date(moment.createdAt).toISOString()}>
                 {formatTime(moment.createdAt)}
               </time>
-              <p>{moment.content}</p>
-              {canPublish && (
-                <button
-                  type="button"
-                  className="moment-delete"
-                  aria-label="删除这条说说"
-                  onClick={() => void remove(moment.id)}
-                >
-                  <Trash2 aria-hidden="true" />
-                </button>
+              {editingId === moment.id ? (
+                <div className="moment-edit">
+                  <textarea
+                    value={editText}
+                    maxLength={1000}
+                    rows={3}
+                    aria-label="编辑说说内容"
+                    onChange={(event) => setEditText(event.target.value)}
+                  />
+                  <div className="moment-edit-actions">
+                    <button
+                      type="button"
+                      className="button primary"
+                      disabled={savingId === moment.id || editText.trim().length < 2}
+                      onClick={() => void saveEdit(moment.id)}
+                    >
+                      <Check aria-hidden="true" />
+                      {savingId === moment.id ? '保存中…' : '保存'}
+                    </button>
+                    <button
+                      type="button"
+                      className="button ghost"
+                      onClick={() => setEditingId('')}
+                    >
+                      <X aria-hidden="true" /> 取消
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p>{moment.content}</p>
+              )}
+              {canPublish && editingId !== moment.id && (
+                <div className="moment-owner-actions">
+                  <button
+                    type="button"
+                    className="moment-action"
+                    aria-label="编辑这条说说"
+                    onClick={() => startEdit(moment)}
+                  >
+                    <Pencil aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="moment-delete"
+                    aria-label="删除这条说说"
+                    onClick={() => void remove(moment.id)}
+                  >
+                    <Trash2 aria-hidden="true" />
+                  </button>
+                </div>
               )}
             </li>
           ))}

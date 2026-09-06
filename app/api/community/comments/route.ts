@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { consumeRateLimit } from '@/lib/rate-limit';
 import { clientKey } from '@/lib/server-auth';
 import { cleanCommunityText, getCommunitySessionUser } from '@/lib/community-auth';
-import { articles } from '@/lib/content';
+import { getArticleBySlug } from '@/lib/site-content';
 import {
   commentBelongsToSlug,
   createArticleComment,
@@ -14,7 +14,7 @@ const COMMENT_WINDOW_MS = 10 * 60_000;
 
 export async function GET(request: Request) {
   const slug = new URL(request.url).searchParams.get('slug') ?? '';
-  if (!articles.some((article) => article.slug === slug)) {
+  if (!(await getArticleBySlug(slug))) {
     return NextResponse.json({ comments: [] }, { status: 404 });
   }
   const comments = await listArticleComments(slug);
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   }
   const input = (body ?? {}) as Record<string, unknown>;
   const slug = typeof input.slug === 'string' ? input.slug : '';
-  if (!articles.some((article) => article.slug === slug)) {
+  if (!(await getArticleBySlug(slug))) {
     return NextResponse.json({ error: '文章不存在' }, { status: 404 });
   }
 

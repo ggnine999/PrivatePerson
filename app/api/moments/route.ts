@@ -4,10 +4,11 @@ import {
   createMoment,
   deleteMoment,
   listMoments,
+  updateMoment,
 } from '@/lib/community-store';
 import { getSession, requireApiSession } from '@/lib/server-auth';
 
-// 说说：公开时间线 + 站主发布/删除（复用保险库的站主会话）。
+// 说说：公开时间线 + 站主发布/编辑/删除（复用保险库的站主会话）。
 export async function GET() {
   const [moments, session] = await Promise.all([listMoments(50), getSession()]);
   return NextResponse.json(
@@ -38,6 +39,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '说说至少 2 个字' }, { status: 400 });
   }
   await createMoment(content);
+  return NextResponse.json({ ok: true });
+}
+
+export async function PUT(request: Request) {
+  const session = await requireApiSession(request, true);
+  if (!session) {
+    return NextResponse.json({ error: '需要站主身份' }, { status: 401 });
+  }
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    body = null;
+  }
+  const input = (body ?? {}) as Record<string, unknown>;
+  const id = typeof input.id === 'string' ? input.id : '';
+  const content =
+    typeof input.content === 'string' ? cleanCommunityText(input.content, 1000) : '';
+  if (!id) {
+    return NextResponse.json({ error: '缺少条目标识' }, { status: 400 });
+  }
+  if (content.length < 2) {
+    return NextResponse.json({ error: '说说至少 2 个字' }, { status: 400 });
+  }
+  const updated = await updateMoment(id, content);
+  if (!updated) {
+    return NextResponse.json({ error: '说说不存在' }, { status: 404 });
+  }
   return NextResponse.json({ ok: true });
 }
 
