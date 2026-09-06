@@ -122,7 +122,8 @@ svg {
 /* ===== 视差波浪分隔层：首页 Hero 与内容区之间的场景过渡 ===== */
 .wave-divider {
   height: 110px;
-  margin: -46px 0 -1px;
+  /* 整体上移一个自身高度：底边与封面（hero）下缘齐平，波峰留在画面内收边 */
+  margin: -110px 0 -1px;
   position: relative;
   pointer-events: none;
 }
@@ -167,7 +168,7 @@ svg {
 @media (max-width: 900px) {
   .wave-divider {
     height: 70px;
-    margin-top: -30px;
+    margin-top: -70px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -255,13 +256,13 @@ svg {
   isolation: isolate;
   margin-top: -72px;
 }
-/* 首页封面背景：miku-ocean 只裁上半屏带状区域，取景稍偏上让人物头部入镜 */
+/* 首页封面背景：miku-ocean 铺满首屏，取景沿用整屏构图 */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url('/images/cover-miku-ocean.jpg') no-repeat center 26% / cover;
+  background: url('/images/cover-miku-ocean.jpg') no-repeat center 32% / cover;
 }
 .dark .hero::before {
   filter: brightness(0.52) saturate(0.9);
@@ -691,8 +692,8 @@ svg {
     width: min(100% - 28px, 1160px);
   }
   .hero {
-    min-height: max(45svh, 330px);
-    padding-block: calc(72px + 0.8rem) 2rem;
+    min-height: 100svh;
+    padding-block: calc(72px + 0.8rem) 4.5rem;
   }
   .hero-copy h1 {
     font-size: 2.55rem;
@@ -1826,13 +1827,13 @@ body::after {
   backdrop-filter: blur(22px) saturate(1.15);
 }
 .hero {
-  /* 方案②上下分层：上半屏约 45vh 封面带，内容区紧随波浪之后铺开 */
-  min-height: max(45svh, 360px);
-  padding-block: calc(72px + 1.4rem) 2.6rem;
+  /* 封面铺满整个首屏，波浪分隔层叠进封面底部收边，内容区从折叠线以下铺开 */
+  min-height: 100svh;
+  padding-block: calc(72px + 1.4rem) 3rem;
 }
-/* ===== 首页：封面带下方落在新一波壁纸上的玻璃卡区 ===== */
+/* ===== 首页：满屏封面之下、壁纸上的玻璃卡区 ===== */
 .home-discover {
-  padding-block: 14px 22px;
+  padding-block: 40px 24px;
 }
 .home-intro-grid {
   display: grid;
@@ -2155,20 +2156,10 @@ body::after {
       linear-gradient(180deg, rgba(4, 12, 31, 0.84), rgba(3, 11, 29, 0.82)),
       linear-gradient(90deg, rgba(5, 14, 35, 0.8), rgba(7, 21, 48, 0.5));
   }
-  .hero {
-    grid-template-columns: minmax(0, 650px);
-    justify-content: start;
-    min-height: calc(100svh - 72px);
-  }
 }
 @media (max-width: 560px) {
   body::before {
     background-position: 80% center;
-  }
-  .hero {
-    align-items: start;
-    min-height: auto;
-    padding-top: 11.5rem;
   }
   .hero-copy {
     padding: 1.35rem;
