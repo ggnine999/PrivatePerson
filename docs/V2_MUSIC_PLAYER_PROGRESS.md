@@ -283,3 +283,11 @@
 - 导航「文章」从下拉框改为直达 /articles 的普通链接（保留当前分区高亮），分类/标签筛选继续由文章列表页的筛选条承担；「关于阿枫」下拉保持不变。
 - 顺带清理：site-header 移除 articles 常量与 content 导入，openMenu 状态收敛为 about 单值。
 - 验证：桌面（无下拉、/articles 高亮、关于阿枫下拉正常）与移动端面板截图确认；lint / typecheck / test 20/20 / build 全绿。
+
+## 追加：移除导航搜索 + 登录态头像胶囊与悬停退出（2026-09-06，用户反馈）
+
+- 导航右侧移除全站搜索按钮（site-search 组件文件保留未删），搜索功能如需恢复可直接复用。
+- 用户区按登录态切换：未登录保持原 👤 图标链接；已登录（GET /api/community/me）渲染「头像 + 昵称」胶囊（有头像用 data URL 图，无头像用昵称首字渐变圆），点击进入 /community/me。
+- 鼠标悬停/键盘聚焦胶囊展开玻璃小菜单「退出登录」（POST /api/community/logout 后原地刷新）；带悬停桥防空隙断触。header 监听 pathname 变化重拉登录态，覆盖登录页 router.push 跳转后的状态刷新。
+- 修复：改导入时误删仍在使用的 ChevronDown（dev 报 ChevronDown is not defined），已补回。
+- 验证：桌面深浅主题悬停菜单、移动端 390 头部无溢出（实测 chip 右缘 278 < 容器 361）、已登录胶囊渲染确认；lint / typecheck / test 20/20 / build 全绿。登出点击未在浏览器实测（避免注销本地已有会话），接口与资料页登出同源。

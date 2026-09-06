@@ -3,27 +3,54 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   ChevronDown,
+  LogOut,
   Menu,
   Moon,
-  Search,
   Sun,
   User,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { SiteSearch } from '@/components/site-search';
+import { useCallback, useEffect, useState } from 'react';
+
+type HeaderUser = {
+  username: string;
+  displayName: string;
+  avatar: string | null;
+};
 
 export function SiteHeader() {
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<'about' | null>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [me, setMe] = useState<HeaderUser | null>(null);
   const pathname = usePathname();
   const isSection = (...paths: string[]) =>
     paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
   const articlesActive = isSection('/articles');
   const aboutActive = isSection('/about', '/archive', '/feed');
+  const loadUser = useCallback(async () => {
+    try {
+      const response = await fetch('/api/community/me');
+      if (!response.ok) {
+        setMe(null);
+        return;
+      }
+      const data = (await response.json()) as { user: HeaderUser | null };
+      setMe(data.user);
+    } catch {
+      setMe(null);
+    }
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => void loadUser(), 0);
+    return () => clearTimeout(timer);
+  }, [loadUser, pathname]);
+  async function logout() {
+    await fetch('/api/community/logout', { method: 'POST' });
+    setMe(null);
+    window.location.reload();
+  }
   useEffect(() => {
     const value = localStorage.getItem('theme');
     const next =
@@ -127,24 +154,44 @@ export function SiteHeader() {
           </div>
         </nav>
         <div className="nav-actions">
-          <button
-            type="button"
-            className="icon-button"
-            onClick={() => setSearchOpen(true)}
-            aria-label="打开全站搜索"
-            aria-haspopup="dialog"
-          >
-            <Search aria-hidden="true" />
-          </button>
-          <Link
-            className="icon-button"
-            href="/community/me"
-            aria-label="社区账号：登录、注册或个人资料"
-            title="社区账号"
-            onClick={closeMenus}
-          >
-            <User />
-          </Link>
+          {me ? (
+            <div className="nav-user">
+              <Link
+                className="nav-user-chip"
+                href="/community/me"
+                title="个人资料"
+                onClick={closeMenus}
+              >
+                {me.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="nav-user-avatar" src={me.avatar} alt="" />
+                ) : (
+                  <span
+                    className="nav-user-avatar nav-user-avatar-fallback"
+                    aria-hidden="true"
+                  >
+                    {me.displayName.slice(0, 1)}
+                  </span>
+                )}
+                <span className="nav-user-name">{me.displayName}</span>
+              </Link>
+              <div className="nav-user-menu">
+                <button type="button" onClick={() => void logout()}>
+                  <LogOut aria-hidden="true" /> 退出登录
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link
+              className="icon-button"
+              href="/community/me"
+              aria-label="社区账号：登录、注册或个人资料"
+              title="社区账号"
+              onClick={closeMenus}
+            >
+              <User />
+            </Link>
+          )}
           <button
             className="icon-button"
             onClick={toggleTheme}
@@ -165,7 +212,6 @@ export function SiteHeader() {
           </button>
         </div>
       </div>
-      {searchOpen && <SiteSearch onClose={() => setSearchOpen(false)} />}
     </header>
   );
 }
