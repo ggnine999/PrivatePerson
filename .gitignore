@@ -45,3 +45,6 @@ tsconfig.tsbuildinfo
 
 # d1 backups (含密码哈希等敏感数据，禁止入库)
 /backups/
+
+# 部署辅助脚本（含服务器凭据，勿入库）
+/deploy/
