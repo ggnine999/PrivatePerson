@@ -5532,3 +5532,107 @@ body::after {
     animation: none;
   }
 }
+
+/* ===== 页面切换过渡：全屏品牌色 + 吉祥物弹跳 ===== */
+.page-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #fff0f6 0%, #ffeef8 45%, #fde9f4 100%);
+  animation: page-transition-in 0.18s ease both;
+}
+.dark .page-transition {
+  background: linear-gradient(135deg, #12101c 0%, #1a1526 45%, #161322 100%);
+}
+@keyframes page-transition-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-transition-cat {
+  width: 88px;
+  height: 88px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: page-transition-bounce 0.9s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+}
+@keyframes page-transition-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  30% {
+    transform: translateY(-22px) rotate(4deg) scale(1.04);
+  }
+  55% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+.page-transition-shadow {
+  position: absolute;
+  width: 64px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.14);
+  animation: page-transition-shadow 0.9s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+}
+@keyframes page-transition-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scaleX(0.55);
+    opacity: 0.3;
+  }
+  55% {
+    transform: scaleX(1);
+    opacity: 0.5;
+  }
+  75% {
+    transform: scaleX(0.8);
+    opacity: 0.4;
+  }
+}
+.page-transition-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff8ac2, var(--primary));
+  animation: page-transition-bar-slide 1.1s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+@keyframes page-transition-bar-slide {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  49% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  51% {
+    transform: scaleX(1);
+    transform-origin: right;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    display: none;
+  }
+}
