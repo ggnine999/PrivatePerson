@@ -98,6 +98,9 @@ export function MusicPlayer() {
   const isPrivateRoute = pathname.startsWith('/vault');
   const [homeTarget, setHomeTarget] = useState<HTMLElement | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  // 版权受限歌曲自动跳过：连续失败计数 + 去重（同一首歌只跳一次）
+  const unplayableStreakRef = useRef(0);
+  const lastUnplayableKeyRef = useRef('');
   const lyricsRef = useRef<HTMLDivElement>(null);
   const lyricLineRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const lyricsLockedUntilRef = useRef(0);
@@ -181,7 +184,12 @@ export function MusicPlayer() {
     const updateDuration = () =>
       setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
     const pause = () => setPlaying(false);
-    const play = () => setPlaying(true);
+    const play = () => {
+      setPlaying(true);
+      // 真正播放成功：重置受限歌曲跳过计数
+      unplayableStreakRef.current = 0;
+      lastUnplayableKeyRef.current = '';
+    };
     const recover = () => setError('');
 
     audio.addEventListener('timeupdate', updateTime);
@@ -462,12 +470,12 @@ export function MusicPlayer() {
         return response.json() as Promise<{ url?: string }>;
       })
       .then((data) => {
-        if (
-          playbackRequestId !== neteasePlaybackRequestRef.current ||
-          typeof data.url !== 'string' ||
-          data.url === ''
-        )
+        if (playbackRequestId !== neteasePlaybackRequestRef.current) return;
+        // 拿不到可用播放地址（版权/会员/地区限制）→ 标记为不可播放
+        if (typeof data.url !== 'string' || data.url === '') {
+          setNeteasePlayback({ songId, state: 'error', url: '' });
           return;
+        }
         setNeteasePlayback({ songId, state: 'idle', url: data.url });
       })
       .catch((requestError: Error) => {
@@ -486,6 +494,34 @@ export function MusicPlayer() {
       playbackController.abort();
     };
   }, [currentQueueItem]);
+
+  // 版权/会员/地区受限歌曲：自动切换队列下一首，直到整队列都试过为止。
+  // 全部不可播时保留错误提示，避免无限跳曲。
+  useEffect(() => {
+    if (!neteaseSong || neteasePlayback.state !== 'error') return;
+    if (lastUnplayableKeyRef.current === neteaseSong.id) return;
+    lastUnplayableKeyRef.current = neteaseSong.id;
+    unplayableStreakRef.current += 1;
+    if (queue.length <= 1 || unplayableStreakRef.current > queue.length) return;
+    setQueueMessage(`《${neteaseSong.name}》受版权限制，自动切换下一首`);
+    const currentIndex = queue.findIndex(
+      (item) => item.key === `netease:${neteaseSong.id}`,
+    );
+    const nextIndex = getWrappedQueueIndex(queue.length, currentIndex, 1);
+    const nextItem = queue[nextIndex];
+    if (!nextItem || nextItem.key === currentQueueItem?.key) return;
+    queueMicrotask(() => {
+      neteaseLyricRequestRef.current += 1;
+      neteasePlaybackRequestRef.current += 1;
+      audioRef.current?.pause();
+      setPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setError('');
+      autoplayAfterSwitchRef.current = true;
+      setCurrentQueueKey(nextItem.key);
+    });
+  }, [neteasePlayback.state, neteaseSong, queue, currentQueueItem]);
   function activateQueueItem(
     item: QueueItem,
     options: {
