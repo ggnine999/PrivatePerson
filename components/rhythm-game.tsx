@@ -682,14 +682,18 @@ export function RhythmGame() {
           // 全屏氛围粒子：背景 + 左右两侧同步点亮
           spawnAmbient(outcome.judgment);
           if (!reducedMotionRef.current) {
-            // PERFECT 抖得更狠一点，优秀/良好轻抖
-            shakeRef.current = {
-              mag: outcome.judgment === 'perfect' ? 3.5 : 2.2,
-              at: performance.now(),
-            };
-            // 连击里程碑：每 25 连击荡开一圈冲击波
+            // 高调震屏：判定越好抖得越狠，里程碑重震
+            const mag =
+              outcome.judgment === 'perfect'
+                ? 6.5
+                : outcome.judgment === 'great'
+                  ? 4.2
+                  : 3;
+            shakeRef.current = { mag, at: performance.now() };
+            // 连击里程碑：每 25 连击荡开冲击波 + 全屏重震
             if (outcome.combo > 0 && outcome.combo % 25 === 0) {
               milestoneRef.current = { combo: outcome.combo, at: performance.now() };
+              shakeRef.current = { mag: 8, at: performance.now() };
             }
           }
         }
@@ -860,7 +864,7 @@ export function RhythmGame() {
       context.clearRect(0, 0, w, h);
 
       // 打击震屏：命中后短促抖动（尊重减少动态偏好）
-      const shakeAge = (now - shakeRef.current.at) / 120;
+      const shakeAge = (now - shakeRef.current.at) / 200;
       context.save();
       if (!reducedMotionRef.current && shakeAge < 1 && shakeRef.current.mag > 0) {
         const decay = (1 - shakeAge) * shakeRef.current.mag;
@@ -989,6 +993,15 @@ export function RhythmGame() {
       horizonGlow.addColorStop(1, toRgba(primary, 0));
       context.fillStyle = horizonGlow;
       context.fillRect(0, horizonY - 60, w, 130);
+
+      // 镜头随节拍呼吸：每个节拍轻微推拉，营造临场感
+      const breathe = reducedMotionRef.current
+        ? 1
+        : 1 + 0.022 * (1 - beatPhase);
+      context.save();
+      context.translate(vanishX, judgeY);
+      context.scale(breathe, breathe);
+      context.translate(-vanishX, -judgeY);
 
       // 透视跑道：向宽消失带汇聚的轨道边界线
       const groundFar = horizonY + 2;
@@ -1172,17 +1185,20 @@ export function RhythmGame() {
         const age = (now - fx.at) / 360;
         const cx = fieldX + fx.lane * laneW + laneW / 2;
         if (now - fx.at < 220) {
-          const pillarAlpha = 0.26 * (1 - (now - fx.at) / 220);
-          const pillar = context.createLinearGradient(0, judgeY, 0, judgeY - 260);
+          const pillarAlpha = 0.42 * (1 - (now - fx.at) / 220);
+          const pillar = context.createLinearGradient(0, judgeY, 0, judgeY - 320);
           pillar.addColorStop(0, toRgba(primary, pillarAlpha));
           pillar.addColorStop(1, toRgba(primary, 0));
           context.fillStyle = pillar;
-          context.fillRect(cx - laneW * 0.35, judgeY - 260, laneW * 0.7, 260);
+          context.fillRect(cx - laneW * 0.42, judgeY - 320, laneW * 0.84, 320);
+          // 光柱核心：一道更亮的细柱
+          context.fillStyle = `rgba(255, 255, 255, ${0.3 * (1 - (now - fx.at) / 220)})`;
+          context.fillRect(cx - 2.5, judgeY - 320, 5, 320);
         }
-        context.strokeStyle = toRgba(primary, 0.7 * (1 - age));
-        context.lineWidth = 2;
+        context.strokeStyle = toRgba(primary, 0.75 * (1 - age));
+        context.lineWidth = 2.5;
         context.beginPath();
-        context.arc(cx, judgeY, noteR + age * 26, 0, Math.PI * 2);
+        context.arc(cx, judgeY, noteR + age * 34, 0, Math.PI * 2);
         context.stroke();
       }
       particlesRef.current = particlesRef.current.filter((p) => now - p.at < 460);
@@ -1200,18 +1216,24 @@ export function RhythmGame() {
         if (age >= 1) {
           milestoneRef.current = null;
         } else if (!reducedMotionRef.current) {
-          const waveR = 30 + age * fieldW * 0.55;
-          context.strokeStyle = toRgba(primary, 0.5 * (1 - age));
-          context.lineWidth = 0.5 + 2.5 * (1 - age);
+          const waveR = 30 + age * fieldW * 0.75;
+          context.strokeStyle = toRgba(primary, 0.6 * (1 - age));
+          context.lineWidth = 0.5 + 3 * (1 - age);
           context.beginPath();
           context.arc(w / 2, judgeY - 40, waveR, 0, Math.PI * 2);
           context.stroke();
-          context.fillStyle = toRgba(primary, 0.07 * (1 - age));
+          context.strokeStyle = toRgba(pinkRgbRef.current, 0.4 * (1 - age));
+          context.lineWidth = 1.5;
+          context.beginPath();
+          context.arc(w / 2, judgeY - 40, waveR * 0.72, 0, Math.PI * 2);
+          context.stroke();
+          context.fillStyle = toRgba(primary, 0.09 * (1 - age));
           context.beginPath();
           context.arc(w / 2, judgeY - 40, waveR, 0, Math.PI * 2);
           context.fill();
         }
       }
+      context.restore(); // 结束镜头呼吸变换
 
       // HUD（Phigros 布局）：准确率左上 / 分数右上
       const acc = accuracyOf(game);
@@ -1228,13 +1250,14 @@ export function RhythmGame() {
       // 连击
       const comboAge = (now - comboPopRef.current.at) / 240;
       if (game.combo >= 2) {
-        const scale = 1 + Math.max(0, 1 - comboAge) * 0.22;
+        const scale = 1 + Math.max(0, 1 - comboAge) * 0.26;
         context.save();
         context.translate(fieldX + fieldW / 2, judgeY - 88);
         context.scale(scale, scale);
         context.textAlign = 'center';
-        context.fillStyle = toRgba(primary, 0.92);
-        context.font = "800 44px Georgia, 'Songti SC', serif";
+        const comboColor = game.combo >= 25 ? '#f2b53c' : toRgba(primary, 0.92);
+        context.fillStyle = comboColor;
+        context.font = "800 56px Georgia, 'Songti SC', serif";
         context.fillText(String(game.combo), 0, 0);
         context.font = "600 12px 'Microsoft YaHei UI', system-ui, sans-serif";
         context.fillStyle = toRgba(primary, 0.55);
@@ -1260,14 +1283,17 @@ export function RhythmGame() {
         };
         context.save();
         context.globalAlpha = 1 - age * age;
+        const pop = 1 + 0.35 * (1 - age);
+        context.translate(fieldX + fieldW / 2, judgeY - 130 - age * 16);
+        context.scale(pop, pop);
         context.textAlign = 'center';
         context.fillStyle = colors[popup.judgment];
-        context.font = "800 24px 'Microsoft YaHei UI', system-ui, sans-serif";
-        context.fillText(
-          labels[popup.judgment],
-          fieldX + fieldW / 2,
-          judgeY - 130 - age * 16,
-        );
+        if (popup.judgment !== 'miss') {
+          context.shadowColor = colors[popup.judgment];
+          context.shadowBlur = 16;
+        }
+        context.font = "800 30px 'Microsoft YaHei UI', system-ui, sans-serif";
+        context.fillText(labels[popup.judgment], 0, 0);
         context.restore();
       }
 

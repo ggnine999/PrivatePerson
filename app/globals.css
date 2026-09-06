@@ -5499,7 +5499,7 @@ body::after {
   }
 }
 
-/* 卡片滚动入场：滚动驱动动画，仅支持该特性的浏览器启用（其余直接显示） */
+/* 卡片滚动入场：弹簧过冲 + 按列交错，仅支持该特性的浏览器启用 */
 @supports (animation-timeline: view()) {
   .article-card,
   .project-card,
@@ -5509,8 +5509,91 @@ body::after {
   .moments-timeline > li {
     animation: site-card-in linear both;
     animation-timeline: view();
-    animation-range: entry 0% entry 45%;
+    animation-range: entry 0% entry 60%;
   }
+  .article-card:nth-child(2),
+  .project-card:nth-child(2),
+  .game-card:nth-child(2),
+  .studio-link-card:nth-child(2) {
+    animation-range: entry 8% entry 68%;
+  }
+  .article-card:nth-child(3),
+  .project-card:nth-child(3),
+  .game-card:nth-child(3),
+  .studio-link-card:nth-child(3) {
+    animation-range: entry 16% entry 76%;
+  }
+  .article-card:nth-child(4),
+  .project-card:nth-child(4),
+  .game-card:nth-child(4),
+  .studio-link-card:nth-child(4) {
+    animation-range: entry 24% entry 84%;
+  }
+}
+@keyframes site-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(56px) scale(0.82) rotate(2.5deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.035) rotate(-0.6deg);
+  }
+  80% {
+    transform: translateY(2px) scale(0.995) rotate(0.2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 卡片 3D 倾斜（鼠标跟随，由 card-tilt 组件写入 CSS 变量） */
+.card-tilt {
+  position: relative;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    scale(var(--tilt-scale, 1));
+  transition: transform 0.16s ease-out;
+  will-change: transform;
+}
+.card-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.2),
+    transparent 55%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.card-tilt:hover .card-glare {
+  opacity: 1;
+}
+
+/* 区块标题也随滚动入场 */
+.section-heading {
+  animation: site-card-in linear both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 60%;
+}
+
+/* 按钮悬停轻浮起 + 主色光晕 */
+.button {
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.button:hover {
+  transform: translateY(-2px);
+}
+.button.primary:hover {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--primary) 38%, transparent);
 }
 
 /* 导航链接悬停：下滑线指示（激活项保持常亮下划线） */

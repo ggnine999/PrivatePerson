@@ -7,6 +7,7 @@ import { SakuraFall } from '@/components/sakura-fall';
 import { KanbanMusume } from '@/components/kanban-musume';
 import { MusicPlayer } from '@/components/music-player';
 import { PageTransition } from '@/components/page-transition';
+import { CardTilt } from '@/components/card-tilt';
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
@@ -38,6 +39,7 @@ export default function RootLayout({
         </a>
         <SiteHeader />
         <PageTransition />
+        <CardTilt />
         <MusicPlayer />
         <div id="main-content">{children}</div>
         <SiteFooter />
