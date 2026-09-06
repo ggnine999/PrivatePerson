@@ -15,6 +15,7 @@ import {
   listPublishedArticles,
   listPublishedProjects,
 } from '@/lib/site-content';
+import { CountUp } from '@/components/count-up';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,11 +80,15 @@ export default async function Home() {
             </p>
             <dl className="hero-stats">
               <div>
-                <dt>{articles.length}</dt>
+                <dt>
+                  <CountUp value={articles.length} />
+                </dt>
                 <dd>篇文章</dd>
               </div>
               <div>
-                <dt>{projects.length}</dt>
+                <dt>
+                  <CountUp value={projects.length} />
+                </dt>
                 <dd>个示例项目</dd>
               </div>
               <div>

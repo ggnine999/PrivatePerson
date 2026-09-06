@@ -5478,3 +5478,98 @@ body::after {
 }
 
 
+
+/* ===== 全站动效层（Animate.css 风格手写调优版） ===== */
+@keyframes site-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes site-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes site-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* 页面切换：每次路由变化，页面主体淡入上移 */
+#main-content > main {
+  animation: site-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 顶部进度条：路由切换反馈 */
+.top-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+}
+.top-progress::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--primary), var(--pink));
+}
+.top-progress.is-active {
+  opacity: 1;
+}
+.top-progress.is-active::before {
+  animation: site-progress-slide 0.48s cubic-bezier(0.3, 0.8, 0.4, 1) both;
+}
+
+/* 卡片滚动入场：滚动驱动动画，仅支持该特性的浏览器启用（其余直接显示） */
+@supports (animation-timeline: view()) {
+  .article-card,
+  .project-card,
+  .game-card,
+  .studio-link-card,
+  .timeline > section,
+  .moments-timeline > li {
+    animation: site-card-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+}
+
+/* 导航链接悬停：下滑线指示（激活项保持常亮下划线） */
+.nav-links > a:not(.active):hover::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0.15rem;
+  width: 55%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary);
+  transform: translateX(-50%);
+  animation: site-progress-slide 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main-content > main,
+  .top-progress.is-active::before,
+  .nav-links > a:not(.active):hover::after {
+    animation: none;
+  }
+}
