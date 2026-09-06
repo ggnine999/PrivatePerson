@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { EmojiPicker } from '@/components/emoji-picker';
 
 type CommentItem = {
   id: string;
@@ -27,6 +28,22 @@ export function Comments({ slug }: { slug: string }) {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function insertFace(face: string) {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setContent((prev) => prev + face);
+      return;
+    }
+    const start = textarea.selectionStart ?? content.length;
+    const end = textarea.selectionEnd ?? start;
+    setContent(content.slice(0, start) + face + content.slice(end));
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + face.length;
+    });
+  }
 
   const load = useCallback(async () => {
     const response = await fetch(
@@ -112,6 +129,7 @@ export function Comments({ slug }: { slug: string }) {
           </p>
         )}
         <textarea
+          ref={textareaRef}
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="说点什么吧……（支持 2-1000 字）"
@@ -119,6 +137,7 @@ export function Comments({ slug }: { slug: string }) {
           rows={4}
           aria-label="评论内容"
         />
+        <EmojiPicker onPick={insertFace} />
         <div className="comments-actions">
           {error && <p className="comments-error">{error}</p>}
           {notice && <p className="comments-notice">{notice}</p>}

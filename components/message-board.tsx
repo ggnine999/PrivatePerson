@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { EmojiPicker } from '@/components/emoji-picker';
 
 type Message = {
   id: string;
@@ -25,6 +26,22 @@ export function MessageBoard() {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function insertFace(face: string) {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setContent((prev) => prev + face);
+      return;
+    }
+    const start = textarea.selectionStart ?? content.length;
+    const end = textarea.selectionEnd ?? start;
+    setContent(content.slice(0, start) + face + content.slice(end));
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + face.length;
+    });
+  }
 
   const load = useCallback(async () => {
     const response = await fetch('/api/community/messages');
@@ -97,6 +114,7 @@ export function MessageBoard() {
           </p>
         )}
         <textarea
+          ref={textareaRef}
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="写点想对博主说的话……（支持 2-1000 字）"
@@ -104,6 +122,7 @@ export function MessageBoard() {
           rows={4}
           aria-label="留言内容"
         />
+        <EmojiPicker onPick={insertFace} />
         <div className="comments-actions">
           {error && <p className="comments-error">{error}</p>}
           {notice && <p className="comments-notice">{notice}</p>}

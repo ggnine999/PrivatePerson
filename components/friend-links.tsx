@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink } from 'lucide-react';
+import { Copy, Check, ExternalLink, Shuffle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 type FriendLink = {
@@ -10,8 +10,20 @@ type FriendLink = {
   description: string;
 };
 
+const SITE_DESCRIPTION = '把代码、生活与微小的灵感写进夜色。';
+
+const LINK_RULES = [
+  '先把本站加进你的友链，并保证可见；',
+  '站点能正常访问，内容以原创为主；',
+  '长期更新，纯转载 / 采集站暂不收录；',
+  '换域名、改名称请留言告诉阿枫，会及时更新；',
+  '二次元小伙伴无视以上全部要求，直接提交就好 XD',
+];
+
 export function FriendLinks() {
   const [links, setLinks] = useState<FriendLink[] | null>(null);
+  const [origin, setOrigin] = useState('');
+  const [copied, setCopied] = useState(false);
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -28,7 +40,10 @@ export function FriendLinks() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => void load(), 0);
+    const timer = setTimeout(() => {
+      setOrigin(window.location.origin);
+      void load();
+    }, 0);
     return () => clearTimeout(timer);
   }, [load]);
 
@@ -56,8 +71,43 @@ export function FriendLinks() {
     }
   }
 
+  function visitRandom() {
+    if (!links || links.length === 0) return;
+    const link = links[Math.floor(Math.random() * links.length)];
+    window.open(link.url, '_blank', 'noopener,noreferrer');
+  }
+
+  async function copySiteInfo() {
+    const info = [
+      `名称：星屿手记`,
+      `链接：${origin}`,
+      `描述：${SITE_DESCRIPTION}`,
+      `图标：${origin}/favicon.svg`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(info);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
     <div className="friend-links">
+      <div className="friend-links-toolbar">
+        <p className="friend-links-count">
+          已收录 {links === null ? '…' : links.length} 个伙伴站点
+        </p>
+        <button
+          type="button"
+          className="button ghost"
+          onClick={visitRandom}
+          disabled={!links || links.length === 0}
+        >
+          <Shuffle aria-hidden="true" /> 随机串门
+        </button>
+      </div>
       <ul className="friend-links-grid">
         {links === null ? (
           <li className="comments-loading">友链加载中…</li>
@@ -76,6 +126,46 @@ export function FriendLinks() {
           ))
         )}
       </ul>
+      <section className="friend-links-info" aria-label="本站信息与友链申请规则">
+        <div className="friend-site-card">
+          <h2>本站信息</h2>
+          <dl className="friend-site-fields">
+            <div>
+              <dt>名称</dt>
+              <dd>星屿手记</dd>
+            </div>
+            <div>
+              <dt>链接</dt>
+              <dd>{origin || '（当前站点地址）'}</dd>
+            </div>
+            <div>
+              <dt>描述</dt>
+              <dd>{SITE_DESCRIPTION}</dd>
+            </div>
+            <div>
+              <dt>图标</dt>
+              <dd>{origin ? `${origin}/favicon.svg` : '/favicon.svg'}</dd>
+            </div>
+          </dl>
+          <button
+            type="button"
+            className="button ghost"
+            onClick={() => void copySiteInfo()}
+            disabled={!origin}
+          >
+            {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+            {copied ? '已复制 ✓' : '复制本站信息'}
+          </button>
+        </div>
+        <div className="friend-rules-card">
+          <h2>收录规则</h2>
+          <ol className="friend-rules">
+            {LINK_RULES.map((rule) => (
+              <li key={rule}>{rule}</li>
+            ))}
+          </ol>
+        </div>
+      </section>
       <form
         className="friend-links-form comments-form"
         onSubmit={(event) => {

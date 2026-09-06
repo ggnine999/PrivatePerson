@@ -114,6 +114,14 @@ export function SiteHeader() {
             留言板
           </Link>
           <Link
+            href="/moments"
+            className={isSection('/moments') ? 'active' : undefined}
+            aria-current={isSection('/moments') ? 'page' : undefined}
+            onClick={closeMenus}
+          >
+            说说
+          </Link>
+          <Link
             href="/links"
             className={isSection('/links') ? 'active' : undefined}
             aria-current={isSection('/links') ? 'page' : undefined}

@@ -275,3 +275,116 @@ export async function deleteContent(
         : 'friend_links';
   await db().prepare(`DELETE FROM ${table} WHERE id = ?`).bind(id).run();
 }
+
+export type ReaderRow = {
+  username: string;
+  displayName: string;
+  avatar: string | null;
+  publishedComments: number;
+  joinedAt: number;
+};
+
+export async function listReaders(limit = 60): Promise<ReaderRow[]> {
+  const result = await db()
+    .prepare(
+      `SELECT u.username, u.display_name, u.avatar, u.created_at,
+              COUNT(c.id) AS published_comments
+       FROM community_users u
+       JOIN article_comments c
+         ON c.author_user_id = u.id
+        AND c.author_type = 'member'
+        AND c.status = 'published'
+       WHERE u.status = 'active'
+       GROUP BY u.id
+       ORDER BY published_comments DESC, u.created_at ASC
+       LIMIT ?`,
+    )
+    .bind(limit)
+    .all<{
+      username: string;
+      display_name: string;
+      avatar: string | null;
+      created_at: number;
+      published_comments: number;
+    }>();
+  return (result.results ?? []).map((row) => ({
+    username: row.username,
+    displayName: row.display_name,
+    avatar: row.avatar,
+    publishedComments: row.published_comments,
+    joinedAt: row.created_at,
+  }));
+}
+
+export type RecentCommentRow = {
+  id: string;
+  articleSlug: string;
+  authorType: 'member' | 'guest';
+  authorName: string;
+  content: string;
+  createdAt: number;
+};
+
+export async function listRecentArticleComments(
+  limit = 8,
+): Promise<RecentCommentRow[]> {
+  const result = await db()
+    .prepare(
+      `SELECT id, article_slug, author_type, author_name, content, created_at
+       FROM article_comments
+       WHERE status = 'published'
+       ORDER BY created_at DESC
+       LIMIT ?`,
+    )
+    .bind(limit)
+    .all<{
+      id: string;
+      article_slug: string;
+      author_type: string;
+      author_name: string;
+      content: string;
+      created_at: number;
+    }>();
+  return (result.results ?? []).map((row) => ({
+    id: row.id,
+    articleSlug: row.article_slug,
+    authorType: row.author_type === 'member' ? 'member' : 'guest',
+    authorName: row.author_name,
+    content: row.content,
+    createdAt: row.created_at,
+  }));
+}
+
+export type MomentRow = { id: string; content: string; createdAt: number };
+
+export async function listMoments(limit = 50): Promise<MomentRow[]> {
+  const result = await db()
+    .prepare(
+      `SELECT id, content, created_at FROM moments
+       WHERE status = 'published'
+       ORDER BY created_at DESC
+       LIMIT ?`,
+    )
+    .bind(limit)
+    .all<{ id: string; content: string; created_at: number }>();
+  return (result.results ?? []).map((row) => ({
+    id: row.id,
+    content: row.content,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function createMoment(content: string): Promise<void> {
+  const id = randomToken();
+  await db()
+    .prepare(
+      `INSERT INTO moments (id, content, status, created_at)
+       VALUES (?, ?, 'published', ?)`,
+    )
+    .bind(id, content, Date.now())
+    .run();
+}
+
+export async function deleteMoment(id: string): Promise<void> {
+  await db().prepare(`DELETE FROM moments WHERE id = ?`).bind(id).run();
+}
