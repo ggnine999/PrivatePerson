@@ -1,23 +1,18 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import mascotManifest from '@/lib/mascots.generated.json';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const MASCOTS = mascotManifest.mascots.map((m) => `/images/mascots/${m.file}`);
-
-// 页面切换过渡：站内导航时全屏展示品牌色 + 吉祥物弹跳，路由完成后淡出。
+// 页面切换过渡：纯色过渡页 + 居中转圈加载动画，路由完成后消失。
 // 拦截站内链接点击与浏览器前进后退；最短展示 420ms 防闪烁，最长 4s 兜底防困住。
 export function PageTransition() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const [mascot, setMascot] = useState(MASCOTS[0]);
   const shownAtRef = useRef(0);
   const firstRender = useRef(true);
 
   const show = useCallback(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    setMascot(MASCOTS[Math.floor(Math.random() * MASCOTS.length)]);
     shownAtRef.current = performance.now();
     setVisible(true);
   }, []);
@@ -81,11 +76,7 @@ export function PageTransition() {
   return (
     <div className="page-transition" aria-hidden="true">
       <div className="page-transition-bar" />
-      <div
-        className="page-transition-cat"
-        style={{ backgroundImage: `url('${mascot}')` }}
-      />
-      <div className="page-transition-shadow" />
+      <div className="page-transition-spinner" />
     </div>
   );
 }
