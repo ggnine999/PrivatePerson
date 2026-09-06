@@ -6,9 +6,10 @@ import {
   Code2,
   Sparkles,
 } from 'lucide-react';
-import { articles, projects } from '@/lib/content';
+import { articles, projects, heroSlides } from '@/lib/content';
 import { countWords } from '@/lib/word-count';
 import { ViewsBadge } from '@/components/article-stats';
+import { HeroCarousel } from '@/components/hero-carousel';
 import { WaveDivider } from '@/components/wave-divider';
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   return (
     <main>
       <section className="hero">
+        <HeroCarousel slides={heroSlides} />
         <div className="hero-copy">
           <span className="eyebrow">
             <Sparkles aria-hidden="true" /> 私人星图 · 公开阅读

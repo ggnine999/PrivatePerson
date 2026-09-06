@@ -322,3 +322,12 @@
 - **D1 定时备份**：`scripts/backup-d1.mjs` 包装 wrangler d1 export（自动建目录、按日期命名），npm 脚本 `db:backup:local` / `db:backup`（生产）；`backups/` 已加入 .gitignore（导出含密码哈希）。本地实测导出 14 张表结构 + 数据。
 - **OG 图**：全站与文章页 openGraph/twitter 卡片统一配置站点封面大图（og:image、twitter:summary_large_image 均实测输出）。动态生成 OG 图需要内嵌约 10MB 的 CJK 字体（否则中文全是豆腐块），性价比不足，暂不采用。
 - 验证：朋友圈 5 源抓取、真实聚合 23 篇、页面渲染；备份导出；文章页 og:image/twitter 标签实测；lint / typecheck / test 24/24 / build 全绿。
+
+## 追加：首页封面轮播（2026-09-06，用户需求）
+
+- 首页封面从单张 miku-ocean 升级为 5 图轮播：初音·海面（默认）、蓝发少女与晴空、薇尔莉特·水边拾信、初音·涂鸦墙、红发和服·夜城（均来自 assets/source/backgrounds，已复制到 public/images/hero/）。
+- `components/hero-carousel.tsx`：图层常驻堆叠 + 透明度交叉过渡（1.2s），7s 自动轮播；`prefers-reduced-motion` 下停用自动轮播、保留指示点手动切换；底部指示点（当前项拉长）+ aria-live 播报当前封面。
+- 每张图带 tone（light/dark）：暗色滑块（涂鸦墙/夜城）经 CSS :has 自动把主标题/副标题切为白字深影，浅色滑块用深色文字（副标题从灰紫加深为前景色，解决蓝天上可读性问题）。
+- 底部 240px 渐隐遮罩移到轮播容器上，保留与薇尔莉特壁纸的叠化过渡；深色模式统一 brightness(0.55) 压暗。
+- 注意：新增 4 张图的再分发授权仍未确认（见 assets/source/backgrounds/README.md 与 TECH_DEBT），公开部署前需逐张确认。
+- 验证：滑块切换、暗/亮滑块文字自适应、底部渐隐叠化、指示点，桌面实测；lint / typecheck / test 34/34 / build 全绿。

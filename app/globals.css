@@ -375,14 +375,12 @@ svg {
   isolation: isolate;
   margin-top: -72px;
 }
-/* 首页封面背景：miku-ocean 铺满首屏，取景沿用整屏构图；
-   底部 240px 渐隐，与薇尔莉特壁纸叠化过渡而非生硬遮挡 */
-.hero::before {
-  content: '';
+/* 首页封面轮播：满屏堆叠图片交叉淡入，底部 240px 渐隐进薇尔莉特壁纸；
+   data-tone 标记当前滑块明暗，标题文字颜色经 :has 自适应 */
+.hero-carousel {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url('/images/cover-miku-ocean.jpg') no-repeat center 32% / cover;
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
@@ -396,8 +394,61 @@ svg {
     transparent 100%
   );
 }
-.dark .hero::before {
-  filter: brightness(0.52) saturate(0.9);
+.hero-carousel > div,
+.hero-carousel img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-carousel img {
+  object-fit: cover;
+  object-position: center 32%;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.hero-carousel img.active {
+  opacity: 1;
+}
+.dark .hero-carousel img {
+  filter: brightness(0.55) saturate(0.95);
+}
+.hero:has(.hero-carousel[data-tone='dark']) .hero-copy h1 {
+  color: #fff;
+  text-shadow: 0 2px 26px rgba(4, 10, 26, 0.7);
+}
+.hero:has(.hero-carousel[data-tone='dark']) .hero-copy .lead {
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 14px rgba(4, 10, 26, 0.7);
+}
+/* 浅色滑块：副标题用前景色而非灰紫，保证在明亮天空/海面上可读 */
+.hero .hero-copy .lead {
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+}
+.hero-dots {
+  position: absolute;
+  bottom: 8.5rem;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 1;
+}
+.hero-dots button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 32%, transparent);
+  cursor: pointer;
+  transition:
+    width 0.25s ease,
+    background 0.25s ease;
+}
+.hero-dots button.active {
+  width: 22px;
+  background: var(--foreground);
 }
 .hero-copy h1 {
   font:

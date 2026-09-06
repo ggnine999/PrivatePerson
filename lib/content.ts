@@ -52,3 +52,13 @@ export const collectLinks: CollectEntry[] = [
   { name: 'CSS-Tricks', url: 'https://css-tricks.com/', description: 'CSS 技巧与布局灵感的老牌博客。', group: '灵感补给' },
   { name: 'Product Hunt', url: 'https://www.producthunt.com/', description: '看看独立开发者们最近在发布什么。', group: '灵感补给' },
 ];
+
+// 首页封面轮播（tone 决定该图上标题用深色还是白色文字）
+export type HeroSlide = { src: string; alt: string; tone: 'light' | 'dark' };
+export const heroSlides: HeroSlide[] = [
+  { src: '/images/cover-miku-ocean.jpg', alt: '初音 · 白裙与海', tone: 'light' },
+  { src: '/images/hero/blue-sky-gaze.jpg', alt: '蓝发少女与晴空', tone: 'light' },
+  { src: '/images/hero/violet-water.jpg', alt: '薇尔莉特 · 水边拾信', tone: 'light' },
+  { src: '/images/hero/miku-graffiti.jpg', alt: '初音 · 涂鸦墙', tone: 'dark' },
+  { src: '/images/hero/akari-night-city.jpg', alt: '红发和服少女 · 夜城', tone: 'dark' },
+];
