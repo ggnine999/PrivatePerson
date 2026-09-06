@@ -28,7 +28,14 @@ export function SiteHeader() {
   const isSection = (...paths: string[]) =>
     paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
   const articlesActive = isSection('/articles');
-  const aboutActive = isSection('/about', '/archive', '/feed');
+  const aboutActive = isSection(
+    '/about',
+    '/archive',
+    '/feed',
+    '/anime',
+    '/photos',
+    '/collect',
+  );
   const loadUser = useCallback(async () => {
     try {
       const response = await fetch('/api/community/me');
@@ -146,6 +153,21 @@ export function SiteHeader() {
               <li>
                 <Link href="/archive" onClick={closeMenus}>
                   归档
+                </Link>
+              </li>
+              <li>
+                <Link href="/anime" onClick={closeMenus}>
+                  追番
+                </Link>
+              </li>
+              <li>
+                <Link href="/photos" onClick={closeMenus}>
+                  相册
+                </Link>
+              </li>
+              <li>
+                <Link href="/collect" onClick={closeMenus}>
+                  收藏
                 </Link>
               </li>
               <li>
