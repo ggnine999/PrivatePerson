@@ -6,7 +6,6 @@ import { BackToTop } from '@/components/back-to-top';
 import { SakuraFall } from '@/components/sakura-fall';
 import { KanbanMusume } from '@/components/kanban-musume';
 import { MusicPlayer } from '@/components/music-player';
-import { TopProgress } from '@/components/top-progress';
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
@@ -37,7 +36,6 @@ export default function RootLayout({
           跳到主要内容
         </a>
         <SiteHeader />
-        <TopProgress />
         <MusicPlayer />
         <div id="main-content">{children}</div>
         <SiteFooter />
