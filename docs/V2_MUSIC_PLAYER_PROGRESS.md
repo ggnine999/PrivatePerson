@@ -277,3 +277,9 @@
 - `site-header.tsx` 接入 `usePathname`：文章下拉命中 `/articles`（含详情页），关于阿枫下拉命中 `/about`、`/archive`、`/feed`，项目/留言板/友链各自精确分区匹配；普通链接同步设置 `aria-current="page"`。
 - 样式：选中项主色文字 + 底部圆角指示条；页首透明态用更高优先级规则压过整体前景色，滚动玻璃态与深浅主题均正常；移动端导航面板内指示条改为左侧竖条。首页不属于任何分区，无高亮。
 - 验证：/articles、/about、/links、/messages、首页，透明态/玻璃态、深浅主题、移动端面板截图确认；lint / typecheck / test 20/20 / build 全绿。
+
+## 追加：移除文章导航下拉（2026-09-06，用户反馈）
+
+- 导航「文章」从下拉框改为直达 /articles 的普通链接（保留当前分区高亮），分类/标签筛选继续由文章列表页的筛选条承担；「关于阿枫」下拉保持不变。
+- 顺带清理：site-header 移除 articles 常量与 content 导入，openMenu 状态收敛为 about 单值。
+- 验证：桌面（无下拉、/articles 高亮、关于阿枫下拉正常）与移动端面板截图确认；lint / typecheck / test 20/20 / build 全绿。

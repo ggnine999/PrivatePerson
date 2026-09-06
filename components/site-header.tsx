@@ -11,16 +11,12 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { articles } from '@/lib/content';
 import { SiteSearch } from '@/components/site-search';
-
-const ARTICLE_CATEGORIES = [...new Set(articles.map((a) => a.category))];
-const ARTICLE_TAGS = [...new Set(articles.flatMap((a) => a.tags))].slice(0, 6);
 
 export function SiteHeader() {
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
-  const [openMenu, setOpenMenu] = useState<'articles' | 'about' | null>(null);
+  const [openMenu, setOpenMenu] = useState<'about' | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -66,49 +62,14 @@ export function SiteHeader() {
           className={open ? 'nav-links open' : 'nav-links'}
           aria-label="主导航"
         >
-          <div
-            className={`nav-dropdown ${openMenu === 'articles' ? 'open' : ''}`}
-            onMouseLeave={() => setOpenMenu(null)}
+          <Link
+            href="/articles"
+            className={articlesActive ? 'active' : undefined}
+            aria-current={articlesActive ? 'page' : undefined}
+            onClick={closeMenus}
           >
-            <button
-              type="button"
-              className={articlesActive ? 'active' : undefined}
-              onClick={() =>
-                setOpenMenu(openMenu === 'articles' ? null : 'articles')
-              }
-              aria-expanded={openMenu === 'articles'}
-            >
-              文章
-              <ChevronDown aria-hidden="true" />
-            </button>
-            <ul className="dropdown-menu">
-              <li>
-                <Link href="/articles" onClick={closeMenus}>
-                  全部文章
-                </Link>
-              </li>
-              {ARTICLE_CATEGORIES.map((category) => (
-                <li key={category}>
-                  <Link
-                    href={`/articles?category=${encodeURIComponent(category)}`}
-                    onClick={closeMenus}
-                  >
-                    {category}
-                  </Link>
-                </li>
-              ))}
-              {ARTICLE_TAGS.map((tag) => (
-                <li key={tag}>
-                  <Link
-                    href={`/articles?tag=${encodeURIComponent(tag)}`}
-                    onClick={closeMenus}
-                  >
-                    #{tag}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            文章
+          </Link>
           <Link
             href="/projects"
             className={isSection('/projects') ? 'active' : undefined}
