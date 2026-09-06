@@ -1,6 +1,7 @@
 'use client';
 
-import { Copy, Check, ExternalLink, Shuffle } from 'lucide-react';
+import Link from 'next/link';
+import { Copy, Check, ExternalLink, Shuffle, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 type FriendLink = {
@@ -99,14 +100,19 @@ export function FriendLinks() {
         <p className="friend-links-count">
           已收录 {links === null ? '…' : links.length} 个伙伴站点
         </p>
-        <button
-          type="button"
-          className="button ghost"
-          onClick={visitRandom}
-          disabled={!links || links.length === 0}
-        >
-          <Shuffle aria-hidden="true" /> 随机串门
-        </button>
+        <div className="friend-links-actions">
+          <Link className="button ghost" href="/circle">
+            <Users aria-hidden="true" /> 朋友圈
+          </Link>
+          <button
+            type="button"
+            className="button ghost"
+            onClick={visitRandom}
+            disabled={!links || links.length === 0}
+          >
+            <Shuffle aria-hidden="true" /> 随机串门
+          </button>
+        </div>
       </div>
       <ul className="friend-links-grid">
         {links === null ? (

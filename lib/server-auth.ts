@@ -19,7 +19,7 @@ function db() {
   return env.DB;
 }
 
-function runtime(name: string) {
+export function runtime(name: string) {
   return (
     (env as unknown as Record<string, string | undefined>)[name] ??
     process.env[name]

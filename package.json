@@ -6,21 +6,23 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "predev": "npm run mascots:sync",
     "dev": "vinext dev",
-    "prebuild": "npm run mascots:sync",
+    "audio:generate": "node scripts/generate-demo-audio.mjs",
+    "auth:hash": "node scripts/hash-password.mjs",
     "build": "vinext build",
-    "start": "wrangler dev --config dist/server/wrangler.json",
-    "mascots:sync": "node scripts/generate-mascot-manifest.mjs",
-    "lint": "oxlint",
-    "format": "oxfmt",
+    "db:backup": "node scripts/backup-d1.mjs remote",
+    "db:backup:local": "node scripts/backup-d1.mjs local",
     "db:generate": "node --require ./scripts/os-userinfo-shim.cjs ./node_modules/drizzle-kit/bin.cjs generate",
     "db:migrate:local": "wrangler d1 migrations apply site-creator-d1 --local --persist-to .wrangler/state --config wrangler.jsonc",
-    "typecheck": "tsc --noEmit",
+    "format": "oxfmt",
+    "lint": "oxlint",
+    "mascots:sync": "node scripts/generate-mascot-manifest.mjs",
+    "prebuild": "npm run mascots:sync",
+    "predev": "npm run mascots:sync",
+    "start": "wrangler dev --config dist/server/wrangler.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "audio:generate": "node scripts/generate-demo-audio.mjs",
-    "auth:hash": "node scripts/hash-password.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

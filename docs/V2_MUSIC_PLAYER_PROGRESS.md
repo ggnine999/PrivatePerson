@@ -315,3 +315,10 @@
 - 新增幂等种子脚本 `scripts/seed-friend-links.sql`（id 取 URL 哈希，重复执行不产生重复行），本地已应用；公开部署后可用 `--remote` 对生产库重放。
 - 顺带清理：移除早期端到端测试遗留的 pending 假友链「星屿手记测试站」（example.com）。
 - 验证：/links 显示 5 张卡片、计数与「随机串门」按钮正常激活。
+
+## 追加：改进方案 P3 进阶与运维（2026-09-06）
+
+- **友链朋友圈**：迁移 0007（friend_links 加 rss_url 列 + friend_posts 聚合表）；`lib/friend-circle.ts` 实现零依赖 RSS2/Atom 解析（CDATA/实体解码，每源取最新 5 篇，按文章链接哈希去重入库）；`/circle` 页时间线展示，站主会话可手动刷新；POST 也支持配置 `FRIEND_CIRCLE_SECRET` 环境变量后由外部定时任务带 `x-refresh-secret` 头触发（wrangler cron 对 vinext 的 scheduled 支持未验证，故先走外部触发路线）。5 个友链 RSS 已实测并写入种子脚本；抓取 UA 用类浏览器标识后 5/5 源全部成功，聚合 23 篇真实文章。入口：友链页工具条「朋友圈」按钮；sitemap 收录 /circle。
+- **D1 定时备份**：`scripts/backup-d1.mjs` 包装 wrangler d1 export（自动建目录、按日期命名），npm 脚本 `db:backup:local` / `db:backup`（生产）；`backups/` 已加入 .gitignore（导出含密码哈希）。本地实测导出 14 张表结构 + 数据。
+- **OG 图**：全站与文章页 openGraph/twitter 卡片统一配置站点封面大图（og:image、twitter:summary_large_image 均实测输出）。动态生成 OG 图需要内嵌约 10MB 的 CJK 字体（否则中文全是豆腐块），性价比不足，暂不采用。
+- 验证：朋友圈 5 源抓取、真实聚合 23 篇、页面渲染；备份导出；文章页 og:image/twitter 标签实测；lint / typecheck / test 24/24 / build 全绿。

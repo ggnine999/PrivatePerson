@@ -4479,3 +4479,67 @@ body::after {
     columns: 1;
   }
 }
+
+/* ===== P3：友链朋友圈 ===== */
+.friend-links-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.circle-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.circle-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.circle-list {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.circle-list a {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  background: var(--card);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.circle-list a:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.circle-post-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+}
+.circle-friend {
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-weight: 750;
+}
+.circle-post-head time {
+  margin-left: auto;
+  color: var(--muted);
+}
+.circle-list strong {
+  color: var(--foreground);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+.spinning {
+  animation: music-spin 1s linear infinite;
+}

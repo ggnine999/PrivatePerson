@@ -41,3 +41,6 @@ tsconfig.tsbuildinfo
 
 # zcode session metadata
 /.zcode/
+
+# d1 backups (含密码哈希等敏感数据，禁止入库)
+/backups/

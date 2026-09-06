@@ -9,3 +9,10 @@ INSERT OR IGNORE INTO friend_links (id, name, url, description, status, created_
 INSERT OR IGNORE INTO friend_links (id, name, url, description, status, created_at) VALUES ('a89437087c09e314250aa63e7a26d654', 'Hackyh''Blog', 'https://www.hackyh.com/', '网络技术、精品软件与网络杂谈，安全运行十多年的老站。', 'approved', 1788710400000);
 INSERT OR IGNORE INTO friend_links (id, name, url, description, status, created_at) VALUES ('b0ebb00524ee5966fcf723833171eb81', '初之音', 'https://www.himiku.com/', 'Mikusa 的自留地：自托管、追番与 Typecho 生态作品，LOVE MIKU FOREVER.', 'approved', 1788710400000);
 INSERT OR IGNORE INTO friend_links (id, name, url, description, status, created_at) VALUES ('e715bcd6bd0a95a05318a827bb4739a2', '彼岸临窗', 'https://onetuzi.cn/', '一名律师的思考与独白，极简文学风随笔（023.me 为同站新域名）。', 'approved', 1788710400000);
+
+-- 友链 RSS 订阅地址（友链朋友圈数据源，2026-09-06 实测均 200 可用）
+UPDATE friend_links SET rss_url = 'https://moejue.cn/feed' WHERE url = 'https://moejue.cn/';
+UPDATE friend_links SET rss_url = 'https://zmoe.com/feed' WHERE url = 'https://zmoe.com/';
+UPDATE friend_links SET rss_url = 'https://www.hackyh.com/feed.php' WHERE url = 'https://www.hackyh.com/';
+UPDATE friend_links SET rss_url = 'https://www.himiku.com/feed/' WHERE url = 'https://www.himiku.com/';
+UPDATE friend_links SET rss_url = 'https://onetuzi.cn/feed' WHERE url = 'https://onetuzi.cn/';

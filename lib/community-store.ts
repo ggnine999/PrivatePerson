@@ -388,3 +388,78 @@ export async function createMoment(content: string): Promise<void> {
 export async function deleteMoment(id: string): Promise<void> {
   await db().prepare(`DELETE FROM moments WHERE id = ?`).bind(id).run();
 }
+
+export type FriendFeed = { id: string; name: string; rssUrl: string };
+
+export async function listFriendFeeds(): Promise<FriendFeed[]> {
+  const result = await db()
+    .prepare(
+      `SELECT id, name, rss_url FROM friend_links
+       WHERE status = 'approved' AND rss_url IS NOT NULL AND rss_url != ''
+       ORDER BY created_at ASC`,
+    )
+    .all<{ id: string; name: string; rss_url: string }>();
+  return (result.results ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    rssUrl: row.rss_url,
+  }));
+}
+
+export type FriendPostInput = {
+  id: string;
+  friendId: string;
+  title: string;
+  link: string;
+  publishedAt: number;
+};
+
+export async function upsertFriendPosts(rows: FriendPostInput[]): Promise<number> {
+  let inserted = 0;
+  for (const row of rows) {
+    const result = await db()
+      .prepare(
+        `INSERT OR IGNORE INTO friend_posts
+           (id, friend_id, title, link, published_at, fetched_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(row.id, row.friendId, row.title, row.link, row.publishedAt, Date.now())
+      .run();
+    inserted += result.meta.changes ?? 0;
+  }
+  return inserted;
+}
+
+export type FriendPostRow = {
+  id: string;
+  friendName: string;
+  title: string;
+  link: string;
+  publishedAt: number;
+};
+
+export async function listFriendPosts(limit = 30): Promise<FriendPostRow[]> {
+  const result = await db()
+    .prepare(
+      `SELECT p.id, f.name AS friend_name, p.title, p.link, p.published_at
+       FROM friend_posts p
+       JOIN friend_links f ON f.id = p.friend_id
+       ORDER BY p.published_at DESC
+       LIMIT ?`,
+    )
+    .bind(limit)
+    .all<{
+      id: string;
+      friend_name: string;
+      title: string;
+      link: string;
+      published_at: number;
+    }>();
+  return (result.results ?? []).map((row) => ({
+    id: row.id,
+    friendName: row.friend_name,
+    title: row.title,
+    link: row.link,
+    publishedAt: row.published_at,
+  }));
+}
