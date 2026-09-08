@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { consumeRateLimit } from '@/lib/rate-limit';
 import { clientKey } from '@/lib/server-auth';
-import { cleanCommunityText, getCommunitySessionUser } from '@/lib/community-auth';
+import {
+  cleanCommunityText,
+  countPublishedCommentsByUser,
+  getCommunitySessionUser,
+} from '@/lib/community-auth';
+import { communityContentStatus } from '@/lib/community-policy';
 import { getArticleBySlug } from '@/lib/site-content';
 import {
   commentBelongsToSlug,
@@ -72,7 +77,12 @@ export async function POST(request: Request) {
     parentId = parentIdRaw;
   }
 
-  const status = member ? 'published' : 'pending';
+  const publishedCommentCount = member
+    ? await countPublishedCommentsByUser(member.id)
+    : 0;
+  const status = member
+    ? communityContentStatus(publishedCommentCount)
+    : 'pending';
   await createArticleComment({
     slug,
     parentId,

@@ -11,7 +11,7 @@ const AVATAR_MAX_CHARS = 140_000; // 约 100KB 的 data URL
 
 export async function GET() {
   const user = await getCommunitySessionUser();
-  if (!user) return NextResponse.json({ user: null }, { status: 401 });
+  if (!user) return NextResponse.json({ user: null });
 
   const published = await countPublishedCommentsByUser(user.id);
   return NextResponse.json({
@@ -20,6 +20,7 @@ export async function GET() {
       displayName: user.displayName,
       avatar: user.avatar,
       bio: user.bio,
+      permission: user.permission,
       level: Math.min(9, 1 + Math.floor(published / 5)),
       publishedComments: published,
       createdAt: user.createdAt,

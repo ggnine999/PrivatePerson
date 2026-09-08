@@ -27,12 +27,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const valid = await validateOwner(
+    const admin = await validateOwner(
       parsed.data.username,
       parsed.data.password,
       parsed.data.otp || undefined,
     );
-    if (!valid) {
+    if (!admin) {
       return Response.json(
         { error: '账号、密码或验证码不正确。' },
         { status: 401, headers: noStore },
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     await clearLoginAttempts(key);
-    const csrfToken = await createSession();
+    const csrfToken = await createSession(admin.id);
     return Response.json({ ok: true, csrfToken }, { headers: noStore });
   } catch {
     return Response.json(

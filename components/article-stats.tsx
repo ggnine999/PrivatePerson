@@ -20,7 +20,9 @@ function applyStats(slug: string, stats: ArticleStats) {
 }
 
 function ensureLoaded(slugs: string[]) {
-  const missing = slugs.filter((slug) => !cache.has(slug) && !pending.has(slug));
+  const missing = slugs.filter(
+    (slug) => !cache.has(slug) && !pending.has(slug),
+  );
   if (missing.length === 0) return;
   for (const slug of missing) pending.add(slug);
   const query = missing
@@ -119,13 +121,17 @@ export function ArticleStatsBar({ slug }: { slug: string }) {
       const response = await fetch('/api/article-stats/like', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ slug, delta: next ? 1 : -1 }),
+        body: JSON.stringify({ slug, liked: next }),
       });
       if (response.ok) {
-        const data = (await response.json()) as { stats: ArticleStats };
+        const data = (await response.json()) as {
+          stats: ArticleStats;
+          liked: boolean;
+        };
+        setLiked(data.liked);
         applyStats(slug, data.stats);
         try {
-          localStorage.setItem(`starry:liked:${slug}`, next ? '1' : '0');
+          localStorage.setItem(`starry:liked:${slug}`, data.liked ? '1' : '0');
         } catch {
           // 存储不可用时仅本次会话生效
         }

@@ -12,13 +12,14 @@ npm run db:migrate:local
 npm run dev
 ```
 
-打开 `http://localhost:3000`。首次本地演示可以使用明确的虚构测试登录：
+打开 `http://localhost:3000`。所有公开注册账号的 `permission` 默认都是 `0`，只能使用社区功能。首次配置管理员时：
 
-- 所有者账号：`demo-owner`
-- 登录密码：`Sakura-Demo-2026!`
-- 主密码：首次进入保险库时自行创建；本次验证使用 `Demo-Master-Password-2026!`
+1. 在 `/community/register` 注册账号；
+2. 在可信的服务器终端运行 `npm run account:permission -- <用户名> 1`；
+3. 退出并重新登录社区账号，导航栏才会显示管理员验证入口；
+4. 在 `/vault/login` 使用同一账号密码完成二次验证，之后才能访问 `/studio` 与 `/vault`。
 
-测试登录只在非生产模式且没有配置正式凭据时启用。生产环境不会接受这组凭据。
+保险库主密码独立于账号登录密码，只留在浏览器内存中。权限不能通过公开接口或注册表单修改。
 
 ## 常用命令
 
@@ -26,7 +27,8 @@ npm run dev
 npm run dev
 npm run db:generate
 npm run db:migrate:local
-npm run auth:hash -- "至少 12 位的登录密码"
+npm run account:permission -- ggnine 1
+npm run account:clear-local -- --yes
 npm run lint
 npm run typecheck
 npm test
@@ -78,7 +80,11 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 阅读体验：响应式、深浅主题、中文排版、图片预览、返回顶部、404、跳转主内容、键盘可访问控件、减少动画偏好
 - SEO：Metadata、Open Graph 文本信息、`sitemap.xml`、`robots.txt`、`rss.xml`
 - 保险库：登录/退出、初始化/解锁/锁定、5 分钟自动锁定、搜索、筛选、收藏、密码生成、再次认证后查看/复制/**编辑**、删除、API Key 到期/轮换字段、加密备份与恢复；锁定、退出、保存或取消都会清除解密表单状态
-- 二次元体验：安全评论占位（同源构建不执行第三方评论脚本）、一言（仅公开路由请求，失败回退站点语句）、文章阅读进度条、樱花飘落特效（左下角开关、localStorage 记忆、尊重减少动态偏好）、轻量看板娘（贴纸卡看板娘：`mascots` 目录卡通形象轮换 + 点击换台词气泡，可关闭，窄屏隐藏）
+- 社区：公开注册/登录、文章评论、留言板、友链与友链 RSS 动态；游客和低信任会员的内容进入待审核，会员累计 3 条已批准评论后才自动发布，同一来源每小时最多注册 2 个账号
+- 内容工作室：文章、项目等站主编辑入口位于 `/studio`，整段路由在服务端校验所有者会话；访客得到 404，页面不出现在公开导航、站点地图或搜索引擎索引中
+- 二次元体验：一言（仅公开路由请求，失败回退站点语句）、文章阅读进度条、樱花飘落特效（左下角开关、localStorage 记忆、尊重减少动态偏好）、轻量看板娘（贴纸卡看板娘：`mascots` 目录卡通形象轮换 + 点击换台词气泡，可关闭，窄屏隐藏）
+- 音游：三首本地合成曲、确定性谱面和云端娱乐榜；服务器校验数值边界与谱面最大连击，榜单明确标注为客户端提交、未经防作弊验证
+- 文章互动：阅读按匿名客户端/文章/UTC 日期数据库去重，点赞以匿名客户端的幂等状态保存；数据库不保存原始 IP
 - 安全：客户端加密、独立随机 IV、D1 只存密文、服务端会话、CSRF、原子登录/公开搜索限速、可选 TOTP、路由分级 CSP、安全响应头、私人路由 no-store/noindex
 
 ## 安全设计与威胁模型
@@ -101,6 +107,9 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 未登录请求无法读取或修改保险库接口。
 - CSRF、常见点击劫持、搜索引擎抓取、缓存残留和基础暴力登录受到约束。
 - Markdown 内容来自受信任的本地源码；原始 HTML 会转义，降低文章内容带来的 XSS 风险。
+- `/studio/*` 与 `/vault/*` 都在服务端鉴权，并统一使用 `no-store`、`X-Robots-Tag: noindex` 与私人 CSP。
+- 友链 RSS 仅允许无凭据的公开 HTTP(S) 地址，逐次验证跳转，拒绝本机/私网 IP，限制内容类型、三次跳转和 1 MB 响应体；展示层再次过滤非 HTTP(S) 外链。
+- 新注册社区账号不能绕过审核；自动发布权限来自已审核内容数量，而不是“已登录”本身。
 
 ### 同源第三方脚本策略
 
@@ -114,6 +123,9 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 - 当前没有硬件安全密钥/WebAuthn。第一版真实实现了可配置 TOTP，没有展示虚假的“已启用”状态。
 - CSP 因 React/Vinext 当前运行模式保留了内联脚本/样式许可；生产部署前应基于最终平台切换到 nonce/hash CSP。
 - Vinext 1.0.0-beta.9 的开发服务器会对其内部预取 shim 输出一条 RSC 依赖优化建议；生产构建、类型检查与浏览器流程均正常，后续升级 Vinext/RSC 插件时应复核并移除对应兼容配置。
+- 文章互动按来源地址的不可逆摘要去重，是轻量防刷而非强身份认证：共享 NAT 可能共用状态，攻击者更换网络仍可产生新身份。
+- 音游成绩来自客户端。服务器会拒绝明显不可能的组合，但没有签名回放或权威游戏模拟，因此排行榜只能作为娱乐榜。
+- RSS 对 URL、IP 字面量和跳转做了严格检查，但标准 Worker `fetch` 无法在应用层锁定 DNS 解析结果；应继续限制只有站主能配置 RSS，并在部署平台保留出站网络保护。
 
 ### 加密备份与恢复
 
@@ -124,9 +136,7 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 复制 `.env.example` 为本地私有配置（`.env*` 已被 gitignore）：
 
 - `NEXT_PUBLIC_SITE_URL`：公开站点可信源
-- `OWNER_LOGIN`：生产所有者账号
-- `OWNER_PASSWORD_HASH`：通过 `npm run auth:hash` 生成
-- `OWNER_TOTP_SECRET`：可选 Base32 TOTP 秘钥；设置后登录强制 2FA
+- `OWNER_TOTP_SECRET`：可选 Base32 TOTP 秘钥；设置后管理员二次验证强制 2FA
 - `SESSION_TTL_MINUTES`：服务端登录会话时长
 
 服务端秘密不得使用 `NEXT_PUBLIC_` 前缀，也不要提交 `.env`。
@@ -135,12 +145,14 @@ Windows 上当前 Node 运行时的 `os.userInfo()` 会返回 ENOMEM，因此 `d
 
 D1 schema 在 `db/schema.ts`，生成的不可变迁移在 `drizzle/`。本地状态保存在忽略提交的 `.wrangler/state/`。
 
+历史上的 `0005`–`0009` 是人工编写的迁移；`0010_schema_metadata_baseline.sql` 是故意为空的元数据基线，用来让 Drizzle 快照与这些已存在的表重新对齐。不要删除或改写它。`0012_sturdy_wolverine.sql` 增加账号权限和管理员会话账号绑定；已应用的迁移不可改写。
+
 ```bash
 npm run db:generate
 npm run db:migrate:local
 ```
 
-生产部署时先创建 D1，替换 `wrangler.jsonc` 或托管平台注入的数据库 ID，然后按顺序应用迁移。不要在运行时自动建表，也不要修改已应用迁移。
+生产部署时先创建 D1，替换 `wrangler.jsonc` 或托管平台注入的数据库 ID，然后按文件名顺序应用 `drizzle/` 中的全部迁移。不要在运行时自动建表，也不要修改已应用迁移。
 
 ## 生产部署前
 
@@ -150,7 +162,7 @@ npm run db:migrate:local
 
 1. 公开域名或正式 origin；
 2. D1/兼容数据库的部署项目与权限；
-3. 正式 `OWNER_LOGIN` 和本地生成的 `OWNER_PASSWORD_HASH`；
+3. 注册正式管理员账号，并在可信终端将其 `permission` 设置为 `1`；
 4. 如启用 2FA，身份验证器生成的 Base32 TOTP secret；
 5. 部署平台的 Secret 写入权限。
 
@@ -158,18 +170,16 @@ npm run db:migrate:local
 
 ## 验证记录
 
-本次交付实际执行并通过：
+2026-09-07 安全修复轮实际执行并通过：
 
+- `npm run db:generate`：18 张表，schema 与快照一致，无待生成迁移
+- `npm run db:migrate:local`：`0010_schema_metadata_baseline` 与 `0011_article_interaction_dedupe` 成功应用到本地 D1
 - `npm run lint`
 - `npm run typecheck`
-- `npm test`：5 个测试文件、20 个测试全部通过；覆盖密码哈希验证、常量形态比较、AES-GCM 往返、唯一 IV、错误主密码拒绝、路由 CSP 隔离、限速边界、第三方响应净化、网易云链接/歌词解析与队列首尾循环
-- `npm run build`
-- 本地 D1 迁移：4 个迁移全部成功（含 `request_rate_limits`）
-- 浏览器：桌面/移动首页、深浅主题、固定背景焦点与玻璃面板、文章搜索、归档、文章详情/目录/图片预览、项目安全外链
-- 首页音乐播放器：今日推荐初始化、本地/网易云加入队列、重复阻止、移除、上一首/下一首、单曲循环与多曲首尾循环；播放/暂停、拖动进度、歌词同步、音量与静音；桌面和 390×844 移动端布局验证通过
-- 保险库：登录、初始化、刷新与无操作自动锁定、解锁、账号与 API Key 新增/查看/复制/编辑、删除确认、删除接口、退出/未授权 API
-- WebMCP：`lock_vault` 工具注册、有效调用和无效参数拒绝均已在浏览器中验证
-- 数据库查询：测试密码、邮箱和 API Key 未出现在 `ciphertext` 中；每条记录 IV 长度与密文长度正常
-- 私人响应头：`Cache-Control: no-store`、`X-Robots-Tag: noindex`、CSP、X-Frame-Options、nosniff
+- `npm test -- --run`：13 个测试文件、70 个测试全部通过；新增覆盖工作室服务端拦截、社区信任审核、RSS URL/协议/IPv4/IPv6 安全策略、游戏成绩一致性、文章互动身份和关键 API 路由
+- `npm run build`：生产构建成功
+- `npm audit --omit=dev --audit-level=moderate`：生产依赖 0 个已知漏洞
+- 本地 HTTP：`/` 返回 200；未登录 `/studio` 返回 404，并带 `Cache-Control: no-store`、`X-Robots-Tag: noindex, nofollow, noarchive`、私人 CSP、X-Frame-Options 与 nosniff
+- Git 跟踪文件检查：未发现 `.env`、`.dev.vars`、PEM Private Key 等敏感配置文件
 
-本轮重新执行在线审计并升级 Vitest 3.2.7、Cloudflare Vite Plugin 1.54.4、Wrangler 4.129.0 与 Workers Types 5.20260905.1；Drizzle CLI 的传递依赖使用兼容的已修复 esbuild 版本。最终完整 `npm audit` 返回 0 vulnerabilities。上线 CI 仍应重新执行在线审计。
+部署环境和依赖公告会变化，上线 CI 仍应重新执行迁移检查、全量测试、生产构建与在线审计。

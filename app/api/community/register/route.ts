@@ -10,7 +10,7 @@ import {
   validateCommunityUsername,
 } from '@/lib/community-auth';
 
-const REGISTER_LIMIT = 5;
+const REGISTER_LIMIT = 2;
 const REGISTER_WINDOW_MS = 60 * 60_000;
 
 export async function POST(request: Request) {
@@ -22,10 +22,11 @@ export async function POST(request: Request) {
   }
   const input = (body ?? {}) as Record<string, unknown>;
   const username =
-    typeof input.username === 'string' ? input.username.trim().toLowerCase() : '';
+    typeof input.username === 'string'
+      ? input.username.trim().toLowerCase()
+      : '';
   const password = typeof input.password === 'string' ? input.password : '';
-  const displayName =
-    cleanCommunityText(input.displayName, 20) || username;
+  const displayName = cleanCommunityText(input.displayName, 20) || username;
 
   if (!validateCommunityUsername(username)) {
     return NextResponse.json(
@@ -56,13 +57,20 @@ export async function POST(request: Request) {
   }
 
   if (await communityUsernameTaken(username)) {
-    return NextResponse.json({ error: '这个用户名已经被使用了' }, { status: 409 });
+    return NextResponse.json(
+      { error: '这个用户名已经被使用了' },
+      { status: 409 },
+    );
   }
 
   const user = await createCommunityUser(username, password, displayName);
   const csrfToken = await createCommunitySession(user.id);
   return NextResponse.json({
-    user: { username: user.username, displayName: user.displayName },
+    user: {
+      username: user.username,
+      displayName: user.displayName,
+      permission: user.permission,
+    },
     csrfToken,
   });
 }

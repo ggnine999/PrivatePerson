@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { contentSecurityPolicy, isPrivatePath } from '@/lib/security-policy';
 
 describe('route security policy', () => {
-  it('isolates only vault and auth APIs as private routes', () => {
+  it('isolates vault, studio, and their APIs as private routes', () => {
     expect(isPrivatePath('/vault')).toBe(true);
     expect(isPrivatePath('/vault/login')).toBe(true);
+    expect(isPrivatePath('/studio')).toBe(true);
+    expect(isPrivatePath('/studio/articles')).toBe(true);
     expect(isPrivatePath('/api/auth/session')).toBe(true);
     expect(isPrivatePath('/api/vault/records')).toBe(true);
+    expect(isPrivatePath('/api/studio/articles')).toBe(true);
     expect(isPrivatePath('/api/netease-search')).toBe(false);
     expect(isPrivatePath('/api/netease-playback')).toBe(false);
     expect(isPrivatePath('/articles')).toBe(false);

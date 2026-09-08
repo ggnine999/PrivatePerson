@@ -6,6 +6,10 @@ import {
   sha256,
   verifyPassword,
 } from '@/lib/security';
+import {
+  COMMUNITY_PERMISSION,
+  type AccountPermission,
+} from '@/lib/account-permission';
 
 const COOKIE = 'starry_community_session';
 const SESSION_TTL_MS = 7 * 24 * 60 * 60_000;
@@ -17,6 +21,7 @@ export type CommunityUser = {
   displayName: string;
   avatar: string | null;
   bio: string | null;
+  permission: AccountPermission;
   status: 'active' | 'banned';
   createdAt: number;
 };
@@ -94,13 +99,19 @@ export async function createCommunityUser(
     )
     .bind(id, username, passwordHash, displayName, now)
     .run();
-  return { id, username, displayName, createdAt: now };
+  return {
+    id,
+    username,
+    displayName,
+    permission: COMMUNITY_PERMISSION,
+    createdAt: now,
+  };
 }
 
 export async function findCommunityUserByUsername(username: string) {
   return db()
     .prepare(
-      `SELECT id, username, password_hash, display_name, avatar, bio, status, created_at
+      `SELECT id, username, password_hash, display_name, avatar, bio, permission, status, created_at
        FROM community_users WHERE username = ?`,
     )
     .bind(username)
@@ -111,6 +122,7 @@ export async function findCommunityUserByUsername(username: string) {
       display_name: string;
       avatar: string | null;
       bio: string | null;
+      permission: number;
       status: string;
       created_at: number;
     }>();
@@ -159,20 +171,21 @@ export type CommunitySessionUser = {
   displayName: string;
   avatar: string | null;
   bio: string | null;
+  permission: AccountPermission;
   createdAt: number;
+  expiresAt: number;
   csrfToken: string;
 };
 
-export async function getCommunitySessionUser(): Promise<
-  CommunitySessionUser | null
-> {
+export async function getCommunitySessionUser(): Promise<CommunitySessionUser | null> {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
   const tokenHash = await sha256(token);
   const row = await db()
     .prepare(
       `SELECT s.csrf_token, s.expires_at,
-              u.id, u.username, u.display_name, u.avatar, u.bio, u.status, u.created_at
+              u.id, u.username, u.display_name, u.avatar, u.bio,
+              u.permission, u.status, u.created_at
        FROM community_sessions s
        JOIN community_users u ON u.id = s.user_id
        WHERE s.token_hash = ?`,
@@ -186,6 +199,7 @@ export async function getCommunitySessionUser(): Promise<
       display_name: string;
       avatar: string | null;
       bio: string | null;
+      permission: number;
       status: string;
       created_at: number;
     }>();
@@ -198,7 +212,9 @@ export async function getCommunitySessionUser(): Promise<
     displayName: row.display_name,
     avatar: row.avatar,
     bio: row.bio,
+    permission: row.permission === 1 ? 1 : COMMUNITY_PERMISSION,
     createdAt: row.created_at,
+    expiresAt: row.expires_at,
     csrfToken: row.csrf_token,
   };
 }

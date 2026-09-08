@@ -95,10 +95,18 @@ type BoardData = {
   canSubmit: boolean;
   csrfToken: string | null;
   personalBest: ScoreRow | null;
+  trust: { verified: false; basis: 'client-reported' };
 };
 
 type Phase = 'title' | 'playing' | 'result';
-type UploadState = 'idle' | 'uploading' | 'record' | 'kept' | 'guest' | 'skipped' | 'error';
+type UploadState =
+  | 'idle'
+  | 'uploading'
+  | 'record'
+  | 'kept'
+  | 'guest'
+  | 'skipped'
+  | 'error';
 
 type ResultData = {
   gameId: string;
@@ -122,7 +130,14 @@ type Selection = {
 };
 
 type HitFx = { lane: number; judgment: Judgment; at: number };
-type Particle = { lane: number; at: number; color: string; s: number; vx: number; vy: number };
+type Particle = {
+  lane: number;
+  at: number;
+  color: string;
+  s: number;
+  vx: number;
+  vy: number;
+};
 
 // 判定粒子配色：完美=彩色，优秀=金色，良好=蓝色，Miss=红色
 const JUDGMENT_PARTICLE_COLORS: Record<Judgment, string[]> = {
@@ -207,10 +222,13 @@ function LeaderboardPanel({
         <Trophy aria-hidden="true" />
         云端排行榜
       </h2>
+      <p className="sb-board-trust">娱乐榜 · 客户端提交，未经过防作弊验证</p>
       {loading ? (
         <p className="sb-board-empty">榜单加载中…</p>
       ) : scores.length === 0 ? (
-        <p className="sb-board-empty">这个谱面还没有人上榜，来抢第一个「满分传说」吧。</p>
+        <p className="sb-board-empty">
+          这个谱面还没有人上榜，来抢第一个「满分传说」吧。
+        </p>
       ) : (
         <ol className="sb-board-list">
           {scores.map((row, index) => (
@@ -223,7 +241,9 @@ function LeaderboardPanel({
               </span>
               <span className="sb-board-name">{row.username}</span>
               <span className="sb-board-score">{formatScore(row.score)}</span>
-              <span className="sb-board-acc">{formatBoardAccuracy(row.accuracy)}</span>
+              <span className="sb-board-acc">
+                {formatBoardAccuracy(row.accuracy)}
+              </span>
             </li>
           ))}
         </ol>
@@ -245,7 +265,9 @@ export function RhythmGame() {
   const [phase, setPhase] = useState<Phase>('title');
   const [trackIdx, setTrackIdx] = useState(0);
   const [difficulty, setDifficulty] = useState<RhythmDifficulty>('easy');
-  const [runStatus, setRunStatus] = useState<'playing' | 'paused' | 'done'>('playing');
+  const [runStatus, setRunStatus] = useState<'playing' | 'paused' | 'done'>(
+    'playing',
+  );
   const [result, setResult] = useState<ResultData | null>(null);
   const [upload, setUpload] = useState<UploadState>('idle');
   const [board, setBoard] = useState<BoardData | null>(null);
@@ -254,7 +276,9 @@ export function RhythmGame() {
   const [offsetMs, setOffsetMs] = useState(0);
   const [speedIdx, setSpeedIdx] = useState(1);
   const [tempoIdx, setTempoIdx] = useState(0);
-  const [keyBindings, setKeyBindings] = useState<string[]>([...DEFAULT_LANE_CODES]);
+  const [keyBindings, setKeyBindings] = useState<string[]>([
+    ...DEFAULT_LANE_CODES,
+  ]);
   const [listeningLane, setListeningLane] = useState<number | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [startError, setStartError] = useState('');
@@ -292,13 +316,27 @@ export function RhythmGame() {
     }>
   >([]);
   const popupRef = useRef<{ judgment: Judgment; at: number } | null>(null);
-  const comboPopRef = useRef<{ combo: number; at: number }>({ combo: 0, at: 0 });
-  const laneColorsRef = useRef<string[]>(['#5368d9', '#8b98e6', '#e08bb0', '#edb0cb']);
-  const primaryRgbRef = useRef<[number, number, number]>(parseHex('#5368d9') ?? [83, 104, 217]);
-  const pinkRgbRef = useRef<[number, number, number]>(parseHex('#e08bb0') ?? [224, 139, 176]);
+  const comboPopRef = useRef<{ combo: number; at: number }>({
+    combo: 0,
+    at: 0,
+  });
+  const laneColorsRef = useRef<string[]>([
+    '#5368d9',
+    '#8b98e6',
+    '#e08bb0',
+    '#edb0cb',
+  ]);
+  const primaryRgbRef = useRef<[number, number, number]>(
+    parseHex('#5368d9') ?? [83, 104, 217],
+  );
+  const pinkRgbRef = useRef<[number, number, number]>(
+    parseHex('#e08bb0') ?? [224, 139, 176],
+  );
   const reducedMotionRef = useRef(false);
   const keysRef = useRef<string[]>([...DEFAULT_LANE_CODES]);
-  const starsRef = useRef<Array<{ x: number; y: number; r: number; phase: number; speed: number }>>([]);
+  const starsRef = useRef<
+    Array<{ x: number; y: number; r: number; phase: number; speed: number }>
+  >([]);
   const orbitersRef = useRef<
     Array<{
       radius: number;
@@ -338,14 +376,18 @@ export function RhythmGame() {
         if (
           Array.isArray(storedKeys) &&
           storedKeys.length === 4 &&
-          storedKeys.every((code) => typeof code === 'string' && code.length > 0)
+          storedKeys.every(
+            (code) => typeof code === 'string' && code.length > 0,
+          )
         ) {
           setKeyBindings(storedKeys as string[]);
         }
       } catch {
         // 存档损坏则用默认键位
       }
-      reducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      reducedMotionRef.current = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
     });
   }, []);
 
@@ -392,7 +434,10 @@ export function RhythmGame() {
     };
     refresh();
     const observer = new MutationObserver(refresh);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
     return () => observer.disconnect();
   }, [phase]);
 
@@ -487,7 +532,8 @@ export function RhythmGame() {
       fullCombo: game.counts.miss === 0,
     };
     const prevBest = Number(localStorage.getItem(bestKey(data.gameId)) ?? '0');
-    if (data.score > prevBest) localStorage.setItem(bestKey(data.gameId), String(data.score));
+    if (data.score > prevBest)
+      localStorage.setItem(bestKey(data.gameId), String(data.score));
     setResult(data);
     setRunStatus('done');
     setPhase('result');
@@ -533,7 +579,11 @@ export function RhythmGame() {
         difficulty,
         tempoMul: TEMPO_OPTIONS[tempoIdx],
       };
-      gameRef.current = createGame(target.chart.notes, target.track, TEMPO_OPTIONS[tempoIdx]);
+      gameRef.current = createGame(
+        target.chart.notes,
+        target.track,
+        TEMPO_OPTIONS[tempoIdx],
+      );
       finishedRef.current = false;
       pausedRef.current = false;
       pointersRef.current.clear();
@@ -567,7 +617,11 @@ export function RhythmGame() {
   const restartGame = useCallback(() => {
     if (!synthRef.current || !selectionRef.current) return;
     const selection = selectionRef.current;
-    gameRef.current = createGame(selection.chart.notes, selection.track, selection.tempoMul);
+    gameRef.current = createGame(
+      selection.chart.notes,
+      selection.track,
+      selection.tempoMul,
+    );
     finishedRef.current = false;
     pointersRef.current.clear();
     pressedRef.current = [false, false, false, false];
@@ -673,8 +727,15 @@ export function RhythmGame() {
       const outcome = judgeGame(game, lane, synth.songTime(), judgeLatency());
       if (outcome.judgment) {
         synth.playHit(outcome.judgment);
-        hitFxRef.current.push({ lane, judgment: outcome.judgment, at: performance.now() });
-        popupRef.current = { judgment: outcome.judgment, at: performance.now() };
+        hitFxRef.current.push({
+          lane,
+          judgment: outcome.judgment,
+          at: performance.now(),
+        });
+        popupRef.current = {
+          judgment: outcome.judgment,
+          at: performance.now(),
+        };
         // 四级判定各自配色：完美=彩色 / 优秀=金色 / 良好=蓝色 / Miss=红色
         spawnParticles(lane, outcome.judgment);
         if (outcome.judgment !== 'miss') {
@@ -692,7 +753,10 @@ export function RhythmGame() {
             shakeRef.current = { mag, at: performance.now() };
             // 连击里程碑：每 25 连击荡开冲击波 + 全屏重震
             if (outcome.combo > 0 && outcome.combo % 25 === 0) {
-              milestoneRef.current = { combo: outcome.combo, at: performance.now() };
+              milestoneRef.current = {
+                combo: outcome.combo,
+                at: performance.now(),
+              };
               shakeRef.current = { mag: 8, at: performance.now() };
             }
           }
@@ -727,7 +791,8 @@ export function RhythmGame() {
         setListeningLane(null);
         return;
       }
-      if (MODIFIER_PREFIXES.some((prefix) => event.code.startsWith(prefix))) return;
+      if (MODIFIER_PREFIXES.some((prefix) => event.code.startsWith(prefix)))
+        return;
       setKeyBindings((prev) => {
         const next = [...prev];
         const clash = next.indexOf(event.code);
@@ -842,7 +907,9 @@ export function RhythmGame() {
       const selection = selectionRef.current;
       const noteR = Math.max(15, Math.min(laneW * 0.32, 30));
       // 节拍相位：判定座呼吸与地面脉冲共用（由音频时钟驱动）
-      const spb = selection ? 60 / (selection.track.bpm * selection.tempoMul) : 0.5;
+      const spb = selection
+        ? 60 / (selection.track.bpm * selection.tempoMul)
+        : 0.5;
       const beatPhase = selection ? (((songTime / spb) % 1) + 1) % 1 : 0;
       const DEPTH = 3.1;
       const minS = 1 / (1 + DEPTH);
@@ -866,7 +933,11 @@ export function RhythmGame() {
       // 打击震屏：命中后短促抖动（尊重减少动态偏好）
       const shakeAge = (now - shakeRef.current.at) / 200;
       context.save();
-      if (!reducedMotionRef.current && shakeAge < 1 && shakeRef.current.mag > 0) {
+      if (
+        !reducedMotionRef.current &&
+        shakeAge < 1 &&
+        shakeRef.current.mag > 0
+      ) {
         const decay = (1 - shakeAge) * shakeRef.current.mag;
         context.translate(
           (Math.random() - 0.5) * 2 * decay,
@@ -891,7 +962,14 @@ export function RhythmGame() {
         ] as Array<[number, [number, number, number], number]>) {
           const nx = w * (0.5 + 0.22 * Math.sin(drift + offset));
           const ny = horizonY * (0.55 + 0.2 * Math.cos(drift * 1.3 + offset));
-          const nebula = context.createRadialGradient(nx, ny, 0, nx, ny, Math.max(w, h) * radius);
+          const nebula = context.createRadialGradient(
+            nx,
+            ny,
+            0,
+            nx,
+            ny,
+            Math.max(w, h) * radius,
+          );
           nebula.addColorStop(0, toRgba(rgb, 0.1));
           nebula.addColorStop(1, toRgba(rgb, 0));
           context.fillStyle = nebula;
@@ -913,7 +991,8 @@ export function RhythmGame() {
         const starY = star.y * (horizonY + 60);
         const twinkle = reducedMotionRef.current
           ? 0.5
-          : 0.35 + 0.45 * Math.abs(Math.sin(now * 0.001 * star.speed + star.phase));
+          : 0.35 +
+            0.45 * Math.abs(Math.sin(now * 0.001 * star.speed + star.phase));
         context.fillStyle = `rgba(226, 232, 255, ${twinkle})`;
         context.fillRect(star.x * w, starY, star.r, star.r);
       }
@@ -927,7 +1006,8 @@ export function RhythmGame() {
           squash: 0.3 + Math.random() * 0.25,
           size: 1.2 + Math.random() * 2.2,
           phase: Math.random() * Math.PI * 2,
-          color: ORBITER_COLORS[Math.floor(Math.random() * ORBITER_COLORS.length)],
+          color:
+            ORBITER_COLORS[Math.floor(Math.random() * ORBITER_COLORS.length)],
         }));
       }
       const orbitT = reducedMotionRef.current ? 0 : now * 0.001;
@@ -940,7 +1020,8 @@ export function RhythmGame() {
         // 呼吸亮度：慢速明暗变化
         const glow =
           0.25 +
-          0.35 * Math.abs(Math.sin(now * 0.001 * orbiter.speed * 3 + orbiter.phase));
+          0.35 *
+            Math.abs(Math.sin(now * 0.001 * orbiter.speed * 3 + orbiter.phase));
         // 短彗尾：沿公转方向的一小段渐隐弧线（克制，不抢跑道）
         if (!reducedMotionRef.current) {
           const dir = Math.sign(orbiter.speed) || 1;
@@ -970,7 +1051,9 @@ export function RhythmGame() {
       }
 
       // 全屏氛围粒子：判定时撒向背景与两侧的长寿命光点，缓缓上浮摇摆
-      ambientRef.current = ambientRef.current.filter((p) => now - p.at < p.life);
+      ambientRef.current = ambientRef.current.filter(
+        (p) => now - p.at < p.life,
+      );
       for (const p of ambientRef.current) {
         const age = (now - p.at) / p.life;
         const ax =
@@ -986,7 +1069,12 @@ export function RhythmGame() {
       context.globalAlpha = 1;
 
       // 地平线辉光
-      const horizonGlow = context.createLinearGradient(0, horizonY - 60, 0, horizonY + 70);
+      const horizonGlow = context.createLinearGradient(
+        0,
+        horizonY - 60,
+        0,
+        horizonY + 70,
+      );
       horizonGlow.addColorStop(0, toRgba(primary, 0));
       horizonGlow.addColorStop(0.62, toRgba(primary, 0.16));
       horizonGlow.addColorStop(0.78, toRgba(pink, 0.12));
@@ -1108,7 +1196,11 @@ export function RhythmGame() {
             const wHead = r * 0.82;
             const wTail = noteR * fTail * 0.82;
             if (headY > tailY) {
-              context.globalAlpha = dim ? 0.18 : note.state === 'holding' ? 0.72 : 0.38;
+              context.globalAlpha = dim
+                ? 0.18
+                : note.state === 'holding'
+                  ? 0.72
+                  : 0.38;
               context.fillStyle = color;
               context.beginPath();
               context.moveTo(headX - wHead, headY);
@@ -1130,7 +1222,12 @@ export function RhythmGame() {
           // 逼近拖尾：身后一道渐隐光痕
           if (!dim && t > 0.02 && t < 0.82) {
             const tBack = Math.min(t + 0.08, 1);
-            const trailGrad = context.createLinearGradient(nx, ny, xAt(lane, tBack), yAt(tBack));
+            const trailGrad = context.createLinearGradient(
+              nx,
+              ny,
+              xAt(lane, tBack),
+              yAt(tBack),
+            );
             trailGrad.addColorStop(0, toRgba(primary, 0.38 * f));
             trailGrad.addColorStop(1, toRgba(primary, 0));
             context.strokeStyle = trailGrad;
@@ -1145,7 +1242,8 @@ export function RhythmGame() {
           // 圆形音符盘：远处小而暗，越近越大越亮；在地平线辉光里淡入
           context.save();
           const fadeIn = t > 0.8 ? Math.max(0, (1 - t) / 0.2) : 1;
-          context.globalAlpha = (dim ? 0.25 : Math.min(1, 0.3 + f * 0.8)) * fadeIn;
+          context.globalAlpha =
+            (dim ? 0.25 : Math.min(1, 0.3 + f * 0.8)) * fadeIn;
           if (!dim) {
             context.shadowColor = color;
             context.shadowBlur = 8 + 18 * f;
@@ -1166,7 +1264,9 @@ export function RhythmGame() {
           context.arc(nx, ny, r, 0, Math.PI * 2);
           context.fill();
           context.lineWidth = Math.max(2, 3 * f);
-          context.strokeStyle = dim ? toRgba(primary, 0.4) : 'rgba(255, 255, 255, 0.78)';
+          context.strokeStyle = dim
+            ? toRgba(primary, 0.4)
+            : 'rgba(255, 255, 255, 0.78)';
           context.beginPath();
           context.arc(nx, ny, Math.max(1, r - 1.5), 0, Math.PI * 2);
           context.stroke();
@@ -1186,7 +1286,12 @@ export function RhythmGame() {
         const cx = fieldX + fx.lane * laneW + laneW / 2;
         if (now - fx.at < 220) {
           const pillarAlpha = 0.42 * (1 - (now - fx.at) / 220);
-          const pillar = context.createLinearGradient(0, judgeY, 0, judgeY - 320);
+          const pillar = context.createLinearGradient(
+            0,
+            judgeY,
+            0,
+            judgeY - 320,
+          );
           pillar.addColorStop(0, toRgba(primary, pillarAlpha));
           pillar.addColorStop(1, toRgba(primary, 0));
           context.fillStyle = pillar;
@@ -1201,12 +1306,16 @@ export function RhythmGame() {
         context.arc(cx, judgeY, noteR + age * 34, 0, Math.PI * 2);
         context.stroke();
       }
-      particlesRef.current = particlesRef.current.filter((p) => now - p.at < 460);
+      particlesRef.current = particlesRef.current.filter(
+        (p) => now - p.at < 460,
+      );
       for (const p of particlesRef.current) {
         const age = (now - p.at) / 1000;
         const x = fieldX + p.lane * laneW + laneW / 2 + p.vx * age;
         const y = judgeY + p.vy * age + 300 * age * age;
-        context.fillStyle = p.color.replace('rgb(', 'rgba(').replace(')', `, ${Math.max(0, 1 - age * 2.2)})`);
+        context.fillStyle = p.color
+          .replace('rgb(', 'rgba(')
+          .replace(')', `, ${Math.max(0, 1 - age * 2.2)})`);
         context.fillRect(x - p.s / 2, y - p.s / 2, p.s, p.s);
       }
 
@@ -1243,7 +1352,7 @@ export function RhythmGame() {
       context.fillStyle = toRgba(primary, 0.6);
       context.fillText(formatAccuracy(acc), fieldX, 18);
       context.textAlign = 'right';
-      context.font = "700 22px ui-monospace, SFMono-Regular, Menlo, monospace";
+      context.font = '700 22px ui-monospace, SFMono-Regular, Menlo, monospace';
       context.fillStyle = toRgba(primary, 0.9);
       context.fillText(formatScore(game.score), fieldX + fieldW, 12);
 
@@ -1298,7 +1407,10 @@ export function RhythmGame() {
       }
 
       // 进度条
-      const progress = Math.max(0, Math.min(1, songTime / Math.max(durationRef.current, 1)));
+      const progress = Math.max(
+        0,
+        Math.min(1, songTime / Math.max(durationRef.current, 1)),
+      );
       context.fillStyle = toRgba(primary, 0.12);
       context.fillRect(0, 0, w, 3);
       context.fillStyle = toRgba(primary, 0.75);
@@ -1371,7 +1483,8 @@ export function RhythmGame() {
     }
   };
 
-  const resultBoardHighlight = upload === 'record' ? (board?.personalBest?.id ?? null) : null;
+  const resultBoardHighlight =
+    upload === 'record' ? (board?.personalBest?.id ?? null) : null;
   const selectedChartNotes = findRhythmChart(gameId)?.chart.notes.length ?? 0;
 
   return (
@@ -1415,7 +1528,11 @@ export function RhythmGame() {
               ))}
             </fieldset>
             <div className="sb-start-row">
-              <button type="button" className="button primary sb-start" onClick={() => void startGame()}>
+              <button
+                type="button"
+                className="button primary sb-start"
+                onClick={() => void startGame()}
+              >
                 <Play aria-hidden="true" />
                 开始演奏
               </button>
@@ -1429,21 +1546,26 @@ export function RhythmGame() {
                 <Settings2 aria-hidden="true" />
               </button>
               <span className="sb-start-meta">
-                {selectedChartNotes} 音符 · {Math.round(track.bpm * TEMPO_OPTIONS[tempoIdx])} BPM ·
-                本机最高 {formatScore(localBest)}
+                {selectedChartNotes} 音符 ·{' '}
+                {Math.round(track.bpm * TEMPO_OPTIONS[tempoIdx])} BPM · 本机最高{' '}
+                {formatScore(localBest)}
               </span>
             </div>
             {settingsOpen && (
               <div className="sb-settings">
                 <label className="sb-setting">
-                  <span>判定偏移 {offsetMs > 0 ? `+${offsetMs}` : offsetMs} ms</span>
+                  <span>
+                    判定偏移 {offsetMs > 0 ? `+${offsetMs}` : offsetMs} ms
+                  </span>
                   <input
                     type="range"
                     min={-120}
                     max={120}
                     step={5}
                     value={offsetMs}
-                    onChange={(event) => setOffsetMs(Number(event.target.value))}
+                    onChange={(event) =>
+                      setOffsetMs(Number(event.target.value))
+                    }
                   />
                   <small>总觉得「按晚了」就往正调，「按早了」往负调。</small>
                 </label>
@@ -1477,7 +1599,9 @@ export function RhythmGame() {
                       </button>
                     ))}
                   </div>
-                  <small>音频与谱面同步加速：音符更密、歌曲更短，成绩与原速同榜。</small>
+                  <small>
+                    音频与谱面同步加速：音符更密、歌曲更短，成绩与原速同榜。
+                  </small>
                 </div>
                 <div className="sb-setting">
                   <span>自定义按键</span>
@@ -1503,7 +1627,10 @@ export function RhythmGame() {
                       恢复默认
                     </button>
                   </div>
-                  <small>点击一格再按下想用的键；与其他轨道冲突会自动交换；Esc 取消。方向键始终可用。</small>
+                  <small>
+                    点击一格再按下想用的键；与其他轨道冲突会自动交换；Esc
+                    取消。方向键始终可用。
+                  </small>
                 </div>
               </div>
             )}
@@ -1517,112 +1644,142 @@ export function RhythmGame() {
 
         {phase === 'playing' &&
           createPortal(
-          <div className="sb-fullscreen">
-            <div className="sb-stage">
-              <canvas
-                ref={canvasRef}
-                className="sb-canvas"
-                aria-label="星屿音击游玩画面"
-                onPointerDown={onPointerDown}
-                onPointerUp={onPointerUp}
-                onPointerCancel={onPointerUp}
-                onContextMenu={(event) => event.preventDefault()}
-              />
-              <button
-                type="button"
-                className="icon-button sb-pause-btn"
-                aria-label={runStatus === 'paused' ? '继续' : '暂停'}
-                onClick={() => void togglePause()}
-              >
-                {runStatus === 'paused' ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-              </button>
-              <button
-                type="button"
-                className="icon-button sb-exit-btn"
-                aria-label="退出游玩"
-                onClick={quitGame}
-              >
-                <X aria-hidden="true" />
-              </button>
-              {runStatus === 'paused' && (
-                <dialog open className="sb-overlay" aria-label="游戏暂停">
-                  <h2>暂停中</h2>
-                  <p>呼吸，听节拍，回来。</p>
-                  <div className="sb-overlay-actions">
-                    <button type="button" className="button primary" onClick={() => void togglePause(false)}>
-                      <Play aria-hidden="true" />
-                      继续
-                    </button>
-                    <button type="button" className="button ghost" onClick={restartGame}>
-                      <RotateCcw aria-hidden="true" />
-                      重开
-                    </button>
-                    <button type="button" className="button ghost" onClick={quitGame}>
-                      <ChevronLeft aria-hidden="true" />
-                      退出
-                    </button>
-                  </div>
-                </dialog>
-              )}
+            <div className="sb-fullscreen">
+              <div className="sb-stage">
+                <canvas
+                  ref={canvasRef}
+                  className="sb-canvas"
+                  aria-label="星屿音击游玩画面"
+                  onPointerDown={onPointerDown}
+                  onPointerUp={onPointerUp}
+                  onPointerCancel={onPointerUp}
+                  onContextMenu={(event) => event.preventDefault()}
+                />
+                <button
+                  type="button"
+                  className="icon-button sb-pause-btn"
+                  aria-label={runStatus === 'paused' ? '继续' : '暂停'}
+                  onClick={() => void togglePause()}
+                >
+                  {runStatus === 'paused' ? (
+                    <Play aria-hidden="true" />
+                  ) : (
+                    <Pause aria-hidden="true" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="icon-button sb-exit-btn"
+                  aria-label="退出游玩"
+                  onClick={quitGame}
+                >
+                  <X aria-hidden="true" />
+                </button>
+                {runStatus === 'paused' && (
+                  <dialog open className="sb-overlay" aria-label="游戏暂停">
+                    <h2>暂停中</h2>
+                    <p>呼吸，听节拍，回来。</p>
+                    <div className="sb-overlay-actions">
+                      <button
+                        type="button"
+                        className="button primary"
+                        onClick={() => void togglePause(false)}
+                      >
+                        <Play aria-hidden="true" />
+                        继续
+                      </button>
+                      <button
+                        type="button"
+                        className="button ghost"
+                        onClick={restartGame}
+                      >
+                        <RotateCcw aria-hidden="true" />
+                        重开
+                      </button>
+                      <button
+                        type="button"
+                        className="button ghost"
+                        onClick={quitGame}
+                      >
+                        <ChevronLeft aria-hidden="true" />
+                        退出
+                      </button>
+                    </div>
+                  </dialog>
+                )}
               </div>
             </div>,
             document.body,
           )}
 
-        {phase === 'result' && result &&
+        {phase === 'result' &&
+          result &&
           createPortal(
-          <div className="sb-fullscreen sb-fullscreen-center">
-            <div className="sb-panel sb-result">
-            <div className="sb-result-head">
-              <span className="sb-result-song">{result.trackTitle}</span>
-              <span className="sb-result-diff">{DIFFICULTY_NAMES[result.difficulty]}</span>
-              <span
-                className="sb-result-rating"
-                style={{ color: RATING_COLORS[result.rating] }}
-              >
-                {result.rating}
-              </span>
-            </div>
-            <p className="sb-result-score">{formatScore(result.score)}</p>
-            <p className="sb-result-sub">
-              准确率 {formatAccuracy(result.accuracy)} · 最大连击 {result.maxCombo}
-              {result.fullCombo ? ' · FULL COMBO!' : ''}
-            </p>
-            <div className="sb-result-counts">
-              <span className="is-perfect">完美 {result.counts.perfect}</span>
-              <span className="is-great">优秀 {result.counts.great}</span>
-              <span className="is-good">良好 {result.counts.good}</span>
-              <span className="is-miss">Miss {result.counts.miss}</span>
-            </div>
-            <p className="sb-upload" data-state={upload}>
-              {upload === 'uploading' && '成绩上传中…'}
-              {upload === 'record' && '新纪录！已登上云端排行榜。'}
-              {upload === 'kept' && '成绩已提交，云端保留你的历史最高分。'}
-              {upload === 'guest' && (
-                <>
-                  <LogIn aria-hidden="true" />
-                  登录社区账号后成绩可上榜：
-                  <Link href="/community/me">前往登录</Link>
-                </>
-              )}
-              {upload === 'skipped' && '本局没有得分，成绩就不上榜啦。'}
-              {upload === 'error' && '成绩上传失败，网络恢复后再打一把吧。'}
-              {upload === 'idle' && ''}
-            </p>
-            <div className="sb-overlay-actions">
-              <button type="button" className="button primary" onClick={restartGame}>
-                <RotateCcw aria-hidden="true" />
-                再来一局
-              </button>
-              <button type="button" className="button ghost" onClick={quitGame}>
-                <ChevronLeft aria-hidden="true" />
-                选曲
-              </button>
-            </div>
-            </div>
-          </div>,
-          document.body,
-        )}
+            <div className="sb-fullscreen sb-fullscreen-center">
+              <div className="sb-panel sb-result">
+                <div className="sb-result-head">
+                  <span className="sb-result-song">{result.trackTitle}</span>
+                  <span className="sb-result-diff">
+                    {DIFFICULTY_NAMES[result.difficulty]}
+                  </span>
+                  <span
+                    className="sb-result-rating"
+                    style={{ color: RATING_COLORS[result.rating] }}
+                  >
+                    {result.rating}
+                  </span>
+                </div>
+                <p className="sb-result-score">{formatScore(result.score)}</p>
+                <p className="sb-result-sub">
+                  准确率 {formatAccuracy(result.accuracy)} · 最大连击{' '}
+                  {result.maxCombo}
+                  {result.fullCombo ? ' · FULL COMBO!' : ''}
+                </p>
+                <div className="sb-result-counts">
+                  <span className="is-perfect">
+                    完美 {result.counts.perfect}
+                  </span>
+                  <span className="is-great">优秀 {result.counts.great}</span>
+                  <span className="is-good">良好 {result.counts.good}</span>
+                  <span className="is-miss">Miss {result.counts.miss}</span>
+                </div>
+                <p className="sb-upload" data-state={upload}>
+                  {upload === 'uploading' && '成绩上传中…'}
+                  {upload === 'record' && '新纪录！已登上云端排行榜。'}
+                  {upload === 'kept' && '成绩已提交，云端保留你的历史最高分。'}
+                  {upload === 'guest' && (
+                    <>
+                      <LogIn aria-hidden="true" />
+                      登录社区账号后成绩可上榜：
+                      <Link href="/community/me">前往登录</Link>
+                    </>
+                  )}
+                  {upload === 'skipped' && '本局没有得分，成绩就不上榜啦。'}
+                  {upload === 'error' && '成绩上传失败，网络恢复后再打一把吧。'}
+                  {upload === 'idle' && ''}
+                </p>
+                <div className="sb-overlay-actions">
+                  <button
+                    type="button"
+                    className="button primary"
+                    onClick={restartGame}
+                  >
+                    <RotateCcw aria-hidden="true" />
+                    再来一局
+                  </button>
+                  <button
+                    type="button"
+                    className="button ghost"
+                    onClick={quitGame}
+                  >
+                    <ChevronLeft aria-hidden="true" />
+                    选曲
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )}
       </div>
 
       <aside className="sb-side">

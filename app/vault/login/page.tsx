@@ -1,7 +1,7 @@
 'use client';
 
 import { type SyntheticEvent, useEffect, useState } from 'react';
-import { KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react';
+import { KeyRound, LockKeyhole } from 'lucide-react';
 
 export default function VaultLogin() {
   const [busy, setBusy] = useState(false);
@@ -9,8 +9,10 @@ export default function VaultLogin() {
 
   useEffect(() => {
     void fetch('/api/auth/session', { cache: 'no-store' })
-      .then((response) => {
-        if (response.ok) location.replace('/vault');
+      .then(async (response) => {
+        if (!response.ok) return;
+        const data = (await response.json()) as { authenticated?: boolean };
+        if (data.authenticated) location.replace('/vault');
       })
       .catch(() => {});
   }, []);
@@ -54,18 +56,15 @@ export default function VaultLogin() {
         </div>
         <h1>进入私人保险库</h1>
         <p>
-          登录凭据只用于确认所有者身份；解密数据还需要另一把只留在浏览器内存中的主密码。
+          请再次验证当前管理员账号；解密数据还需要另一把只留在浏览器内存中的主密码。
         </p>
         <form onSubmit={submit}>
           <label>
-            所有者账号
+            管理员账号
             <input
               name="username"
               autoComplete="username"
               required
-              defaultValue={
-                process.env.NODE_ENV === 'production' ? '' : 'demo-owner'
-              }
             />
           </label>
           <label>
@@ -96,18 +95,6 @@ export default function VaultLogin() {
             {busy ? '正在验证…' : '安全登录'} <KeyRound />
           </button>
         </form>
-        {process.env.NODE_ENV !== 'production' && (
-          <div className="demo-credentials">
-            <ShieldCheck />
-            <div>
-              <strong>仅限本地开发的虚构测试账号</strong>
-              <code>demo-owner / Sakura-Demo-2026!</code>
-              <span>
-                生产环境必须通过环境变量替换，默认测试凭据会自动失效。
-              </span>
-            </div>
-          </div>
-        )}
       </section>
     </main>
   );

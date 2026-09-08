@@ -2737,7 +2737,10 @@ body::after {
 }
 .auth-form-side h1 {
   margin: 0;
-  font: 800 clamp(1.7rem, 3.2vw, 2.4rem) Georgia, 'Songti SC', serif;
+  font:
+    800 clamp(1.7rem, 3.2vw, 2.4rem) Georgia,
+    'Songti SC',
+    serif;
   letter-spacing: -0.02em;
 }
 .auth-sub {
@@ -2818,12 +2821,17 @@ body::after {
   bottom: 1.2rem;
   display: grid;
   color: white;
-  font: 700 1.15rem Georgia, 'Songti SC', serif;
+  font:
+    700 1.15rem Georgia,
+    'Songti SC',
+    serif;
   letter-spacing: 0.04em;
   text-shadow: 0 2px 14px rgba(10, 20, 40, 0.6);
 }
 .auth-art-brand small {
-  font: 600 0.6rem/1.6 system-ui, sans-serif;
+  font:
+    600 0.6rem/1.6 system-ui,
+    sans-serif;
   letter-spacing: 0.32em;
 }
 @media (max-width: 860px) {
@@ -2923,7 +2931,9 @@ body::after {
   display: grid;
   place-items: center;
   color: white;
-  font: 700 2.1rem Georgia, serif;
+  font:
+    700 2.1rem Georgia,
+    serif;
   background: var(--primary);
 }
 .qq-names {
@@ -2936,7 +2946,10 @@ body::after {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font: 700 1.5rem Georgia, 'Songti SC', serif;
+  font:
+    700 1.5rem Georgia,
+    'Songti SC',
+    serif;
 }
 .qq-uid {
   margin: 0;
@@ -2968,7 +2981,9 @@ body::after {
 }
 .qq-stats dd {
   margin: 0.15rem 0 0;
-  font: 700 1.2rem Georgia, serif;
+  font:
+    700 1.2rem Georgia,
+    serif;
 }
 .qq-edit {
   display: grid;
@@ -3244,19 +3259,21 @@ body::after {
   background: color-mix(in srgb, var(--primary) 12%, transparent);
   color: var(--primary);
 }
-/* ===== 投喂页：月亮上睡觉的小猫 ===== */
+/* ===== 投喂页：微信赞赏码 ===== */
 .feed-art {
   margin: 0;
   padding: 1.2rem;
   border: 1px solid var(--glass-edge);
   border-radius: 22px;
-  background: linear-gradient(165deg, #16223f 0%, #0d1426 100%);
-  box-shadow: 0 18px 50px rgba(10, 20, 40, 0.4);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  box-shadow: var(--shadow);
 }
-.feed-art svg {
+.feed-reward-code {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 16px;
+  object-fit: contain;
 }
 .feed-art figcaption {
   margin-top: 0.9rem;
@@ -3264,36 +3281,14 @@ body::after {
   font-size: 0.88rem;
   text-align: center;
 }
-.feed-zzz text {
-  animation: feed-zzz-float 3.2s ease-in-out infinite alternate;
-}
-.feed-zzz text:nth-child(2) {
-  animation-delay: 0.5s;
-}
-.feed-zzz text:nth-child(3) {
-  animation-delay: 1s;
-}
-@keyframes feed-zzz-float {
-  from {
-    opacity: 0.55;
-    translate: 0 3px;
+@media (max-width: 640px) {
+  .feed-art {
+    padding: 0.65rem;
+    border-radius: 16px;
   }
-  to {
-    opacity: 1;
-    translate: 0 -3px;
+  .feed-reward-code {
+    border-radius: 12px;
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  .feed-zzz text {
-    animation: none;
-  }
-}
-.feed-note {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.feed-note a {
-  color: var(--primary);
 }
 @media (max-width: 640px) {
   .kanban-musume {
@@ -4768,7 +4763,9 @@ body::after {
   font-size: 0.86rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 .sb-diff.is-active {
   background: var(--primary);
@@ -4841,7 +4838,9 @@ body::after {
   font-weight: 700;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 .sb-key:hover {
   border-color: var(--primary);
@@ -5040,10 +5039,18 @@ body::after {
   font-size: 0.8rem;
   font-weight: 700;
 }
-.sb-result-counts .is-perfect { color: #f2b53c; }
-.sb-result-counts .is-great { color: #5ecfb1; }
-.sb-result-counts .is-good { color: #9aa4b8; }
-.sb-result-counts .is-miss { color: #e5484d; }
+.sb-result-counts .is-perfect {
+  color: #f2b53c;
+}
+.sb-result-counts .is-great {
+  color: #5ecfb1;
+}
+.sb-result-counts .is-good {
+  color: #9aa4b8;
+}
+.sb-result-counts .is-miss {
+  color: #e5484d;
+}
 .sb-upload {
   display: flex;
   align-items: center;
@@ -5076,6 +5083,12 @@ body::after {
   width: 17px;
   height: 17px;
   color: #f2b53c;
+}
+.sb-board-trust {
+  margin: -0.45rem 0 0.8rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
 }
 .sb-board-list {
   display: grid;
@@ -5155,7 +5168,6 @@ body::after {
     height: min(58vh, 460px);
   }
 }
-
 
 /* ===== 创作工坊（/studio 站主管理） ===== */
 .studio-links {
@@ -5343,7 +5355,9 @@ body::after {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 .moment-action:hover,
 .moment-delete:hover {
@@ -5412,7 +5426,9 @@ body::after {
   box-shadow: var(--shadow);
   text-decoration: none;
   overflow: hidden;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 .game-card::before {
   content: '';
@@ -5477,8 +5493,6 @@ body::after {
   }
 }
 
-
-
 /* ===== 全站动效层（Animate.css 风格手写调优版） ===== */
 @keyframes site-card-in {
   from {
@@ -5490,15 +5504,6 @@ body::after {
     transform: none;
   }
 }
-@keyframes site-progress-slide {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
 /* 卡片滚动入场：弹簧过冲 + 按列交错，仅支持该特性的浏览器启用 */
 @supports (animation-timeline: view()) {
   .article-card,
@@ -5551,8 +5556,8 @@ body::after {
 /* 卡片 3D 倾斜（鼠标跟随，由 card-tilt 组件写入 CSS 变量） */
 .card-tilt {
   position: relative;
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
-    scale(var(--tilt-scale, 1));
+  transform: perspective(900px) rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg)) scale(var(--tilt-scale, 1));
   transition: transform 0.16s ease-out;
   will-change: transform;
 }
@@ -5596,38 +5601,18 @@ body::after {
   box-shadow: 0 8px 22px color-mix(in srgb, var(--primary) 38%, transparent);
 }
 
-/* 导航链接悬停：下滑线指示（激活项保持常亮下划线） */
-.nav-links > a:not(.active):hover::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 0.15rem;
-  width: 55%;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--primary);
-  transform: translateX(-50%);
-  animation: site-progress-slide 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-links > a:not(.active):hover::after {
-    animation: none;
-  }
-}
-
-/* ===== 页面切换过渡：全屏品牌色 + 吉祥物弹跳 ===== */
+/* ===== 页面切换过渡：保留遮罩与加载圈，不显示顶部光条 ===== */
 .page-transition {
   position: fixed;
   inset: 0;
   z-index: 300;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #fff0f6 0%, #ffeef8 45%, #fde9f4 100%);
+  background: #fff;
   animation: page-transition-in 0.18s ease both;
 }
 .dark .page-transition {
-  background: linear-gradient(135deg, #12101c 0%, #1a1526 45%, #161322 100%);
+  background: #fff;
 }
 @keyframes page-transition-in {
   from {
@@ -5649,33 +5634,6 @@ body::after {
 @keyframes page-transition-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-.page-transition-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ff8ac2, var(--primary));
-  animation: page-transition-bar-slide 1.1s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-@keyframes page-transition-bar-slide {
-  0% {
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-  49% {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-  51% {
-    transform: scaleX(1);
-    transform-origin: right;
-  }
-  100% {
-    transform: scaleX(0);
-    transform-origin: right;
   }
 }
 @media (prefers-reduced-motion: reduce) {

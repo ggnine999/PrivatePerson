@@ -1,11 +1,16 @@
 import { sha256 } from '@/lib/security';
 import {
+  normalizeSafeExternalUrl,
+  parseFeed,
+  type ParsedFeedPost,
+} from '@/lib/feed-security';
+import {
   listFriendFeeds,
   upsertFriendPosts,
   type FriendFeed,
 } from '@/lib/community-store';
 
-export type ParsedPost = { title: string; link: string; publishedAt: number };
+export type ParsedPost = ParsedFeedPost;
 export type FeedRefreshResult = {
   friendId: string;
   name: string;
@@ -13,67 +18,73 @@ export type FeedRefreshResult = {
   count: number;
 };
 
-const PER_FEED_LIMIT = 5;
 const FETCH_TIMEOUT_MS = 12_000;
+const MAX_FEED_BYTES = 1_000_000;
+const MAX_REDIRECTS = 3;
+const ALLOWED_CONTENT_TYPE = /(?:rss|atom|xml)|text\/plain/i;
 
-function decodeEntities(value: string) {
-  return value
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-    .replace(/<[^>]+>/g, '')
-    .trim();
-}
-
-function pick(tag: string, block: string) {
-  const match = block.match(
-    new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'i'),
-  );
-  return match ? decodeEntities(match[1]) : '';
-}
-
-// 宽松的 RSS2/Atom 解析：只取标题、链接、发布时间，够朋友圈展示用。
-export function parseFeed(xml: string): ParsedPost[] {
-  const blocks = xml.match(/<item[\s\S]*?<\/item>|<entry[\s\S]*?<\/entry>/gi) ?? [];
-  const posts: ParsedPost[] = [];
-  for (const block of blocks) {
-    const title = pick('title', block);
-    const rssLink = pick('link', block);
-    const atomLink = block.match(/<link[^>]*href="([^"]+)"/i)?.[1] ?? '';
-    const link = (rssLink || atomLink).trim();
-    if (!title || !link) continue;
-    const dateText =
-      pick('pubDate', block) ||
-      pick('published', block) ||
-      pick('updated', block) ||
-      pick('dc:date', block);
-    const parsed = dateText ? Date.parse(dateText) : Number.NaN;
-    posts.push({
-      title,
-      link,
-      publishedAt: Number.isFinite(parsed) ? parsed : Date.now(),
-    });
+async function readBoundedBody(response: Response) {
+  const declaredLength = Number(response.headers.get('content-length'));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_FEED_BYTES) {
+    throw new Error('Feed exceeds size limit');
   }
-  return posts
-    .sort((a, b) => b.publishedAt - a.publishedAt)
-    .slice(0, PER_FEED_LIMIT);
+  if (!response.body) return '';
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let total = 0;
+  let text = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_FEED_BYTES) {
+      await reader.cancel();
+      throw new Error('Feed exceeds size limit');
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+  return text + decoder.decode();
 }
 
 async function fetchFeed(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      // 部分站点 WAF 会拦非常规 UA，用类浏览器 UA 提高抓取成功率
-      'user-agent':
-        'Mozilla/5.0 (compatible; StarryNotesFriendCircle/1.0; +RSS reader)',
-      accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
-    },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.text();
+  const initialUrl = normalizeSafeExternalUrl(url);
+  if (!initialUrl) throw new Error('Unsafe feed URL');
+  let currentUrl: string = initialUrl;
+
+  for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
+    const response: Response = await fetch(currentUrl, {
+      headers: {
+        'user-agent':
+          'Mozilla/5.0 (compatible; StarryNotesFriendCircle/1.0; +RSS reader)',
+        accept:
+          'application/rss+xml, application/atom+xml, application/xml, text/xml, text/plain',
+      },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      cache: 'no-store',
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location: string | null = response.headers.get('location');
+      const redirected: string | null = location
+        ? normalizeSafeExternalUrl(location, currentUrl)
+        : null;
+      if (!redirected || redirects === MAX_REDIRECTS) {
+        throw new Error('Unsafe or excessive feed redirect');
+      }
+      currentUrl = redirected;
+      continue;
+    }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const contentType = response.headers.get('content-type');
+    if (contentType && !ALLOWED_CONTENT_TYPE.test(contentType)) {
+      throw new Error('Unsupported feed content type');
+    }
+    return readBoundedBody(response);
+  }
+  throw new Error('Feed redirect limit exceeded');
 }
 
 // 抓取所有配置了 RSS 的友链，把最新文章去重写库。
@@ -87,7 +98,7 @@ export async function refreshFriendCircle(): Promise<{
   for (const feed of feeds) {
     try {
       const xml = await fetchFeed(feed.rssUrl);
-      const posts = parseFeed(xml);
+      const posts = parseFeed(xml, feed.rssUrl);
       const rows = await Promise.all(
         posts.map(async (post) => ({
           id: (await sha256(post.link)).slice(0, 32),
@@ -98,7 +109,12 @@ export async function refreshFriendCircle(): Promise<{
         })),
       );
       inserted += await upsertFriendPosts(rows);
-      results.push({ friendId: feed.id, name: feed.name, ok: true, count: rows.length });
+      results.push({
+        friendId: feed.id,
+        name: feed.name,
+        ok: true,
+        count: rows.length,
+      });
     } catch {
       results.push({ friendId: feed.id, name: feed.name, ok: false, count: 0 });
     }

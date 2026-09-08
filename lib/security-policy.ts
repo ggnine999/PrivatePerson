@@ -5,8 +5,10 @@ function startsWithRoute(pathname: string, route: string) {
 export function isPrivatePath(pathname: string) {
   return (
     startsWithRoute(pathname, '/vault') ||
+    startsWithRoute(pathname, '/studio') ||
     startsWithRoute(pathname, '/api/auth') ||
-    startsWithRoute(pathname, '/api/vault')
+    startsWithRoute(pathname, '/api/vault') ||
+    startsWithRoute(pathname, '/api/studio')
   );
 }
 

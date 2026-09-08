@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { recordArticleView } from '@/lib/article-stats';
 import { clientKey } from '@/lib/server-auth';
 import { consumeRateLimit } from '@/lib/rate-limit';
+import { articleInteractionId } from '@/lib/article-interaction';
 
-const VIEW_LIMIT = 120;
+const VIEW_LIMIT = 30;
 const VIEW_WINDOW_MS = 60_000;
 
 export async function POST(request: Request) {
@@ -21,10 +22,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '缺少文章标识' }, { status: 400 });
   }
   const key = await clientKey();
-  if (!(await consumeRateLimit('article-view', key, VIEW_LIMIT, VIEW_WINDOW_MS))) {
+  if (
+    !(await consumeRateLimit('article-view', key, VIEW_LIMIT, VIEW_WINDOW_MS))
+  ) {
     return NextResponse.json({ error: '请求太频繁' }, { status: 429 });
   }
-  const stats = await recordArticleView(slug);
+  const interactionId = await articleInteractionId('view', slug, key);
+  const stats = await recordArticleView(slug, interactionId);
   if (!stats) {
     return NextResponse.json({ error: '文章不存在' }, { status: 404 });
   }

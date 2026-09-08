@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vinext dev",
     "audio:generate": "node scripts/generate-demo-audio.mjs",
-    "auth:hash": "node scripts/hash-password.mjs",
+    "account:clear-local": "node scripts/clear-local-accounts.mjs",
+    "account:permission": "node scripts/set-account-permission.mjs",
     "build": "vinext build",
     "db:backup": "node scripts/backup-d1.mjs remote",
     "db:backup:local": "node scripts/backup-d1.mjs local",

@@ -17,6 +17,15 @@ function formatDate(timestamp: number) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+function safePostHref(value: string) {
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 // 友链朋友圈：聚合友链 RSS 的最新文章；站主可手动刷新。
 export function FriendCircleBoard() {
   const [posts, setPosts] = useState<CirclePost[] | null>(null);
@@ -57,7 +66,10 @@ export function FriendCircleBoard() {
       });
       const data = (await response.json()) as {
         error?: string;
-        summary?: { results: Array<{ name: string; ok: boolean }>; inserted: number };
+        summary?: {
+          results: Array<{ name: string; ok: boolean }>;
+          inserted: number;
+        };
         posts?: CirclePost[];
       };
       if (!response.ok) {
@@ -67,7 +79,9 @@ export function FriendCircleBoard() {
       if (data.posts) setPosts(data.posts);
       const okCount = data.summary?.results.filter((r) => r.ok).length ?? 0;
       const total = data.summary?.results.length ?? 0;
-      setSummary(`已刷新 ${total} 个源（成功 ${okCount}），新增 ${data.summary?.inserted ?? 0} 篇`);
+      setSummary(
+        `已刷新 ${total} 个源（成功 ${okCount}），新增 ${data.summary?.inserted ?? 0} 篇`,
+      );
     } finally {
       setRefreshing(false);
     }
@@ -83,7 +97,10 @@ export function FriendCircleBoard() {
             onClick={() => void refresh()}
             disabled={refreshing}
           >
-            <RefreshCw aria-hidden="true" className={refreshing ? 'spinning' : ''} />
+            <RefreshCw
+              aria-hidden="true"
+              className={refreshing ? 'spinning' : ''}
+            />
             {refreshing ? '抓取中…' : '刷新友链动态'}
           </button>
           {summary && <p className="circle-summary">{summary}</p>}
@@ -98,19 +115,23 @@ export function FriendCircleBoard() {
         </p>
       ) : (
         <ul className="circle-list">
-          {posts.map((post) => (
-            <li key={post.id}>
-              <a href={post.link} target="_blank" rel="noopener noreferrer">
-                <span className="circle-post-head">
-                  <span className="circle-friend">{post.friendName}</span>
-                  <time dateTime={new Date(post.publishedAt).toISOString()}>
-                    {formatDate(post.publishedAt)}
-                  </time>
-                </span>
-                <strong>{post.title}</strong>
-              </a>
-            </li>
-          ))}
+          {posts.map((post) => {
+            const href = safePostHref(post.link);
+            if (!href) return null;
+            return (
+              <li key={post.id}>
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                  <span className="circle-post-head">
+                    <span className="circle-friend">{post.friendName}</span>
+                    <time dateTime={new Date(post.publishedAt).toISOString()}>
+                      {formatDate(post.publishedAt)}
+                    </time>
+                  </span>
+                  <strong>{post.title}</strong>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

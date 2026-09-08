@@ -102,9 +102,6 @@ export function CommunityAuthForm({ mode }: { mode: 'login' | 'register' }) {
             {submitting ? '处理中…' : isRegister ? '注册账号' : '登录账号'}
           </button>
         </form>
-        <p className="auth-note">
-          社区账号仅用于评论互动，和私人保险库完全独立。
-        </p>
       </div>
       <div className="auth-art" aria-hidden="true">
         <span className="auth-art-brand">

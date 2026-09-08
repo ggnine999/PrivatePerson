@@ -1,12 +1,14 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// 页面切换过渡：纯色过渡页 + 居中转圈加载动画，路由完成后消失。
+// 页面切换过渡：保留全屏遮罩与居中加载圈，路由完成后消失。
 // 拦截站内链接点击与浏览器前进后退；最短展示 420ms 防闪烁，最长 4s 兜底防困住。
 export function PageTransition() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const routeKey = `${pathname}?${searchParams.toString()}`;
   const [visible, setVisible] = useState(false);
   const shownAtRef = useRef(0);
   const firstRender = useRef(true);
@@ -17,18 +19,20 @@ export function PageTransition() {
     setVisible(true);
   }, []);
 
-  // 新页面渲染完成（路由变化）→ 最短展示时长后淡出
+  // 新页面或同页查询条件渲染完成后，满足最短展示时长再淡出。
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
       return;
     }
     const elapsed = performance.now() - shownAtRef.current;
-    const timer = setTimeout(() => setVisible(false), Math.max(0, 420 - elapsed));
+    const timer = setTimeout(
+      () => setVisible(false),
+      Math.max(0, 420 - elapsed),
+    );
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, [routeKey]);
 
-  // 拦截站内链接点击（捕获阶段，先于 React 路由）与前进后退
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (
@@ -43,13 +47,22 @@ export function PageTransition() {
       const anchor = (event.target as HTMLElement | null)?.closest('a');
       if (!anchor) return;
       const href = anchor.getAttribute('href');
-      if (!href || href.startsWith('#') || anchor.target === '_blank' || anchor.hasAttribute('download'))
+      if (
+        !href ||
+        href.startsWith('#') ||
+        anchor.target === '_blank' ||
+        anchor.hasAttribute('download')
+      )
         return;
       if (/^(https?:|mailto:|tel:)/.test(href)) return;
       try {
         const target = new URL(anchor.href, location.href);
         if (target.origin !== location.origin) return;
-        if (target.pathname + target.search === location.pathname + location.search) return;
+        if (
+          target.pathname + target.search ===
+          location.pathname + location.search
+        )
+          return;
       } catch {
         return;
       }
@@ -64,7 +77,6 @@ export function PageTransition() {
     };
   }, [show]);
 
-  // 兜底：导航异常时最多展示 4 秒，不困住用户
   useEffect(() => {
     if (!visible) return;
     const failsafe = setTimeout(() => setVisible(false), 4000);
@@ -75,7 +87,6 @@ export function PageTransition() {
 
   return (
     <div className="page-transition" aria-hidden="true">
-      <div className="page-transition-bar" />
       <div className="page-transition-spinner" />
     </div>
   );

@@ -7,6 +7,7 @@ function db() {
 }
 
 export type ArticleStats = { views: number; likes: number };
+export type LikeResult = { stats: ArticleStats; liked: boolean };
 
 async function isKnownSlug(slug: string) {
   try {
@@ -39,10 +40,22 @@ export async function getArticleStatsMap(slugs: string[]) {
 
 export async function recordArticleView(
   slug: string,
+  interactionId: string,
 ): Promise<ArticleStats | null> {
   if (!(await isKnownSlug(slug))) return null;
   try {
-    return await db()
+    const database = db();
+    const inserted = await database
+      .prepare(
+        `INSERT OR IGNORE INTO article_view_events (id, slug, created_at)
+         VALUES (?, ?, ?)`,
+      )
+      .bind(interactionId, slug, Date.now())
+      .run();
+    if ((inserted.meta?.changes ?? 0) === 0) {
+      return await getArticleStats(slug);
+    }
+    return await database
       .prepare(
         `INSERT INTO article_stats (slug, views, likes, updated_at)
          VALUES (?, 1, 0, ?)
@@ -58,13 +71,41 @@ export async function recordArticleView(
   }
 }
 
-export async function adjustArticleLikes(
+async function getArticleStats(slug: string): Promise<ArticleStats> {
+  const row = await db()
+    .prepare('SELECT views, likes FROM article_stats WHERE slug = ?')
+    .bind(slug)
+    .first<ArticleStats>();
+  return row ?? { views: 0, likes: 0 };
+}
+
+export async function setArticleLike(
   slug: string,
-  delta: number,
-): Promise<ArticleStats | null> {
+  interactionId: string,
+  liked: boolean,
+): Promise<LikeResult | null> {
   if (!(await isKnownSlug(slug))) return null;
   try {
-    return await db()
+    const database = db();
+    const change = liked
+      ? await database
+          .prepare(
+            `INSERT OR IGNORE INTO article_like_events (id, slug, created_at)
+             VALUES (?, ?, ?)`,
+          )
+          .bind(interactionId, slug, Date.now())
+          .run()
+      : await database
+          .prepare('DELETE FROM article_like_events WHERE id = ? AND slug = ?')
+          .bind(interactionId, slug)
+          .run();
+
+    if ((change.meta?.changes ?? 0) === 0) {
+      return { stats: await getArticleStats(slug), liked };
+    }
+
+    const delta = liked ? 1 : -1;
+    const stats = await database
       .prepare(
         `INSERT INTO article_stats (slug, views, likes, updated_at)
          VALUES (?, 0, MAX(0, ?), ?)
@@ -75,6 +116,7 @@ export async function adjustArticleLikes(
       )
       .bind(slug, delta, Date.now(), delta)
       .first<ArticleStats>();
+    return stats ? { stats, liked } : null;
   } catch {
     return null;
   }

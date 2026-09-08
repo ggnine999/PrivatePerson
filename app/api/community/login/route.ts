@@ -50,7 +50,11 @@ export async function POST(request: Request) {
 
   const csrfToken = await createCommunitySession(user.id);
   return NextResponse.json({
-    user: { username: user.username, displayName: user.display_name },
+    user: {
+      username: user.username,
+      displayName: user.display_name,
+      permission: user.permission === 1 ? 1 : 0,
+    },
     csrfToken,
   });
 }

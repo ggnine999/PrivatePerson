@@ -4,13 +4,16 @@ import { cookies, headers } from 'next/headers';
 import {
   randomToken,
   sha256,
-  verifyPassword,
   verifyTotp,
 } from '@/lib/security';
+import { isAdminPermission } from '@/lib/account-permission';
+import {
+  findCommunityUserByUsername,
+  getCommunitySessionUser,
+  verifyCommunityPassword,
+} from '@/lib/community-auth';
 
 const COOKIE = 'starry_owner_session';
-const DEMO_USER = 'demo-owner';
-const DEMO_PASSWORD = 'Sakura-Demo-2026!';
 const LOGIN_WINDOW_MS = 15 * 60_000;
 const MAX_LOGIN_ATTEMPTS = 5;
 
@@ -77,19 +80,31 @@ export async function validateOwner(
   password: string,
   otp?: string,
 ) {
-  const configuredUser = runtime('OWNER_LOGIN');
-  const configuredHash = runtime('OWNER_PASSWORD_HASH');
-  const production = runtime('NODE_ENV') === 'production';
-  const userOk =
-    configuredUser && configuredHash
-      ? username === configuredUser
-      : !production && username === DEMO_USER;
-  const passwordOk = configuredHash
-    ? await verifyPassword(password, configuredHash)
-    : !production && password === DEMO_PASSWORD;
-  if (!userOk || !passwordOk) return false;
+  const sessionUser = await getCommunitySessionUser();
+  if (
+    !sessionUser ||
+    !isAdminPermission(sessionUser.permission) ||
+    username !== sessionUser.username
+  ) {
+    return null;
+  }
+
+  const user = await findCommunityUserByUsername(username);
+  const passwordOk = user
+    ? await verifyCommunityPassword(password, user.password_hash)
+    : false;
+  if (
+    !user ||
+    !passwordOk ||
+    user.status !== 'active' ||
+    !isAdminPermission(user.permission)
+  ) {
+    return null;
+  }
+
   const secret = runtime('OWNER_TOTP_SECRET');
-  return secret ? Boolean(otp && (await verifyTotp(secret, otp))) : true;
+  if (secret && !(otp && (await verifyTotp(secret, otp)))) return null;
+  return sessionUser;
 }
 
 function sessionTtlMilliseconds() {
@@ -100,7 +115,7 @@ function sessionTtlMilliseconds() {
   return safeMinutes * 60_000;
 }
 
-export async function createSession() {
+export async function createSession(userId: string) {
   const token = randomToken();
   const tokenHash = await sha256(token);
   const csrfToken = randomToken(24);
@@ -114,9 +129,9 @@ export async function createSession() {
       .bind(now),
     database
       .prepare(
-        'INSERT INTO owner_sessions (token_hash, csrf_token, expires_at, created_at) VALUES (?, ?, ?, ?)',
+        'INSERT INTO owner_sessions (token_hash, user_id, csrf_token, expires_at, created_at) VALUES (?, ?, ?, ?, ?)',
       )
-      .bind(tokenHash, csrfToken, now + ttl, now),
+      .bind(tokenHash, userId, csrfToken, now + ttl, now),
   ]);
 
   const jar = await cookies();
@@ -131,15 +146,24 @@ export async function createSession() {
 }
 
 export async function getSession() {
+  const communityUser = await getCommunitySessionUser();
+  if (!communityUser || !isAdminPermission(communityUser.permission)) return null;
+
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
   const hash = await sha256(token);
   const session = await db()
     .prepare(
-      'SELECT token_hash, csrf_token, expires_at FROM owner_sessions WHERE token_hash = ?',
+      `SELECT token_hash, user_id, csrf_token, expires_at
+       FROM owner_sessions WHERE token_hash = ? AND user_id = ?`,
     )
-    .bind(hash)
-    .first<{ token_hash: string; csrf_token: string; expires_at: number }>();
+    .bind(hash, communityUser.id)
+    .first<{
+      token_hash: string;
+      user_id: string;
+      csrf_token: string;
+      expires_at: number;
+    }>();
   if (!session || session.expires_at < Date.now()) return null;
   return session;
 }

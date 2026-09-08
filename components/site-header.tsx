@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import {
   ChevronDown,
   Hammer,
+  KeyRound,
   LogOut,
   Menu,
   Moon,
@@ -17,6 +18,7 @@ type HeaderUser = {
   username: string;
   displayName: string;
   avatar: string | null;
+  permission: 0 | 1;
 };
 
 export function SiteHeader() {
@@ -219,6 +221,17 @@ export function SiteHeader() {
           </div>
         </nav>
         <div className="nav-actions">
+          {me?.permission === 1 && !ownerAuthed && (
+            <Link
+              className="icon-button nav-studio-link"
+              href="/vault/login"
+              title="�X��"
+              aria-label="�e�X��"
+              onClick={closeMenus}
+            >
+              <KeyRound aria-hidden="true" />
+            </Link>
+          )}
           {ownerAuthed && (
             <Link
               className="icon-button nav-studio-link"

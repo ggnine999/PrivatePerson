@@ -19,7 +19,14 @@ export const metadata: Metadata = {
     description: '把代码、生活与微小的灵感写进夜色。',
     type: 'website',
     locale: 'zh_CN',
-    images: [{ url: '/images/cover-miku-ocean.jpg', width: 1259, height: 737, alt: '星屿手记' }],
+    images: [
+      {
+        url: '/images/cover-miku-ocean.jpg',
+        width: 1259,
+        height: 737,
+        alt: '星屿手记',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
